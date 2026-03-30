@@ -2,3 +2,4 @@
 // 各モジュールのフックはここから re-export する
 
 export { useAsyncState } from './useAsyncState'
+export { useStrapiCollection, useStrapiSingle } from './useStrapiCollection'
