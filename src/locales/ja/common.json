@@ -15,5 +15,12 @@
     "error": "エラーが発生しました",
     "notFound": "ページが見つかりません",
     "backToHome": "ホームへ戻る"
+  },
+  "auth": {
+    "signIn": "ログイン",
+    "signOut": "ログアウト",
+    "memberOnly": "このコンテンツは会員限定です。ログインしてください。",
+    "signedInAs": "ログイン中:",
+    "role": "ロール:"
   }
 }
