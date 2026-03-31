@@ -4,6 +4,7 @@ import { useStrapiCollection, useContentAccess } from '@/hooks'
 import { getBlogList } from '@/modules/blog/api'
 import { formatDate } from '@/utils'
 import { detailPath } from '@/lib/routes'
+import PageHead from '@/components/seo/PageHead'
 import type { BlogPost } from '@/types'
 
 export default function BlogPage() {
@@ -19,6 +20,7 @@ export default function BlogPage() {
 
   return (
     <section className="mx-auto max-w-5xl px-4 py-20">
+      <PageHead title={t('nav.blog')} description={t('seo.blog')} />
       <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
         {t('nav.blog')}
       </h1>

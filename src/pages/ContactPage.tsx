@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import ContactForm from '@/modules/contact/components/ContactForm'
 import RequestForm from '@/modules/contact/components/RequestForm'
+import PageHead from '@/components/seo/PageHead'
 
 type Tab = 'contact' | 'request'
 
@@ -17,6 +18,7 @@ export default function ContactPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
+        <PageHead title={t('nav.contact')} description={t('seo.contact')} />
         <h1 className="text-xs uppercase tracking-widest text-gray-400">
           {t('nav.contact')}
         </h1>

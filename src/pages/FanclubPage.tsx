@@ -5,6 +5,7 @@ import { useStrapiCollection, useContentAccess } from '@/hooks'
 import { getFanclubList } from '@/modules/fanclub/api'
 import { formatDate } from '@/utils'
 import { detailPath } from '@/lib/routes'
+import PageHead from '@/components/seo/PageHead'
 import type { FanclubContent } from '@/types'
 
 export default function FanclubPage() {
@@ -12,6 +13,7 @@ export default function FanclubPage() {
 
   return (
     <section className="mx-auto max-w-5xl px-4 py-20">
+      <PageHead title={t('nav.fanclub')} description={t('seo.fanclub')} noindex />
       <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
         {t('nav.fanclub')}
       </h1>
