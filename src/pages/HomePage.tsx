@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+import PageHead from '@/components/seo/PageHead'
 import HeroSection from '@/modules/home/components/HeroSection'
 import LatestSection from '@/modules/home/components/LatestSection'
 import FeaturedWorksSection from '@/modules/home/components/FeaturedWorksSection'
@@ -6,8 +8,10 @@ import MediaAwardsSection from '@/modules/home/components/MediaAwardsSection'
 import FanclubCTASection from '@/modules/home/components/FanclubCTASection'
 
 export default function HomePage() {
+  const { t } = useTranslation()
   return (
     <div>
+      <PageHead description={t('seo.home')} />
       <HeroSection />
       <LatestSection />
       <FeaturedWorksSection />

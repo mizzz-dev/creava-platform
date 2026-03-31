@@ -4,6 +4,7 @@ import { useStrapiCollection, useContentAccess } from '@/hooks'
 import { getWorksList } from '@/modules/works/api'
 import { formatDate } from '@/utils'
 import { detailPath } from '@/lib/routes'
+import PageHead from '@/components/seo/PageHead'
 import type { Work } from '@/types'
 
 export default function WorksPage() {
@@ -19,6 +20,7 @@ export default function WorksPage() {
 
   return (
     <section className="mx-auto max-w-5xl px-4 py-20">
+      <PageHead title={t('nav.works')} description={t('seo.works')} />
       <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
         {t('nav.works')}
       </h1>

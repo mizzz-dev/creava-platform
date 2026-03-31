@@ -7,6 +7,7 @@ import { formatPrice } from '@/utils'
 import { ROUTES } from '@/lib/routes'
 import NotFoundState from '@/components/common/NotFoundState'
 import ErrorState from '@/components/common/ErrorState'
+import PageHead from '@/components/seo/PageHead'
 
 export default function StoreDetailPage() {
   const { handle } = useParams<{ handle: string }>()
@@ -22,6 +23,13 @@ export default function StoreDetailPage() {
       {notFound && <NotFoundState backTo={ROUTES.STORE} />}
 
       {product && (
+        <>
+        <PageHead
+          title={product.title}
+          description={product.description || undefined}
+          ogImage={product.featuredImage?.url}
+          ogType="article"
+        />
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -101,6 +109,7 @@ export default function StoreDetailPage() {
             )}
           </div>
         </motion.div>
+        </>
       )}
     </section>
   )

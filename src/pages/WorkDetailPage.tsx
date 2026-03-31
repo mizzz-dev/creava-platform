@@ -5,7 +5,9 @@ import { getWorkDetail } from '@/modules/works/api'
 import ContentAccessGuard from '@/components/guards/ContentAccessGuard'
 import NotFoundState from '@/components/common/NotFoundState'
 import ErrorState from '@/components/common/ErrorState'
+import PageHead from '@/components/seo/PageHead'
 import { formatDate } from '@/utils'
+import { truncateForDescription } from '@/lib/seo'
 import { ROUTES } from '@/lib/routes'
 import type { Work } from '@/types'
 
@@ -22,6 +24,12 @@ export default function WorkDetailPage() {
 
       {item && (
         <ContentAccessGuard item={item}>
+          <PageHead
+            title={item.title}
+            description={item.description ? truncateForDescription(item.description) : undefined}
+            ogImage={item.thumbnailUrl ?? undefined}
+            ogType="article"
+          />
           <article className="max-w-3xl">
             <header>
               <h1 className="text-3xl font-semibold tracking-tight text-gray-900">

@@ -187,7 +187,41 @@ Clerk ダッシュボードで以下を確認してください。
 
 ---
 
-## 9. 将来 AWS へ移行する際に流用できる部分
+## 9. GitHub Actions による自動デプロイ
+
+`main` ブランチへのプッシュで自動的にビルド → FTP デプロイが実行されます。
+
+### 必要な GitHub Secrets
+
+リポジトリの **Settings → Secrets and variables → Actions** に以下を登録してください。
+
+| Secret 名 | 内容 |
+|---|---|
+| `FTP_SERVER` | FTPサーバーホスト名（例: `ftp.your-domain.com`） |
+| `FTP_USERNAME` | FTPユーザー名 |
+| `FTP_PASSWORD` | FTPパスワード |
+| `FTP_SERVER_DIR` | アップロード先パス（例: `/public_html/`）省略時は `/public_html/` |
+| `VITE_SITE_URL` | 本番サイトURL |
+| `VITE_STRAPI_API_URL` | Strapi Cloud APIエンドポイント |
+| `VITE_STRAPI_API_TOKEN` | Strapi APIトークン |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Clerk本番キー（`pk_live_`） |
+| `VITE_SHOPIFY_STORE_DOMAIN` | Shopifyストアドメイン |
+| `VITE_SHOPIFY_STOREFRONT_TOKEN` | Shopify Storefront APIトークン |
+
+### ワークフロー
+
+| ファイル | トリガー | 内容 |
+|---|---|---|
+| `.github/workflows/ci.yml` | PR・`main` push | 型チェック + ビルド確認 |
+| `.github/workflows/deploy.yml` | `main` push・手動 | ビルド + FTP デプロイ |
+
+### 手動デプロイ
+
+GitHub のリポジトリページ → **Actions** → **Deploy to お名前.com** → **Run workflow** で手動実行できます。
+
+---
+
+## 10. 将来 AWS へ移行する際に流用できる部分
 
 このプロジェクトは静的ビルド出力（`dist/`）を前提としているため、AWS 移行は比較的シンプルです。
 

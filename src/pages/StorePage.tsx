@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { useProductList } from '@/modules/store/hooks/useProductList'
 import ProductCard from '@/modules/store/components/ProductCard'
+import PageHead from '@/components/seo/PageHead'
 
 export default function StorePage() {
   const { t } = useTranslation()
@@ -14,6 +15,7 @@ export default function StorePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
+        <PageHead title={t('store.title')} description={t('seo.store')} />
         <h1 className="text-xs uppercase tracking-widest text-gray-400">
           {t('store.title')}
         </h1>

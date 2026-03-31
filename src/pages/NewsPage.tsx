@@ -4,6 +4,7 @@ import { useStrapiCollection, useContentAccess } from '@/hooks'
 import { getNewsList } from '@/modules/news/api'
 import { formatDate } from '@/utils'
 import { detailPath } from '@/lib/routes'
+import PageHead from '@/components/seo/PageHead'
 import type { NewsItem } from '@/types'
 
 export default function NewsPage() {
@@ -19,6 +20,7 @@ export default function NewsPage() {
 
   return (
     <section className="mx-auto max-w-5xl px-4 py-20">
+      <PageHead title={t('nav.news')} description={t('seo.news')} />
       <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
         {t('nav.news')}
       </h1>

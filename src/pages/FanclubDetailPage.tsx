@@ -6,7 +6,9 @@ import FanclubGuard from '@/components/guards/FanclubGuard'
 import ContentAccessGuard from '@/components/guards/ContentAccessGuard'
 import NotFoundState from '@/components/common/NotFoundState'
 import ErrorState from '@/components/common/ErrorState'
+import PageHead from '@/components/seo/PageHead'
 import { formatDate } from '@/utils'
+import { truncateForDescription } from '@/lib/seo'
 import { ROUTES } from '@/lib/routes'
 import type { FanclubContent } from '@/types'
 
@@ -38,6 +40,13 @@ function FanclubDetailContent({ slug }: { slug: string | undefined }) {
 
   return (
     <ContentAccessGuard item={item}>
+      <PageHead
+        title={item.title}
+        description={item.body ? truncateForDescription(item.body) : undefined}
+        ogImage={item.thumbnailUrl ?? undefined}
+        ogType="article"
+        noindex
+      />
       <article className="max-w-3xl">
         <header>
           <h1 className="text-3xl font-semibold tracking-tight text-gray-900">

@@ -5,7 +5,9 @@
     "news": "News",
     "blog": "Blog",
     "fanclub": "Fan Club",
-    "contact": "Contact"
+    "contact": "Contact",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "footer": {
     "copyright": "© 2025 Creava Platform. All rights reserved."
@@ -69,6 +71,15 @@
       "music": "Music Production",
       "other": "Other"
     }
+  },
+  "seo": {
+    "home": "Portfolio, store, and fan club platform for a creator working in film, photography, and music.",
+    "works": "Browse works in film, photography, and music.",
+    "news": "Latest news and updates.",
+    "blog": "Blog posts and articles.",
+    "fanclub": "Exclusive content for fan club members.",
+    "store": "Shop merchandise and photo books.",
+    "contact": "Get in touch or submit a work request."
   },
   "home": {
     "hero": {
