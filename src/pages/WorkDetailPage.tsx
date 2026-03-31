@@ -1,5 +1,4 @@
 import { useParams } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
 import { useSlugDetail } from '@/hooks'
 import { getWorkDetail } from '@/modules/works/api'
 import ContentAccessGuard from '@/components/guards/ContentAccessGuard'
@@ -14,7 +13,6 @@ import type { Work } from '@/types'
 
 export default function WorkDetailPage() {
   const { slug } = useParams<{ slug: string }>()
-  const { t } = useTranslation()
   const { item, loading, error, notFound } = useSlugDetail<Work>(getWorkDetail, slug)
 
   return (
