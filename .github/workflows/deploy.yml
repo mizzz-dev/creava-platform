@@ -1,0 +1,54 @@
+name: Deploy to お名前.com
+
+on:
+  push:
+    branches: [main]
+  # 手動実行も可能にする
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (production)
+        run: npm run build:prod
+        env:
+          VITE_SITE_URL: ${{ secrets.VITE_SITE_URL }}
+          VITE_STRAPI_API_URL: ${{ secrets.VITE_STRAPI_API_URL }}
+          VITE_STRAPI_API_TOKEN: ${{ secrets.VITE_STRAPI_API_TOKEN }}
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
+          VITE_SHOPIFY_STORE_DOMAIN: ${{ secrets.VITE_SHOPIFY_STORE_DOMAIN }}
+          VITE_SHOPIFY_STOREFRONT_TOKEN: ${{ secrets.VITE_SHOPIFY_STOREFRONT_TOKEN }}
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          # デプロイ元: Vite ビルド出力ディレクトリ
+          local-dir: ./dist/
+          # デプロイ先: お名前.com の公開ディレクトリ
+          # 環境に合わせて Secrets で上書き可能
+          server-dir: ${{ secrets.FTP_SERVER_DIR || '/public_html/' }}
+          # 差分のみアップロード（初回は全ファイル）
+          dangerous-clean-slate: false
+          # .htaccess などのドットファイルも転送
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
