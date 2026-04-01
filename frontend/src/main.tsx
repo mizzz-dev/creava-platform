@@ -7,23 +7,36 @@ import App from './App'
 import './lib/i18n'
 import './index.css'
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined
 
 if (!PUBLISHABLE_KEY && import.meta.env.DEV) {
   console.warn(
     '[Clerk] VITE_CLERK_PUBLISHABLE_KEY が設定されていません。' +
-    '.env ファイルに設定してください。',
+    'frontend/.env.local に VITE_CLERK_PUBLISHABLE_KEY=pk_test_... を設定してください。' +
+    '認証機能は無効化された状態で起動します。',
   )
 }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+const app = (
   <React.StrictMode>
     <HelmetProvider>
       <BrowserRouter>
-        <ClerkProvider publishableKey={PUBLISHABLE_KEY ?? ''}>
-          <App />
-        </ClerkProvider>
+        <App />
       </BrowserRouter>
     </HelmetProvider>
-  </React.StrictMode>,
+  </React.StrictMode>
+)
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  PUBLISHABLE_KEY ? (
+    <React.StrictMode>
+      <HelmetProvider>
+        <BrowserRouter>
+          <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+            <App />
+          </ClerkProvider>
+        </BrowserRouter>
+      </HelmetProvider>
+    </React.StrictMode>
+  ) : app,
 )

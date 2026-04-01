@@ -3,13 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { useCurrentUser } from '@/hooks'
 
 /**
- * ログイン / ログアウトボタン
+ * ログイン / ログアウトボタン（Clerk あり）
  *
  * - 未ロード時: 非表示（レイアウトシフト防止）
  * - 未ログイン: ログインボタン（Clerk モーダルを開く）
  * - ログイン済み: role バッジ + ログアウトボタン
  */
-export default function AuthButton() {
+function AuthButtonWithClerk() {
   const { isLoaded } = useAuth()
   const { openSignIn, signOut } = useClerk()
   const { user, isSignedIn } = useCurrentUser()
@@ -17,15 +17,11 @@ export default function AuthButton() {
 
   if (!isLoaded) return null
 
-  const btnClass =
-    'text-sm text-gray-500 hover:text-gray-900 transition-colors'
+  const btnClass = 'text-sm text-gray-500 hover:text-gray-900 transition-colors'
 
   if (!isSignedIn) {
     return (
-      <button
-        onClick={() => void openSignIn({})}
-        className={btnClass}
-      >
+      <button onClick={() => void openSignIn({})} className={btnClass}>
         {t('auth.signIn')}
       </button>
     )
@@ -38,12 +34,16 @@ export default function AuthButton() {
           {user.role}
         </span>
       )}
-      <button
-        onClick={() => void signOut()}
-        className={btnClass}
-      >
+      <button onClick={() => void signOut()} className={btnClass}>
         {t('auth.signOut')}
       </button>
     </div>
   )
 }
+
+/**
+ * VITE_CLERK_PUBLISHABLE_KEY 未設定時は認証ボタンを非表示にする
+ */
+export default import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+  ? AuthButtonWithClerk
+  : function AuthButtonDisabled() { return null }

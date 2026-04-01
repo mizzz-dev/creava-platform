@@ -11,30 +11,25 @@ export interface UseCurrentUserResult {
   isSignedIn: boolean
 }
 
+const GUEST: UseCurrentUserResult = { user: null, isLoaded: true, isSignedIn: false }
+
 /**
- * 現在のログインユーザーを AppUser として返すフック
+ * Clerk あり: 実際の認証状態を返す
+ * Clerk なし（VITE_CLERK_PUBLISHABLE_KEY 未設定）: 常にゲスト状態を返す
  *
- * Clerk への依存はこのフックに封じ込める。
- * 各ページ・コンポーネントはこのフックだけを使用すること。
- *
- * - 未ログイン時: { user: null, isLoaded: true,  isSignedIn: false }
- * - 読み込み中:   { user: null, isLoaded: false, isSignedIn: false }
- * - ログイン済み: { user: AppUser, isLoaded: true, isSignedIn: true }
+ * フック関数そのものをモジュール初期化時に切り替えることで
+ * Rules of Hooks に違反せずに条件分岐を実現する。
  */
-export function useCurrentUser(): UseCurrentUserResult {
-  const { user, isLoaded, isSignedIn } = useUser()
+export const useCurrentUser: () => UseCurrentUserResult =
+  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+    ? function useCurrentUser(): UseCurrentUserResult {
+        const { user, isLoaded, isSignedIn } = useUser()
 
-  if (!isLoaded) {
-    return { user: null, isLoaded: false, isSignedIn: false }
-  }
+        if (!isLoaded) return { user: null, isLoaded: false, isSignedIn: false }
+        if (!isSignedIn || !user) return { user: null, isLoaded: true, isSignedIn: false }
 
-  if (!isSignedIn || !user) {
-    return { user: null, isLoaded: true, isSignedIn: false }
-  }
-
-  return {
-    user: toAppUser(user),
-    isLoaded: true,
-    isSignedIn: true,
-  }
-}
+        return { user: toAppUser(user), isLoaded: true, isSignedIn: true }
+      }
+    : function useCurrentUserNoClerk(): UseCurrentUserResult {
+        return GUEST
+      }

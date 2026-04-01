@@ -9,15 +9,15 @@ interface Props {
 }
 
 /**
- * Fanclub ページ専用のアクセスガード
+ * Fanclub ページ専用のアクセスガード（Clerk あり）
  *
  * 判定フロー:
  * 1. isLoaded = false → ローディング表示（Clerk 認証状態の解決待ち）
  * 2. isSignedIn = false → ログイン誘導
- * 3. role = 'guest' → 会員限定コンテンツの案内（ログイン済みだが非会員）
+ * 3. role = 'guest' → 会員限定コンテンツの案内
  * 4. role = 'member' | 'admin' → children を描画
  */
-export default function FanclubGuard({ children }: Props) {
+function FanclubGuardWithClerk({ children }: Props) {
   const { t } = useTranslation()
   const { openSignIn } = useClerk()
   const { user, isLoaded, isSignedIn } = useCurrentUser()
@@ -41,3 +41,14 @@ export default function FanclubGuard({ children }: Props) {
 
   return <>{children}</>
 }
+
+/**
+ * Clerk 未設定時はファンクラブコンテンツをゲスト扱いで非表示にする
+ */
+function FanclubGuardNoClerk() {
+  return <RestrictedNotice variant="not_signed_in" onSignIn={() => {}} />
+}
+
+export default import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+  ? FanclubGuardWithClerk
+  : FanclubGuardNoClerk
