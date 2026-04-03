@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { useStrapiCollection } from '@/hooks'
 import { getWorksList } from '@/modules/works/api'
+import { getMediaUrl } from '@/utils'
 import { ROUTES, detailPath } from '@/lib/routeConstants'
 import SectionHeader from '@/components/common/SectionHeader'
 import WorkCard from '@/components/cards/WorkCard'
@@ -12,6 +13,7 @@ import type { Work } from '@/types/content'
 /** Bento layout: 4 items in asymmetric 3-col grid */
 function BentoGrid({ items }: { items: Work[] }) {
   const [first, ...rest] = items.slice(0, 4)
+  const firstThumb = getMediaUrl(first?.thumbnail, 'large') ?? getMediaUrl(first?.thumbnail)
 
   return (
     <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-3">
@@ -22,9 +24,9 @@ function BentoGrid({ items }: { items: Work[] }) {
           className="group relative col-span-2 overflow-hidden bg-gray-100 md:col-span-2"
           style={{ aspectRatio: '2 / 1' }}
         >
-          {first.thumbnailUrl ? (
+          {firstThumb ? (
             <img
-              src={first.thumbnailUrl}
+              src={firstThumb}
               alt={first.title}
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
             />
@@ -66,7 +68,7 @@ function BentoGrid({ items }: { items: Work[] }) {
             title={work.title}
             href={detailPath.work(work.slug)}
             category={work.category}
-            thumbnailUrl={work.thumbnailUrl}
+            thumbnailUrl={getMediaUrl(work.thumbnail, 'small') ?? getMediaUrl(work.thumbnail)}
             index={i + 1}
             isFeatured={work.isFeatured}
             status={work.status}

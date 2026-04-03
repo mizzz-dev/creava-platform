@@ -1,76 +1,74 @@
-import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useStrapiCollection, useContentAccess } from '@/hooks'
 import { getWorksList } from '@/modules/works/api'
-import { formatDate } from '@/utils'
+import { getMediaUrl } from '@/utils'
 import { detailPath } from '@/lib/routeConstants'
 import PageHead from '@/components/seo/PageHead'
-import SkeletonListItem from '@/components/common/SkeletonListItem'
+import WorkCard from '@/components/cards/WorkCard'
+import ErrorState from '@/components/common/ErrorState'
 import type { Work } from '@/types'
+
+function WorksGridSkeleton() {
+  return (
+    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="space-y-2">
+          <div className="skeleton aspect-square bg-gray-100" />
+          <div className="skeleton h-3 w-3/4 rounded bg-gray-100" />
+          <div className="skeleton h-3 w-1/2 rounded bg-gray-100" />
+        </div>
+      ))}
+    </div>
+  )
+}
 
 export default function WorksPage() {
   const { t } = useTranslation()
   const { filterVisible } = useContentAccess()
 
   const { items, loading, error } = useStrapiCollection<Work>(
-    () => getWorksList({ pagination: { pageSize: 20 } }),
+    () => getWorksList({ pagination: { pageSize: 40 } }),
   )
 
-  // 閲覧不可コンテンツを除外（fc_only / 期限切れ limited）
   const visibleItems = items ? filterVisible(items) : null
 
   return (
     <section className="mx-auto max-w-5xl px-4 py-20">
       <PageHead title={t('nav.works')} description={t('seo.works')} />
-      <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
-        {t('nav.works')}
-      </h1>
 
-      <div className="mt-10">
-        {loading && (
-          <ul className="divide-y divide-gray-100">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <SkeletonListItem key={i} />
-            ))}
-          </ul>
-        )}
+      <header className="mb-10">
+        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-300">
+          <span className="mr-1 text-gray-200">//</span>
+          {t('nav.works')}
+        </p>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900">
+          {t('nav.works')}
+        </h1>
+      </header>
 
-        {error && (
-          <div className="rounded border border-red-200 bg-red-50 px-4 py-3">
-            <p className="text-sm font-medium text-red-600">{t('common.error')}</p>
-            <p className="mt-1 font-mono text-xs text-red-400">{error}</p>
-          </div>
-        )}
+      {loading && <WorksGridSkeleton />}
+      {error && <ErrorState message={error} />}
 
-        {!loading && !error && visibleItems !== null && visibleItems.length === 0 && (
-          <p className="text-sm text-gray-400">{t('access.noContent')}</p>
-        )}
+      {!loading && !error && visibleItems !== null && visibleItems.length === 0 && (
+        <p className="text-sm text-gray-400">{t('access.noContent')}</p>
+      )}
 
-        {visibleItems && visibleItems.length > 0 && (
-          <ul className="divide-y divide-gray-100">
-            {visibleItems.map((item) => (
-              <li key={item.id} className="py-4">
-                <Link
-                  to={detailPath.work(item.slug)}
-                  className="group block"
-                >
-                  <p className="text-sm font-medium text-gray-900 group-hover:text-gray-600 transition-colors">
-                    {item.title}
-                  </p>
-                  {item.category && (
-                    <p className="mt-0.5 text-xs text-gray-400">{item.category}</p>
-                  )}
-                  {item.publishAt && (
-                    <p className="mt-1 text-xs text-gray-400">
-                      {formatDate(item.publishAt)}
-                    </p>
-                  )}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {visibleItems && visibleItems.length > 0 && (
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          {visibleItems.map((item, i) => (
+            <WorkCard
+              key={item.id}
+              title={item.title}
+              href={detailPath.work(item.slug)}
+              category={item.category}
+              thumbnailUrl={getMediaUrl(item.thumbnail, 'small') ?? getMediaUrl(item.thumbnail)}
+              index={i}
+              isFeatured={item.isFeatured}
+              status={item.status}
+            />
+          ))}
+        </div>
+      )}
     </section>
   )
 }

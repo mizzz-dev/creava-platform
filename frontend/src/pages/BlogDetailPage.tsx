@@ -1,22 +1,34 @@
+import { Link } from 'react-router-dom'
 import { useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useSlugDetail } from '@/hooks'
 import { getBlogDetail } from '@/modules/blog/api'
+import { getMediaUrl, formatDate } from '@/utils'
+import { truncateForDescription } from '@/lib/seo'
+import { ROUTES } from '@/lib/routeConstants'
 import ContentAccessGuard from '@/components/guards/ContentAccessGuard'
 import NotFoundState from '@/components/common/NotFoundState'
 import ErrorState from '@/components/common/ErrorState'
 import PageHead from '@/components/seo/PageHead'
 import SkeletonDetail from '@/components/common/SkeletonDetail'
-import { formatDate } from '@/utils'
-import { truncateForDescription } from '@/lib/seo'
-import { ROUTES } from '@/lib/routeConstants'
+import Badge from '@/components/common/Badge'
 import type { BlogPost } from '@/types'
 
 export default function BlogDetailPage() {
   const { slug } = useParams<{ slug: string }>()
+  const { t } = useTranslation()
   const { item, loading, error, notFound } = useSlugDetail<BlogPost>(getBlogDetail, slug)
 
   return (
     <section className="mx-auto max-w-5xl px-4 py-20">
+      {/* back link */}
+      <Link
+        to={ROUTES.BLOG}
+        className="mb-8 inline-flex items-center gap-1.5 font-mono text-[11px] text-gray-400 transition-colors hover:text-gray-700"
+      >
+        ← {t('detail.backToList')}
+      </Link>
+
       {loading && <SkeletonDetail />}
       {error && <ErrorState message={error} />}
       {notFound && <NotFoundState backTo={ROUTES.BLOG} />}
@@ -26,23 +38,43 @@ export default function BlogDetailPage() {
           <PageHead
             title={item.title}
             description={item.body ? truncateForDescription(item.body) : undefined}
-            ogImage={item.thumbnailUrl ?? undefined}
+            ogImage={getMediaUrl(item.thumbnail) ?? undefined}
             ogType="article"
           />
+
+          {/* cover image */}
+          {item.thumbnail && (
+            <div className="mb-10 overflow-hidden bg-gray-100" style={{ aspectRatio: '16 / 9' }}>
+              <img
+                src={getMediaUrl(item.thumbnail, 'large') ?? getMediaUrl(item.thumbnail)!}
+                alt={item.thumbnail.alternativeText ?? item.title}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          )}
+
           <article className="max-w-3xl">
             <header>
+              {/* status badges */}
+              <div className="mb-3 flex flex-wrap items-center gap-1.5">
+                {item.status === 'fc_only' && <Badge variant="fc" />}
+                {item.status === 'limited' && <Badge variant="limited" />}
+              </div>
+
               <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
                 {item.title}
               </h1>
+
               {item.publishAt && (
-                <p className="mt-2 text-sm text-gray-400">{formatDate(item.publishAt)}</p>
+                <p className="mt-2 font-mono text-xs text-gray-400">{formatDate(item.publishAt)}</p>
               )}
+
               {item.tags && item.tags.length > 0 && (
-                <ul className="mt-3 flex flex-wrap gap-2">
+                <ul className="mt-3 flex flex-wrap gap-1.5">
                   {item.tags.map((tag) => (
                     <li
                       key={tag}
-                      className="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-500"
+                      className="rounded-sm border border-gray-100 bg-gray-50 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-gray-400"
                     >
                       {tag}
                     </li>
@@ -52,7 +84,7 @@ export default function BlogDetailPage() {
             </header>
 
             {item.body && (
-              <div className="mt-8 whitespace-pre-wrap text-sm leading-7 text-gray-700">
+              <div className="mt-10 whitespace-pre-wrap text-sm leading-7 text-gray-700">
                 {item.body}
               </div>
             )}

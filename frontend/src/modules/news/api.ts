@@ -13,6 +13,7 @@ export function getNewsList(
 ): Promise<StrapiListResponse<NewsItem>> {
   return fetchCollection<NewsItem>(ENDPOINT, {
     sort: ['publishAt:desc'],
+    populate: ['thumbnail'],
     ...params,
   })
 }
@@ -24,5 +25,5 @@ export function getNewsDetail(
   slug: string,
   params?: Omit<StrapiQueryParams, 'filters' | 'pagination'>,
 ): Promise<NewsItem | null> {
-  return fetchBySlug<NewsItem>(ENDPOINT, slug, params)
+  return fetchBySlug<NewsItem>(ENDPOINT, slug, { populate: ['thumbnail'], ...params })
 }
