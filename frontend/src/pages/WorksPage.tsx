@@ -64,7 +64,7 @@ export default function WorksPage() {
               thumbnailUrl={getMediaUrl(item.thumbnail, 'small') ?? getMediaUrl(item.thumbnail)}
               index={i}
               isFeatured={item.isFeatured}
-              status={item.status}
+              status={item.accessStatus}
             />
           ))}
         </div>

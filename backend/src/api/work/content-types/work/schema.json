@@ -11,7 +11,9 @@
     "draftAndPublish": true
   },
   "pluginOptions": {
-    "i18n": { "localized": false }
+    "i18n": {
+      "localized": false
+    }
   },
   "attributes": {
     "title": {
@@ -21,12 +23,6 @@
     "slug": {
       "type": "uid",
       "targetField": "title",
-      "required": true
-    },
-    "status": {
-      "type": "enumeration",
-      "enum": ["public", "fc_only", "limited"],
-      "default": "public",
       "required": true
     },
     "publishAt": {
@@ -53,10 +49,22 @@
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
     },
     "externalUrl": {
       "type": "string"
+    },
+    "accessStatus": {
+      "type": "enumeration",
+      "enum": [
+        "public",
+        "fc_only",
+        "limited"
+      ],
+      "default": "public",
+      "required": true
     }
   }
 }

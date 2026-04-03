@@ -54,7 +54,7 @@ function BentoGrid({ items }: { items: Work[] }) {
               </div>
               <div className="flex flex-col items-end gap-1 shrink-0">
                 {first.isFeatured && <Badge variant="featured" />}
-                {first.status === 'fc_only' && <Badge variant="fc" />}
+                {first.accessStatus === 'fc_only' && <Badge variant="fc" />}
               </div>
             </div>
           </div>
@@ -71,7 +71,7 @@ function BentoGrid({ items }: { items: Work[] }) {
             thumbnailUrl={getMediaUrl(work.thumbnail, 'small') ?? getMediaUrl(work.thumbnail)}
             index={i + 1}
             isFeatured={work.isFeatured}
-            status={work.status}
+            status={work.accessStatus}
           />
         </div>
       ))}

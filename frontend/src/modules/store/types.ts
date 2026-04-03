@@ -21,8 +21,8 @@ export interface StoreProductSummary {
   /** 通貨コード（デフォルト: 'JPY'） */
   currency: string
   previewImage: { url: string; alt: string | null } | null
-  /** FC 表示制御 */
-  status: ContentStatus
+  /** FC 表示制御（Strapi v5 では status はシステム予約のため accessStatus を使用） */
+  accessStatus: ContentStatus
   limitedEndAt: string | null
   archiveVisibleForFC: boolean
   /** Stripe Checkout / Payment Link URL */

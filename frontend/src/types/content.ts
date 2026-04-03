@@ -37,11 +37,14 @@ export interface StrapiBase {
 
 /**
  * すべてのコンテンツが持つ共通フィールド
+ *
+ * NOTE: Strapi v5 は `status` をシステム予約フィールド（draft/published）として使用するため、
+ * アクセス制御用のカスタム enum は `accessStatus` という名前にしています。
  */
 export interface ContentBase extends StrapiBase {
   title: string
   slug: string
-  status: ContentStatus
+  accessStatus: ContentStatus
   publishAt: string | null
   limitedEndAt: string | null
   archiveVisibleForFC: boolean

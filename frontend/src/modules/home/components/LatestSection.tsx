@@ -29,13 +29,13 @@ export default function LatestSection() {
       label: t('home.latest.news'),
       data: news,
       viewAllTo: ROUTES.NEWS,
-      renderCard: (item: { id: number; title: string; slug: string; publishAt: string | null; status: 'public' | 'fc_only' | 'limited' }) => (
+      renderCard: (item: { id: number; title: string; slug: string; publishAt: string | null; accessStatus: 'public' | 'fc_only' | 'limited' }) => (
         <ContentCard
           key={item.id}
           title={item.title}
           href={detailPath.news(item.slug)}
           publishAt={item.publishAt}
-          status={item.status}
+          status={item.accessStatus}
         />
       ),
     },
@@ -44,13 +44,13 @@ export default function LatestSection() {
       label: t('home.latest.blog'),
       data: blog,
       viewAllTo: ROUTES.BLOG,
-      renderCard: (item: { id: number; title: string; slug: string; publishAt: string | null; status: 'public' | 'fc_only' | 'limited' }) => (
+      renderCard: (item: { id: number; title: string; slug: string; publishAt: string | null; accessStatus: 'public' | 'fc_only' | 'limited' }) => (
         <ContentCard
           key={item.id}
           title={item.title}
           href={detailPath.blog(item.slug)}
           publishAt={item.publishAt}
-          status={item.status}
+          status={item.accessStatus}
         />
       ),
     },
@@ -66,7 +66,7 @@ export default function LatestSection() {
           href={detailPath.event(item.slug)}
           startAt={item.startAt}
           venue={item.venue}
-          status={item.status}
+          status={item.accessStatus}
         />
       ),
     },

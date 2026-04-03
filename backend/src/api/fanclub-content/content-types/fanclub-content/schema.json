@@ -21,12 +21,6 @@
       "targetField": "title",
       "required": true
     },
-    "status": {
-      "type": "enumeration",
-      "enum": ["public", "fc_only", "limited"],
-      "default": "fc_only",
-      "required": true
-    },
     "publishAt": {
       "type": "datetime"
     },
@@ -42,14 +36,35 @@
     },
     "category": {
       "type": "enumeration",
-      "enum": ["diary", "exclusive", "qa", "behind_scenes", "teaser", "live_archive", "tips", "info"],
+      "enum": [
+        "diary",
+        "exclusive",
+        "qa",
+        "behind_scenes",
+        "teaser",
+        "live_archive",
+        "tips",
+        "info"
+      ],
       "default": "diary"
     },
     "thumbnail": {
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "accessStatus": {
+      "type": "enumeration",
+      "enum": [
+        "public",
+        "fc_only",
+        "limited"
+      ],
+      "default": "fc_only",
+      "required": true
     }
   }
 }

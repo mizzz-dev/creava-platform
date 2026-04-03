@@ -18,12 +18,12 @@ export function useContentAccess() {
    * コンテンツリストを現在の role でフィルタリングする
    * 閲覧不可のアイテムを除外した配列を返す
    */
-  function filterVisible<T extends Pick<ContentBase, 'status' | 'limitedEndAt' | 'archiveVisibleForFC'>>(
+  function filterVisible<T extends Pick<ContentBase, 'accessStatus' | 'limitedEndAt' | 'archiveVisibleForFC'>>(
     items: T[],
   ): T[] {
     return items.filter((item) =>
       canViewContent({
-        status: item.status,
+        status: item.accessStatus,
         role,
         limitedEndAt: item.limitedEndAt,
         archiveVisibleForFC: item.archiveVisibleForFC,
@@ -35,10 +35,10 @@ export function useContentAccess() {
    * 単一コンテンツの表示可否を判定する
    */
   function canView(
-    item: Pick<ContentBase, 'status' | 'limitedEndAt' | 'archiveVisibleForFC'>,
+    item: Pick<ContentBase, 'accessStatus' | 'limitedEndAt' | 'archiveVisibleForFC'>,
   ): boolean {
     return canViewContent({
-      status: item.status,
+      status: item.accessStatus,
       role,
       limitedEndAt: item.limitedEndAt,
       archiveVisibleForFC: item.archiveVisibleForFC,

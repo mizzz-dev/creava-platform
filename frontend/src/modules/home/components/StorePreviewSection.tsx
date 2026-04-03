@@ -11,7 +11,7 @@ export default function StorePreviewSection() {
   const { t } = useTranslation()
   const { products, loading } = useProductList(6)
 
-  const previewItems = products.filter((p) => p.status === 'public').slice(0, 3)
+  const previewItems = products.filter((p) => p.accessStatus === 'public').slice(0, 3)
 
   return (
     <motion.section
@@ -75,8 +75,8 @@ export default function StorePreviewSection() {
 
                   {/* status badges top-right */}
                   <div className="absolute right-2 top-2 flex flex-col gap-1">
-                    {product.status === 'fc_only' && <Badge variant="fc" />}
-                    {product.status === 'limited' && <Badge variant="limited" />}
+                    {product.accessStatus === 'fc_only' && <Badge variant="fc" />}
+                    {product.accessStatus === 'limited' && <Badge variant="limited" />}
                     {product.purchaseStatus === 'coming_soon' && <Badge variant="coming_soon" />}
                   </div>
                 </div>

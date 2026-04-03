@@ -6,7 +6,7 @@ import RestrictedNotice from '@/components/common/RestrictedNotice'
 import type { ContentBase } from '@/types'
 
 interface Props {
-  item: Pick<ContentBase, 'status' | 'limitedEndAt' | 'archiveVisibleForFC'>
+  item: Pick<ContentBase, 'accessStatus' | 'limitedEndAt' | 'archiveVisibleForFC'>
   children: ReactNode
 }
 
