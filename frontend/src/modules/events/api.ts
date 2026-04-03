@@ -1,8 +1,9 @@
 import { fetchCollection, fetchBySlug } from '@/lib/api/strapi'
 import type { StrapiQueryParams } from '@/lib/api/strapi'
 import type { Event, StrapiListResponse } from '@/types'
+import { API_ENDPOINTS } from '@/lib/api/endpoints'
 
-const ENDPOINT = '/events'
+const ENDPOINT = API_ENDPOINTS.events
 
 export function getEventsList(
   params?: StrapiQueryParams,

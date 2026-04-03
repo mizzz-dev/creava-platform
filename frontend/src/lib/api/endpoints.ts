@@ -1,0 +1,26 @@
+/**
+ * Strapi API エンドポイント定数
+ *
+ * バックエンドの schema.json の `pluralName` と一致させること。
+ * 変更時は backend/src/api/<name>/content-types/<name>/schema.json の
+ * "pluralName" を必ず確認する。
+ *
+ * Collection Types → pluralName がエンドポイントになる
+ * Single Types     → singularName がエンドポイントになる
+ */
+export const API_ENDPOINTS = {
+  // Collection Types
+  works:           '/works',
+  news:            '/news-items',
+  blog:            '/blog-posts',
+  fanclub:         '/fanclub-contents',
+  events:          '/events',
+  store:           '/store-products',
+  mediaItems:      '/media-items',
+  awards:          '/awards',
+  faqs:            '/faqs',
+
+  // Single Types
+  profile:         '/profile',
+  siteSettings:    '/site-setting',
+} as const

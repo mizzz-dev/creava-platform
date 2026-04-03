@@ -1,8 +1,9 @@
 import { fetchCollection, fetchBySlug } from '@/lib/api/strapi'
 import type { StrapiQueryParams } from '@/lib/api/strapi'
 import type { FanclubContent, StrapiListResponse } from '@/types'
+import { API_ENDPOINTS } from '@/lib/api/endpoints'
 
-const ENDPOINT = '/fanclub-contents'
+const ENDPOINT = API_ENDPOINTS.fanclub
 
 /**
  * ファンクラブコンテンツ一覧を取得する
