@@ -21,12 +21,6 @@
       "targetField": "title",
       "required": true
     },
-    "status": {
-      "type": "enumeration",
-      "enum": ["public", "fc_only", "limited"],
-      "default": "public",
-      "required": true
-    },
     "publishAt": {
       "type": "datetime"
     },
@@ -58,7 +52,11 @@
     },
     "purchaseStatus": {
       "type": "enumeration",
-      "enum": ["available", "soldout", "coming_soon"],
+      "enum": [
+        "available",
+        "soldout",
+        "coming_soon"
+      ],
       "default": "available",
       "required": true
     },
@@ -69,7 +67,19 @@
       "type": "media",
       "multiple": false,
       "required": false,
-      "allowedTypes": ["images"]
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "accessStatus": {
+      "type": "enumeration",
+      "enum": [
+        "public",
+        "fc_only",
+        "limited"
+      ],
+      "default": "public",
+      "required": true
     }
   }
 }

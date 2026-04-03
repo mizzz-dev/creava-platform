@@ -85,7 +85,7 @@ export default function EventsPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <EventStatusBadge event={event} />
-                    {event.status === 'fc_only' && (
+                    {event.accessStatus === 'fc_only' && (
                       <span className="rounded-sm bg-gray-900 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-white">
                         fc
                       </span>

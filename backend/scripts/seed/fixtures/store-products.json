@@ -2,7 +2,6 @@
   {
     "title": "写真集 Vol.1「光の記憶」",
     "slug": "photobook-vol1-hikari",
-    "status": "public",
     "publishAt": "2024-04-01T10:00:00.000Z",
     "limitedEndAt": null,
     "archiveVisibleForFC": false,
@@ -11,12 +10,12 @@
     "currency": "JPY",
     "stripeLink": "https://buy.stripe.com/test_photobook_vol1",
     "baseLink": "https://thebase.com/shop/example/items/photobook-vol1",
-    "purchaseStatus": "available"
+    "purchaseStatus": "available",
+    "accessStatus": "public"
   },
   {
     "title": "Instrumental EP「Between」DL版",
     "slug": "ep-between-digital",
-    "status": "public",
     "publishAt": "2024-03-15T10:00:00.000Z",
     "limitedEndAt": null,
     "archiveVisibleForFC": false,
@@ -25,12 +24,12 @@
     "currency": "JPY",
     "stripeLink": "https://buy.stripe.com/test_ep_between_dl",
     "baseLink": null,
-    "purchaseStatus": "available"
+    "purchaseStatus": "available",
+    "accessStatus": "public"
   },
   {
     "title": "ポートレートプリント A3（限定30枚）",
     "slug": "print-portrait-a3-limited",
-    "status": "public",
     "publishAt": "2024-02-20T10:00:00.000Z",
     "limitedEndAt": null,
     "archiveVisibleForFC": false,
@@ -39,12 +38,12 @@
     "currency": "JPY",
     "stripeLink": "https://buy.stripe.com/test_print_portrait_a3",
     "baseLink": null,
-    "purchaseStatus": "available"
+    "purchaseStatus": "available",
+    "accessStatus": "public"
   },
   {
     "title": "オリジナルトートバッグ",
     "slug": "tote-bag-original",
-    "status": "public",
     "publishAt": "2024-03-01T10:00:00.000Z",
     "limitedEndAt": null,
     "archiveVisibleForFC": false,
@@ -53,12 +52,12 @@
     "currency": "JPY",
     "stripeLink": null,
     "baseLink": "https://thebase.com/shop/example/items/tote-bag",
-    "purchaseStatus": "available"
+    "purchaseStatus": "available",
+    "accessStatus": "public"
   },
   {
     "title": "Original Soundtrack「夜の庭」DL版",
     "slug": "ost-night-garden-digital",
-    "status": "public",
     "publishAt": "2024-01-25T10:00:00.000Z",
     "limitedEndAt": null,
     "archiveVisibleForFC": false,
@@ -67,12 +66,12 @@
     "currency": "JPY",
     "stripeLink": "https://buy.stripe.com/test_ost_night_garden",
     "baseLink": "https://thebase.com/shop/example/items/ost-night-garden",
-    "purchaseStatus": "available"
+    "purchaseStatus": "available",
+    "accessStatus": "public"
   },
   {
     "title": "ポストカードセット（10枚組）",
     "slug": "postcard-set-10",
-    "status": "public",
     "publishAt": "2024-03-10T10:00:00.000Z",
     "limitedEndAt": null,
     "archiveVisibleForFC": false,
@@ -81,12 +80,12 @@
     "currency": "JPY",
     "stripeLink": null,
     "baseLink": "https://thebase.com/shop/example/items/postcard-set-10",
-    "purchaseStatus": "available"
+    "purchaseStatus": "available",
+    "accessStatus": "public"
   },
   {
     "title": "デジタルプリント — 「光の記憶」シリーズ全5点セット",
     "slug": "digital-print-set-hikari",
-    "status": "public",
     "publishAt": "2024-04-10T10:00:00.000Z",
     "limitedEndAt": null,
     "archiveVisibleForFC": false,
@@ -95,12 +94,12 @@
     "currency": "JPY",
     "stripeLink": "https://buy.stripe.com/test_digital_print_hikari",
     "baseLink": null,
-    "purchaseStatus": "available"
+    "purchaseStatus": "available",
+    "accessStatus": "public"
   },
   {
     "title": "写真集 Vol.1「光の記憶」+ プリントセット",
     "slug": "photobook-vol1-print-bundle",
-    "status": "limited",
     "publishAt": "2024-04-01T10:00:00.000Z",
     "limitedEndAt": "2025-06-30T23:59:59.000Z",
     "archiveVisibleForFC": false,
@@ -109,12 +108,12 @@
     "currency": "JPY",
     "stripeLink": "https://buy.stripe.com/test_photobook_bundle",
     "baseLink": null,
-    "purchaseStatus": "available"
+    "purchaseStatus": "available",
+    "accessStatus": "limited"
   },
   {
     "title": "FC 限定 — 壁紙パック Vol.1（デジタル）",
     "slug": "fc-wallpaper-pack-vol1",
-    "status": "fc_only",
     "publishAt": "2024-03-20T10:00:00.000Z",
     "limitedEndAt": null,
     "archiveVisibleForFC": false,
@@ -123,12 +122,12 @@
     "currency": "JPY",
     "stripeLink": "https://buy.stripe.com/test_fc_wallpaper_vol1",
     "baseLink": null,
-    "purchaseStatus": "available"
+    "purchaseStatus": "available",
+    "accessStatus": "fc_only"
   },
   {
     "title": "撮影ワークショップ参加券（2025年4月）",
     "slug": "workshop-ticket-april-2025",
-    "status": "public",
     "publishAt": "2024-03-01T10:00:00.000Z",
     "limitedEndAt": "2025-04-05T23:59:59.000Z",
     "archiveVisibleForFC": false,
@@ -137,12 +136,12 @@
     "currency": "JPY",
     "stripeLink": "https://buy.stripe.com/test_workshop_april_2025",
     "baseLink": null,
-    "purchaseStatus": "available"
+    "purchaseStatus": "available",
+    "accessStatus": "public"
   },
   {
     "title": "アクリルスタンド — 「夕暮れの港」",
     "slug": "acrylic-stand-sunset-harbor",
-    "status": "public",
     "publishAt": "2024-02-01T10:00:00.000Z",
     "limitedEndAt": null,
     "archiveVisibleForFC": false,
@@ -151,12 +150,12 @@
     "currency": "JPY",
     "stripeLink": "https://buy.stripe.com/test_acrylic_sunset",
     "baseLink": "https://thebase.com/shop/example/items/acrylic-sunset-harbor",
-    "purchaseStatus": "coming_soon"
+    "purchaseStatus": "coming_soon",
+    "accessStatus": "public"
   },
   {
     "title": "オリジナルステッカーパック",
     "slug": "sticker-pack-original",
-    "status": "public",
     "publishAt": "2023-12-15T10:00:00.000Z",
     "limitedEndAt": null,
     "archiveVisibleForFC": false,
@@ -165,6 +164,7 @@
     "currency": "JPY",
     "stripeLink": null,
     "baseLink": "https://thebase.com/shop/example/items/sticker-pack",
-    "purchaseStatus": "soldout"
+    "purchaseStatus": "soldout",
+    "accessStatus": "public"
   }
 ]

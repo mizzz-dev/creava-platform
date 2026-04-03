@@ -57,8 +57,8 @@ export default function NewsDetailPage() {
             <header>
               {/* status badges */}
               <div className="mb-3 flex flex-wrap items-center gap-1.5">
-                {item.status === 'fc_only' && <Badge variant="fc" />}
-                {item.status === 'limited' && <Badge variant="limited" />}
+                {item.accessStatus === 'fc_only' && <Badge variant="fc" />}
+                {item.accessStatus === 'limited' && <Badge variant="limited" />}
               </div>
 
               <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
