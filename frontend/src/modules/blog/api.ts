@@ -1,8 +1,9 @@
 import { fetchCollection, fetchBySlug } from '@/lib/api/strapi'
 import type { StrapiQueryParams } from '@/lib/api/strapi'
 import type { BlogPost, StrapiListResponse } from '@/types'
+import { API_ENDPOINTS } from '@/lib/api/endpoints'
 
-const ENDPOINT = '/blog-posts'
+const ENDPOINT = API_ENDPOINTS.blog
 
 /**
  * ブログ記事一覧を取得する

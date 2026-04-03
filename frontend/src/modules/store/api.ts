@@ -3,6 +3,7 @@ import { getMockStoreProducts, getMockStoreProduct } from '@/lib/mock/store-prod
 import type { StrapiQueryParams } from '@/lib/api/strapi'
 import type { StrapiListResponse } from '@/types'
 import type { StoreProduct, StoreProductSummary } from './types'
+import { API_ENDPOINTS } from '@/lib/api/endpoints'
 
 /**
  * Strapi コレクションエンドポイント名
@@ -15,7 +16,7 @@ import type { StoreProduct, StoreProductSummary } from './types'
  *
  * 将来 Shopify へ移行する場合は ENDPOINT と型を差し替える
  */
-const ENDPOINT = '/store-products'
+const ENDPOINT = API_ENDPOINTS.store
 
 /**
  * VITE_STRAPI_API_URL 未設定時はモックデータを使う

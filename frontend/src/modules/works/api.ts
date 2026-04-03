@@ -1,8 +1,9 @@
 import { fetchCollection, fetchBySlug } from '@/lib/api/strapi'
 import type { StrapiQueryParams } from '@/lib/api/strapi'
 import type { Work, StrapiListResponse } from '@/types'
+import { API_ENDPOINTS } from '@/lib/api/endpoints'
 
-const ENDPOINT = '/works'
+const ENDPOINT = API_ENDPOINTS.works
 
 /**
  * 作品一覧を取得する

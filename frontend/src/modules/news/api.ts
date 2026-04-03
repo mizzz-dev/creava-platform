@@ -1,9 +1,10 @@
 import { fetchCollection, fetchBySlug } from '@/lib/api/strapi'
 import type { StrapiQueryParams } from '@/lib/api/strapi'
 import type { NewsItem, StrapiListResponse } from '@/types'
+import { API_ENDPOINTS } from '@/lib/api/endpoints'
 
 /** Strapi のコレクションエンドポイント名 */
-const ENDPOINT = '/news-items'
+const ENDPOINT = API_ENDPOINTS.news
 
 /**
  * ニュース一覧を取得する
