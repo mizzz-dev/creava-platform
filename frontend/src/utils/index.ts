@@ -89,3 +89,31 @@ export function formatPriceNum(price: number, currencyCode: string = 'JPY'): str
     minimumFractionDigits: 0,
   }).format(price)
 }
+
+/**
+ * Strapi Media オブジェクトから表示用 URL を取得する
+ *
+ * - Strapi Cloud: url は絶対 URL のためそのまま返す
+ * - ローカル Strapi: url は `/uploads/...` 形式なので VITE_STRAPI_API_URL を付与する
+ */
+export function getMediaUrl(
+  media: { url: string; formats?: Record<string, { url: string }> | null } | null | undefined,
+  size?: 'thumbnail' | 'small' | 'medium' | 'large',
+): string | null {
+  if (!media) return null
+
+  if (size) {
+    const fmt = media.formats?.[size]
+    if (fmt?.url) {
+      return resolveUrl(fmt.url)
+    }
+  }
+
+  return resolveUrl(media.url)
+}
+
+function resolveUrl(url: string): string {
+  if (url.startsWith('http')) return url
+  const base = (import.meta.env.VITE_STRAPI_API_URL as string | undefined)?.replace(/\/$/, '') ?? ''
+  return base ? `${base}${url}` : url
+}

@@ -12,6 +12,7 @@ export function getWorksList(
 ): Promise<StrapiListResponse<Work>> {
   return fetchCollection<Work>(ENDPOINT, {
     sort: ['publishAt:desc'],
+    populate: ['thumbnail'],
     ...params,
   })
 }
@@ -23,5 +24,5 @@ export function getWorkDetail(
   slug: string,
   params?: Omit<StrapiQueryParams, 'filters' | 'pagination'>,
 ): Promise<Work | null> {
-  return fetchBySlug<Work>(ENDPOINT, slug, params)
+  return fetchBySlug<Work>(ENDPOINT, slug, { populate: ['thumbnail'], ...params })
 }

@@ -7,6 +7,24 @@
 export type ContentStatus = 'public' | 'fc_only' | 'limited'
 
 /**
+ * Strapi Media フィールドの型（populate 時に返されるオブジェクト）
+ * Strapi Cloud では url は絶対 URL、ローカルでは相対パス
+ */
+export interface StrapiMedia {
+  id: number
+  url: string
+  alternativeText: string | null
+  width: number | null
+  height: number | null
+  formats?: {
+    thumbnail?: { url: string; width: number; height: number }
+    small?: { url: string; width: number; height: number }
+    medium?: { url: string; width: number; height: number }
+    large?: { url: string; width: number; height: number }
+  } | null
+}
+
+/**
  * Strapi 共通フィールド
  */
 export interface StrapiBase {
@@ -57,19 +75,20 @@ export interface Profile extends ContentBase {
 
 export interface Work extends ContentBase {
   description: string | null
-  thumbnailUrl: string | null
+  thumbnail: StrapiMedia | null
   category: string | null
   isFeatured?: boolean
+  externalUrl?: string | null
 }
 
 export interface NewsItem extends ContentBase {
   body: string | null
-  thumbnailUrl: string | null
+  thumbnail: StrapiMedia | null
 }
 
 export interface BlogPost extends ContentBase {
   body: string | null
-  thumbnailUrl: string | null
+  thumbnail: StrapiMedia | null
   tags: string[]
 }
 
@@ -78,11 +97,12 @@ export interface Event extends ContentBase {
   startAt: string | null
   endAt: string | null
   venue: string | null
+  bookingLink?: string | null
 }
 
 export interface FanclubContent extends ContentBase {
   body: string | null
-  thumbnailUrl: string | null
+  thumbnail: StrapiMedia | null
 }
 
 export interface MediaItem extends StrapiBase {
