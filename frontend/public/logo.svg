@@ -1,5 +1,59 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="32" height="32" fill="none">
-  <rect width="40" height="40" rx="9" fill="#1a1a1a"/>
-  <path d="M27 13.5a9 9 0 1 0 0 13" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
-  <circle cx="27" cy="14.5" r="1.5" fill="#8b5cf6"/>
+<svg width="1200" height="1200" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="accent" x1="320" y1="0" x2="880" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5B6CFF"/>
+      <stop offset="1" stop-color="#1B6BFF"/>
+    </linearGradient>
+    <filter id="glow" x="0" y="0" width="1200" height="1200" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .word { fill: none; stroke: #F6F7FB; stroke-width: 24; stroke-linecap: round; stroke-linejoin: round; }
+      .accent { fill: none; stroke: url(#accent); stroke-width: 16; stroke-linecap: round; stroke-linejoin: round; }
+      .dot { fill: #1B6BFF; }
+      .icon { fill: none; stroke: #F6F7FB; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+      .icon-accent { fill: none; stroke: url(#accent); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <!-- transparent background by default -->
+
+  <!-- mizzz wordmark -->
+  <g transform="translate(215 535)">
+    <!-- m -->
+    <path class="word" d="M0 112V0C0 -10 8 -18 18 -18C25 -18 31 -13 34 -7L92 109L150 -7C153 -13 159 -18 166 -18C176 -18 184 -10 184 0V112"/>
+    <!-- i -->
+    <path class="word" d="M256 112V0"/>
+    <!-- z1 -->
+    <path class="word" d="M338 0H485L349 112H495"/>
+    <!-- z2 -->
+    <path class="word" d="M548 0H695L559 112H705"/>
+    <!-- z3 -->
+    <path class="word" d="M758 0H905L769 112H915"/>
+
+    <!-- accent underline -->
+    <path class="accent" d="M274 138H466"/>
+
+    <!-- accent dots -->
+    <circle class="dot" cx="-28" cy="138" r="10"/>
+    <circle class="dot" cx="690" cy="-2" r="11"/>
+    <circle class="dot" cx="928" cy="138" r="10"/>
+  </g>
+
+  <!-- cosmic icon above the i -->
+  <g transform="translate(520 430)" filter="url(#glow)">
+    <!-- crescent moon -->
+    <path class="icon" d="M74 18C57 26 46 44 46 65C46 93 69 116 97 116C115 116 131 107 140 93C133 95 126 96 118 96C91 96 69 74 69 47C69 36 71 26 74 18Z"/>
+    <!-- orbit ring -->
+    <path class="icon-accent" d="M17 82C31 57 61 40 100 40C141 40 176 58 190 86"/>
+    <path class="icon-accent" d="M22 87C43 111 80 126 121 124C156 122 185 109 201 88" opacity="0.85"/>
+    <!-- stars -->
+    <path class="icon" d="M14 22L19 34L31 39L19 44L14 56L9 44L-3 39L9 34L14 22Z"/>
+    <path class="icon" d="M170 18L174 27L183 31L174 35L170 44L166 35L157 31L166 27L170 18Z"/>
+    <path class="icon-accent" d="M209 58L212 65L219 68L212 71L209 78L206 71L199 68L206 65L209 58Z"/>
+  </g>
 </svg>
