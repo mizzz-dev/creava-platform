@@ -86,6 +86,9 @@ export default function HeroSection() {
                 <span className="mt-0.5 font-mono text-sm leading-7 text-gray-300 select-none">&gt;</span>
                 <span>{t('home.hero.subCopy')}</span>
               </p>
+              <p className="mt-2 font-mono text-[11px] uppercase tracking-widest text-gray-300 dark:text-gray-700">
+                {t('home.hero.hubLine')}
+              </p>
 
               {/* genre tags */}
               <div className="mt-5 flex flex-wrap gap-2">
@@ -116,6 +119,13 @@ export default function HeroSection() {
                   className="inline-flex items-center border border-gray-200 px-7 py-3 text-sm font-medium tracking-wide text-gray-700 transition-all duration-200 hover:border-gray-400 hover:bg-gray-50"
                 >
                   {t('home.hero.ctaContact')}
+                </Link>
+
+                <Link
+                  to={ROUTES.PRICING}
+                  className="inline-flex items-center border border-gray-200 px-4 py-3 text-sm tracking-wide text-gray-500 transition-all duration-200 hover:border-gray-400 hover:text-gray-700"
+                >
+                  {t('home.hero.ctaPricing')}
                 </Link>
 
                 {/* fanclub — tertiary */}

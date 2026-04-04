@@ -55,7 +55,11 @@
     "requestCta": "Request restock / custom project",
     "stripeNote": "Purchases are guided through a Stripe-first flow.",
     "comingSoonDetail": "This item is not on sale yet. Launch updates will be posted in News and Fanclub.",
-    "fcBridge": "Early announcements for limited drops are shared in Fanclub."
+    "fcBridge": "Early announcements for limited drops are shared in Fanclub.",
+    "subtitle": "Now live with Stripe-first flow",
+    "stripeLead": "stripe-first / limited drops / fanclub bridge",
+    "fanclubLead": "fanclub early access",
+    "emptySubCta": "Get early drops via Fanclub"
   },
   "form": {
     "required": "Required",
@@ -160,7 +164,9 @@
       "subCopy": "Creating across film, photography, and music.",
       "ctaWorks": "View Works",
       "ctaContact": "Contact",
-      "ctaFanclub": "Fan Club"
+      "ctaFanclub": "Fan Club",
+      "hubLine": "works / latest / pricing / contact",
+      "ctaPricing": "View pricing"
     },
     "latest": {
       "title": "Latest",

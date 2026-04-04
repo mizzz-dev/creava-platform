@@ -55,7 +55,11 @@
     "requestCta": "制作相談・再販リクエストはこちら",
     "stripeNote": "購入は Stripe を優先導線としてご案内しています。",
     "comingSoonDetail": "販売開始前のアイテムです。公開通知は News / Fanclub で案内します。",
-    "fcBridge": "限定商品の先行案内は Fanclub で配信しています。"
+    "fcBridge": "限定商品の先行案内は Fanclub で配信しています。",
+    "subtitle": "Stripe 主軸で公開中",
+    "stripeLead": "stripe-first / limited drops / fanclub bridge",
+    "fanclubLead": "fanclub先行あり",
+    "emptySubCta": "Fanclubで先行案内を受け取る"
   },
   "form": {
     "required": "必須",
@@ -160,7 +164,9 @@
       "subCopy": "映像・写真・音楽を中心に活動しています。",
       "ctaWorks": "作品を見る",
       "ctaContact": "お問い合わせ",
-      "ctaFanclub": "ファンクラブ"
+      "ctaFanclub": "ファンクラブ",
+      "hubLine": "works / latest / pricing / contact",
+      "ctaPricing": "料金を見る"
     },
     "latest": {
       "title": "最新情報",

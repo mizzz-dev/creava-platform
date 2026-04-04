@@ -10,6 +10,16 @@ import WorkCard from '@/components/cards/WorkCard'
 import Badge from '@/components/common/Badge'
 import type { Work } from '@/types/content'
 
+function hasCaseStudy(work: Work) {
+  return Boolean(
+    work.caseStudyBackground
+    || work.caseStudyGoal
+    || work.caseStudyApproach
+    || work.caseStudyImplementation
+    || work.caseStudyResult,
+  )
+}
+
 /** Bento layout: 4 items in asymmetric 3-col grid */
 function BentoGrid({ items }: { items: Work[] }) {
   const [first, ...rest] = items.slice(0, 4)
@@ -53,6 +63,11 @@ function BentoGrid({ items }: { items: Work[] }) {
                 </h3>
               </div>
               <div className="flex flex-col items-end gap-1 shrink-0">
+                {hasCaseStudy(first) && (
+                  <span className="rounded-sm border border-cyan-200/70 bg-cyan-50/90 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wide text-cyan-700">
+                    case
+                  </span>
+                )}
                 {first.isFeatured && <Badge variant="featured" />}
                 {first.accessStatus === 'fc_only' && <Badge variant="fc" />}
               </div>
@@ -72,6 +87,7 @@ function BentoGrid({ items }: { items: Work[] }) {
             index={i + 1}
             isFeatured={work.isFeatured}
             status={work.accessStatus}
+            hasCaseStudy={hasCaseStudy(work)}
           />
         </div>
       ))}

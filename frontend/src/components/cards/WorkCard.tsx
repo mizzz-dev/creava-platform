@@ -11,9 +11,10 @@ interface Props {
   index?: number
   isFeatured?: boolean
   status?: ContentStatus
+  hasCaseStudy?: boolean
 }
 
-export default function WorkCard({ title, href, category, thumbnailUrl, index, isFeatured, status }: Props) {
+export default function WorkCard({ title, href, category, thumbnailUrl, index, isFeatured, status, hasCaseStudy }: Props) {
   const label = index !== undefined ? String(index + 1).padStart(2, '0') : null
 
   return (
@@ -48,6 +49,11 @@ export default function WorkCard({ title, href, category, thumbnailUrl, index, i
 
         {/* badges — top-right */}
         <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
+          {hasCaseStudy && (
+            <span className="rounded-sm border border-cyan-200/80 bg-cyan-50/90 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wide text-cyan-700">
+              case
+            </span>
+          )}
           {isFeatured && (
             <Badge variant="featured" />
           )}

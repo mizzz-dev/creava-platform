@@ -44,6 +44,14 @@ export default function StorePage() {
         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
           {t('home.store.description')}
         </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <span className="rounded-sm border border-gray-200 dark:border-gray-800 px-2 py-1 font-mono text-[10px] text-gray-400 dark:text-gray-600">
+            {t('store.subtitle')}
+          </span>
+          <span className="rounded-sm border border-violet-200/60 dark:border-violet-900/40 px-2 py-1 font-mono text-[10px] text-violet-500">
+            {t('store.fanclubLead')}
+          </span>
+        </div>
       </motion.div>
 
       {loading && (
@@ -66,12 +74,20 @@ export default function StorePage() {
           <p className="mt-2 text-xs text-gray-400 dark:text-gray-600">
             {t('store.empty')}
           </p>
-          <Link
-            to={ROUTES.CONTACT}
-            className="mt-5 inline-flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
-          >
-            {t('store.requestCta')} →
-          </Link>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
+            <Link
+              to={ROUTES.CONTACT}
+              className="inline-flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+            >
+              {t('store.requestCta')} →
+            </Link>
+            <Link
+              to={ROUTES.FANCLUB}
+              className="inline-flex items-center text-xs font-mono text-violet-500 hover:text-violet-400"
+            >
+              {t('store.emptySubCta')} →
+            </Link>
+          </div>
         </div>
       )}
 
