@@ -29,6 +29,9 @@ export default function StorePreviewSection() {
           viewAllTo={ROUTES.STORE}
           viewAllLabel={t('home.store.viewAll')}
         />
+        <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-gray-300 dark:text-gray-700">
+          {t('store.stripeLead')}
+        </p>
 
         {/* skeleton */}
         {loading && (
@@ -124,6 +127,23 @@ export default function StorePreviewSection() {
             ))}
           </div>
         )}
+
+        <div className="mt-7 flex flex-wrap items-center gap-4">
+          <Link
+            to={ROUTES.STORE}
+            className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+          >
+            {t('home.store.viewAll')}
+            <span>→</span>
+          </Link>
+          <Link
+            to={ROUTES.FANCLUB}
+            className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-violet-500 hover:text-violet-400"
+          >
+            {t('store.fanclubLead')}
+            <span>→</span>
+          </Link>
+        </div>
       </div>
     </motion.section>
   )

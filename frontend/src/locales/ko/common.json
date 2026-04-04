@@ -55,7 +55,11 @@
     "requestCta": "재입고/의뢰 문의",
     "stripeNote": "구매는 Stripe 중심 동선으로 안내됩니다.",
     "comingSoonDetail": "아직 판매 전인 상품입니다. 오픈 소식은 뉴스/팬클럽에서 안내합니다.",
-    "fcBridge": "한정 상품 선공지는 팬클럽에서 먼저 안내됩니다."
+    "fcBridge": "한정 상품 선공지는 팬클럽에서 먼저 안내됩니다.",
+    "subtitle": "Stripe 중심 구매 동선 운영중",
+    "stripeLead": "stripe-first / limited drops / fanclub bridge",
+    "fanclubLead": "팬클럽 선공개 있음",
+    "emptySubCta": "팬클럽에서 선공개 소식 받기"
   },
   "form": {
     "required": "필수",
@@ -160,7 +164,9 @@
       "subCopy": "영상·사진·음악을 중심으로 활동합니다.",
       "ctaWorks": "작품 보기",
       "ctaContact": "문의하기",
-      "ctaFanclub": "팬클럽"
+      "ctaFanclub": "팬클럽",
+      "hubLine": "works / latest / pricing / contact",
+      "ctaPricing": "요금 보기"
     },
     "latest": {
       "title": "최신 정보",
