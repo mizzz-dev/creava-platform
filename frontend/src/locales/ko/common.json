@@ -304,7 +304,8 @@
     "totalItems": "상품 수",
     "fcBlockedDetail": "장바구니에 회원 전용 상품이 포함되어 있습니다. 결제 전에 회원 상태를 확인하세요.",
     "checkoutNote": "체크아웃 시 외부 결제 페이지로 이동합니다. 내용을 확인 후 진행해 주세요.",
-    "continueShopping": "쇼핑 계속하기"
+    "continueShopping": "쇼핑 계속하기",
+    "dragHint": "길게 눌러 드래그"
   },
   "member": {
     "title": "My Page",
@@ -324,5 +325,17 @@
     "actionFanclub": "Fanclub 확인",
     "actionNews": "News 확인",
     "joinHint": "FC 한정 상품과 선공개 정보는 Fanclub 가입 후 이용할 수 있습니다."
+  },
+  "memberGuide": {
+    "label": "Member Guide",
+    "loadingTitle": "회원 상태를 확인 중입니다…",
+    "loadingBody": "마이페이지와 회원 혜택 정보를 동기화하고 있습니다.",
+    "memberTitle": "회원 상태가 활성화되어 있습니다",
+    "memberBody": "FC 한정 콘텐츠·상품 동선을 그대로 이용할 수 있습니다.",
+    "signedInTitle": "회원 가입으로 한정 동선을 해제하세요",
+    "signedInBody": "현재는 일반 사용자입니다. 마이페이지에서 회원 동선을 확인하세요.",
+    "guestTitle": "로그인 후 회원 상태를 확인하세요",
+    "guestBody": "먼저 로그인한 뒤 마이페이지에서 회원 상태를 확인해 주세요.",
+    "cta": "마이페이지로"
   }
 }

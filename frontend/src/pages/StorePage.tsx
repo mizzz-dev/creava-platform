@@ -10,9 +10,11 @@ import SkeletonProductCard from '@/components/common/SkeletonProductCard'
 import { ROUTES } from '@/lib/routeConstants'
 import Badge from '@/components/common/Badge'
 import { SITE_URL } from '@/lib/seo'
+import { useListPageWebVitals } from '@/modules/analytics/webVitals'
 
 export default function StorePage() {
   const { t } = useTranslation()
+  useListPageWebVitals('store-list')
   const { products, loading, error } = useProductList(12)
   const { filterVisible } = useContentAccess()
 

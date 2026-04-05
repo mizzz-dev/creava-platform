@@ -1,4 +1,4 @@
-import { useState, useEffect, type PointerEvent as ReactPointerEvent } from 'react'
+import { useRef, useState, useEffect, type PointerEvent as ReactPointerEvent } from 'react'
 import { NavLink, useLocation, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -19,6 +19,18 @@ const NAV_ITEMS = [
   { key: 'nav.contact', to: ROUTES.CONTACT },
 ] as const
 
+type DeviceType = 'mobile' | 'desktop'
+const DRAG_HINT_SEEN_KEY = 'floating-cart-drag-hint-seen'
+
+function getDeviceType(): DeviceType {
+  if (typeof window === 'undefined') return 'desktop'
+  return window.matchMedia('(max-width: 767px)').matches ? 'mobile' : 'desktop'
+}
+
+function getFloatingCartStorageKey(deviceType: DeviceType): string {
+  return `floating-cart-position:${deviceType}`
+}
+
 function useShowAuth() {
   const { pathname } = useLocation()
   return (
@@ -32,9 +44,13 @@ export default function Header() {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [showFloatingCart, setShowFloatingCart] = useState(true)
+  const [deviceType, setDeviceType] = useState<DeviceType>(() => getDeviceType())
   const [floatingPosition, setFloatingPosition] = useState({ x: 0, y: 0 })
+  const [showDragHint, setShowDragHint] = useState(false)
   const [isDraggingCart, setIsDraggingCart] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const dragStartTimerRef = useRef<number | null>(null)
+  const pointerStateRef = useRef<{ startX: number; startY: number; originX: number; originY: number } | null>(null)
   const { pathname } = useLocation()
   const showAuth = useShowAuth()
   const { itemCount } = useCart()
@@ -45,10 +61,11 @@ export default function Header() {
   }, [pathname])
 
   useEffect(() => {
+    setDeviceType(getDeviceType())
     const fallback = { x: Math.max(window.innerWidth - 68, 16), y: Math.max(window.innerHeight - 68, 16) }
 
     try {
-      const raw = localStorage.getItem('floating-cart-position')
+      const raw = localStorage.getItem(getFloatingCartStorageKey(getDeviceType()))
       if (!raw) {
         setFloatingPosition(fallback)
         return
@@ -64,6 +81,15 @@ export default function Header() {
       setFloatingPosition(fallback)
     } catch {
       setFloatingPosition(fallback)
+    }
+  }, [])
+
+  useEffect(() => {
+    try {
+      const hasSeen = localStorage.getItem(DRAG_HINT_SEEN_KEY) === '1'
+      setShowDragHint(!hasSeen)
+    } catch {
+      setShowDragHint(true)
     }
   }, [])
 
@@ -84,11 +110,36 @@ export default function Header() {
     if (floatingPosition.x === 0 && floatingPosition.y === 0) {
       return
     }
-    localStorage.setItem('floating-cart-position', JSON.stringify(floatingPosition))
-  }, [floatingPosition])
+    localStorage.setItem(getFloatingCartStorageKey(deviceType), JSON.stringify(floatingPosition))
+  }, [deviceType, floatingPosition])
 
   useEffect(() => {
     const resizeHandler = () => {
+      const nextDeviceType = getDeviceType()
+      setDeviceType((prev) => {
+        if (prev !== nextDeviceType) {
+          const fallback = { x: Math.max(window.innerWidth - 68, 16), y: Math.max(window.innerHeight - 68, 16) }
+          try {
+            const raw = localStorage.getItem(getFloatingCartStorageKey(nextDeviceType))
+            if (!raw) {
+              setFloatingPosition(fallback)
+            } else {
+              const parsed = JSON.parse(raw) as { x?: number; y?: number }
+              if (typeof parsed.x === 'number' && typeof parsed.y === 'number') {
+                setFloatingPosition({
+                  x: Math.min(Math.max(parsed.x, 16), window.innerWidth - 56),
+                  y: Math.min(Math.max(parsed.y, 16), window.innerHeight - 56),
+                })
+              } else {
+                setFloatingPosition(fallback)
+              }
+            }
+          } catch {
+            setFloatingPosition(fallback)
+          }
+        }
+        return nextDeviceType
+      })
       setFloatingPosition((prev) => ({
         x: Math.min(Math.max(prev.x, 16), window.innerWidth - 56),
         y: Math.min(Math.max(prev.y, 16), window.innerHeight - 56),
@@ -99,32 +150,50 @@ export default function Header() {
   }, [])
 
   const beginCartDrag = (event: ReactPointerEvent<HTMLAnchorElement>) => {
-    event.preventDefault()
-    const startX = event.clientX
-    const startY = event.clientY
-    const originX = floatingPosition.x
-    const originY = floatingPosition.y
+    pointerStateRef.current = {
+      startX: event.clientX,
+      startY: event.clientY,
+      originX: floatingPosition.x,
+      originY: floatingPosition.y,
+    }
     setIsDraggingCart(false)
 
     const onMove = (moveEvent: PointerEvent) => {
-      const nextX = Math.min(Math.max(originX + (moveEvent.clientX - startX), 16), window.innerWidth - 56)
-      const nextY = Math.min(Math.max(originY + (moveEvent.clientY - startY), 16), window.innerHeight - 56)
+      const pointerState = pointerStateRef.current
+      if (!pointerState) return
+      const nextX = Math.min(Math.max(pointerState.originX + (moveEvent.clientX - pointerState.startX), 16), window.innerWidth - 56)
+      const nextY = Math.min(Math.max(pointerState.originY + (moveEvent.clientY - pointerState.startY), 16), window.innerHeight - 56)
       setFloatingPosition({ x: nextX, y: nextY })
 
       if (!isDraggingCart) {
-        const moved = Math.abs(moveEvent.clientX - startX) + Math.abs(moveEvent.clientY - startY) > 8
+        const moved = Math.abs(moveEvent.clientX - pointerState.startX) + Math.abs(moveEvent.clientY - pointerState.startY) > 8
         if (moved) setIsDraggingCart(true)
       }
     }
 
     const onUp = () => {
+      pointerStateRef.current = null
+      if (dragStartTimerRef.current) {
+        window.clearTimeout(dragStartTimerRef.current)
+        dragStartTimerRef.current = null
+      }
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
       setTimeout(() => setIsDraggingCart(false), 0)
     }
 
-    window.addEventListener('pointermove', onMove)
-    window.addEventListener('pointerup', onUp)
+    dragStartTimerRef.current = window.setTimeout(() => {
+      window.addEventListener('pointermove', onMove)
+      window.addEventListener('pointerup', onUp)
+      try {
+        localStorage.setItem(DRAG_HINT_SEEN_KEY, '1')
+      } catch {
+        // noop
+      }
+      setShowDragHint(false)
+    }, 240)
+
+    window.addEventListener('pointerup', onUp, { once: true })
   }
 
   return (
@@ -245,6 +314,10 @@ export default function Header() {
               to={ROUTES.CART}
               onPointerDown={beginCartDrag}
               onClick={(event) => {
+                if (dragStartTimerRef.current) {
+                  window.clearTimeout(dragStartTimerRef.current)
+                  dragStartTimerRef.current = null
+                }
                 if (isDraggingCart) {
                   event.preventDefault()
                 }
@@ -263,6 +336,11 @@ export default function Header() {
                 </span>
               )}
             </Link>
+            {showDragHint && (
+              <p className="pointer-events-none absolute -top-7 right-0 rounded-full border border-violet-200 bg-white/95 px-2 py-1 text-[10px] font-mono text-violet-600 shadow-sm dark:border-violet-800 dark:bg-gray-900/95 dark:text-violet-300">
+                {t('cart.dragHint', { defaultValue: '長押しでドラッグ' })}
+              </p>
+            )}
           </div>
         </div>
       )}

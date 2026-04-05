@@ -23,8 +23,9 @@ const DEFAULT_TIMEOUT_MS = Number(import.meta.env.VITE_STRAPI_TIMEOUT_MS ?? 1500
 const MAX_RETRIES = Number(import.meta.env.VITE_STRAPI_RETRY_COUNT ?? 2)
 const RETRYABLE_STATUS = new Set([408, 425, 429, 500, 502, 503, 504])
 const RESPONSE_CACHE_TTL_MS = Number(import.meta.env.VITE_STRAPI_RESPONSE_CACHE_TTL_MS ?? 60_000)
+const RESPONSE_CACHE_STALE_TTL_MS = Number(import.meta.env.VITE_STRAPI_RESPONSE_CACHE_STALE_TTL_MS ?? 300_000)
 
-const responseCache = new Map<string, { expiresAt: number; value: unknown }>()
+const responseCache = new Map<string, { expiresAt: number; staleExpiresAt: number; value: unknown }>()
 const inFlightRequests = new Map<string, Promise<unknown>>()
 
 export interface StrapiRequestOptions {
@@ -154,14 +155,42 @@ export async function strapiGet<T>(
   const cacheKey = `${authMode}:${url}`
   const now = Date.now()
   const cached = responseCache.get(cacheKey)
-  if (cached && cached.expiresAt > now) {
-    return cached.value as T
+  if (cached) {
+    if (cached.expiresAt > now) {
+      return cached.value as T
+    }
+    if (cached.staleExpiresAt > now) {
+      void revalidateInBackground<T>(cacheKey, url, authMode, token)
+      return cached.value as T
+    }
   }
 
   const pending = inFlightRequests.get(cacheKey)
   if (pending) {
     return pending as Promise<T>
   }
+
+  return executeRequest<T>(cacheKey, url, authMode, token)
+}
+
+function revalidateInBackground<T>(
+  cacheKey: string,
+  url: string,
+  authMode: 'none' | 'required' | 'auto',
+  token: string | undefined,
+): void {
+  if (inFlightRequests.has(cacheKey)) return
+  void executeRequest<T>(cacheKey, url, authMode, token).catch(() => {
+    // stale を返した直後のバックグラウンド更新失敗は握りつぶす
+  })
+}
+
+async function executeRequest<T>(
+  cacheKey: string,
+  url: string,
+  authMode: 'none' | 'required' | 'auto',
+  token: string | undefined,
+): Promise<T> {
 
   const headers: Record<string, string> = { Accept: 'application/json' }
 
@@ -199,6 +228,7 @@ export async function strapiGet<T>(
           responseCache.set(cacheKey, {
             value: json,
             expiresAt: Date.now() + RESPONSE_CACHE_TTL_MS,
+            staleExpiresAt: Date.now() + RESPONSE_CACHE_TTL_MS + Math.max(RESPONSE_CACHE_STALE_TTL_MS, 0),
           })
         }
         return json

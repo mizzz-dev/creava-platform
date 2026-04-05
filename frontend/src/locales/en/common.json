@@ -304,7 +304,8 @@
     "totalItems": "Items",
     "fcBlockedDetail": "Members-only items are in your cart. Please verify membership before checkout.",
     "checkoutNote": "Checkout redirects to an external payment page. Please review details first.",
-    "continueShopping": "Continue shopping"
+    "continueShopping": "Continue shopping",
+    "dragHint": "Hold to drag"
   },
   "member": {
     "title": "My Page",
@@ -324,5 +325,17 @@
     "actionFanclub": "Check Fanclub",
     "actionNews": "Check News",
     "joinHint": "Members-only items and early drops become available after joining Fanclub."
+  },
+  "memberGuide": {
+    "label": "Member Guide",
+    "loadingTitle": "Checking your membership status…",
+    "loadingBody": "Syncing your My Page and member benefits.",
+    "memberTitle": "Your member status is active",
+    "memberBody": "You can continue to access members-only content and products.",
+    "signedInTitle": "Join membership to unlock member routes",
+    "signedInBody": "You are currently a regular user. Check My Page for membership options.",
+    "guestTitle": "Sign in to confirm your membership status",
+    "guestBody": "Please sign in first, then verify your status from My Page.",
+    "cta": "Go to My Page"
   }
 }

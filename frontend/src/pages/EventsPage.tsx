@@ -7,6 +7,7 @@ import { detailPath } from '@/lib/routeConstants'
 import PageHead from '@/components/seo/PageHead'
 import SkeletonListItem from '@/components/common/SkeletonListItem'
 import ErrorState from '@/components/common/ErrorState'
+import { useListPageWebVitals } from '@/modules/analytics/webVitals'
 import type { Event } from '@/types'
 
 function EventStatusBadge({ event }: { event: Event }) {
@@ -37,6 +38,7 @@ function EventStatusBadge({ event }: { event: Event }) {
 
 export default function EventsPage() {
   const { t } = useTranslation()
+  useListPageWebVitals('events-list')
 
   const { items, loading, error, refetch } = useStrapiCollection<Event>(
     () => getEventsList({ pagination: { pageSize: 16, withCount: false } }),
