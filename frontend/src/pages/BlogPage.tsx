@@ -6,14 +6,15 @@ import { formatDate } from '@/utils'
 import { detailPath } from '@/lib/routeConstants'
 import PageHead from '@/components/seo/PageHead'
 import SkeletonListItem from '@/components/common/SkeletonListItem'
+import ErrorState from '@/components/common/ErrorState'
 import type { BlogPost } from '@/types'
 
 export default function BlogPage() {
   const { t } = useTranslation()
   const { filterVisible } = useContentAccess()
 
-  const { items, loading, error } = useStrapiCollection<BlogPost>(
-    () => getBlogList({ pagination: { pageSize: 20 } }),
+  const { items, loading, error, refetch } = useStrapiCollection<BlogPost>(
+    () => getBlogList({ pagination: { pageSize: 12, withCount: false } }),
   )
 
   // 閲覧不可コンテンツを除外（fc_only / 期限切れ limited）
@@ -36,10 +37,7 @@ export default function BlogPage() {
         )}
 
         {error && (
-          <div className="rounded border border-red-200 bg-red-50 px-4 py-3">
-            <p className="text-sm font-medium text-red-600">{t('common.error')}</p>
-            <p className="mt-1 font-mono text-xs text-red-400">{error}</p>
-          </div>
+          <ErrorState message={error} onRetry={refetch} />
         )}
 
         {!loading && !error && visibleItems !== null && visibleItems.length === 0 && (
