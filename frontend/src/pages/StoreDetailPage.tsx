@@ -16,6 +16,7 @@ import PageHead from '@/components/seo/PageHead'
 import StructuredData from '@/components/seo/StructuredData'
 import SkeletonProductDetail from '@/components/common/SkeletonProductDetail'
 import Badge from '@/components/common/Badge'
+import MemberGuideCard from '@/components/common/MemberGuideCard'
 import type { PurchaseStatus } from '@/modules/store/types'
 import { useCart } from '@/modules/cart/context'
 
@@ -155,6 +156,8 @@ export default function StoreDetailPage() {
                   </p>
                 </div>
               )}
+
+              <MemberGuideCard />
 
               {/* 補足説明 */}
               {product.externalPurchaseNote && (

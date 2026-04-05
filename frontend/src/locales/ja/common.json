@@ -304,7 +304,8 @@
     "totalItems": "商品点数",
     "fcBlockedDetail": "FC限定商品が含まれています。決済前に会員ステータスをご確認ください。",
     "checkoutNote": "チェックアウトは外部決済ページへ遷移します。内容を確認してから進んでください。",
-    "continueShopping": "買い物を続ける"
+    "continueShopping": "買い物を続ける",
+    "dragHint": "長押しでドラッグ"
   },
   "member": {
     "title": "マイページ",
@@ -324,5 +325,17 @@
     "actionFanclub": "Fanclubを確認",
     "actionNews": "Newsを確認",
     "joinHint": "FC限定商品や先行情報は Fanclub 参加後に利用できます。"
+  },
+  "memberGuide": {
+    "label": "Member Guide",
+    "loadingTitle": "会員状態を確認中です…",
+    "loadingBody": "マイページと会員特典の同期を行っています。",
+    "memberTitle": "会員状態は有効です",
+    "memberBody": "FC限定コンテンツ・商品への導線をそのまま利用できます。",
+    "signedInTitle": "会員登録で限定導線を解放できます",
+    "signedInBody": "現在は一般ユーザーです。マイページから会員導線をご確認ください。",
+    "guestTitle": "ログインして会員状態を確認しましょう",
+    "guestBody": "まずはログインして、マイページで会員状態を確認してください。",
+    "cta": "マイページへ"
   }
 }

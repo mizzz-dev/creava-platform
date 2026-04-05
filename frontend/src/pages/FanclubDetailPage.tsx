@@ -12,6 +12,7 @@ import NotFoundState from '@/components/common/NotFoundState'
 import ErrorState from '@/components/common/ErrorState'
 import PageHead from '@/components/seo/PageHead'
 import SkeletonDetail from '@/components/common/SkeletonDetail'
+import MemberGuideCard from '@/components/common/MemberGuideCard'
 import type { FanclubContent } from '@/types'
 
 export default function FanclubDetailPage() {
@@ -81,6 +82,7 @@ function FanclubDetailContent({ slug }: { slug: string | undefined }) {
             {item.body}
           </div>
         )}
+        <MemberGuideCard />
       </article>
     </ContentAccessGuard>
   )

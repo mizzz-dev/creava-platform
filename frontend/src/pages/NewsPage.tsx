@@ -13,11 +13,13 @@ import Badge from '@/components/common/Badge'
 import SkeletonListItem from '@/components/common/SkeletonListItem'
 import ErrorState from '@/components/common/ErrorState'
 import SnsLinks from '@/components/common/SnsLinks'
+import { useListPageWebVitals } from '@/modules/analytics/webVitals'
 import type { NewsItem } from '@/types'
 
 export default function NewsPage() {
   const { t } = useTranslation()
   const { filterVisible } = useContentAccess()
+  useListPageWebVitals('news-list')
 
   const { items, loading, error, refetch } = useStrapiCollection<NewsItem>(
     () => getNewsList({ pagination: { pageSize: 16, withCount: false } }),

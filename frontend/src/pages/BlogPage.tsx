@@ -7,11 +7,13 @@ import { detailPath } from '@/lib/routeConstants'
 import PageHead from '@/components/seo/PageHead'
 import SkeletonListItem from '@/components/common/SkeletonListItem'
 import ErrorState from '@/components/common/ErrorState'
+import { useListPageWebVitals } from '@/modules/analytics/webVitals'
 import type { BlogPost } from '@/types'
 
 export default function BlogPage() {
   const { t } = useTranslation()
   const { filterVisible } = useContentAccess()
+  useListPageWebVitals('blog-list')
 
   const { items, loading, error, refetch } = useStrapiCollection<BlogPost>(
     () => getBlogList({ pagination: { pageSize: 12, withCount: false } }),
