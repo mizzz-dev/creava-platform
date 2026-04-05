@@ -11,6 +11,7 @@ import PageHead from '@/components/seo/PageHead'
 import StructuredData from '@/components/seo/StructuredData'
 import Badge from '@/components/common/Badge'
 import SkeletonListItem from '@/components/common/SkeletonListItem'
+import ErrorState from '@/components/common/ErrorState'
 import SnsLinks from '@/components/common/SnsLinks'
 import type { NewsItem } from '@/types'
 
@@ -18,8 +19,8 @@ export default function NewsPage() {
   const { t } = useTranslation()
   const { filterVisible } = useContentAccess()
 
-  const { items, loading, error } = useStrapiCollection<NewsItem>(
-    () => getNewsList({ pagination: { pageSize: 30 } }),
+  const { items, loading, error, refetch } = useStrapiCollection<NewsItem>(
+    () => getNewsList({ pagination: { pageSize: 16, withCount: false } }),
   )
 
   // 閲覧不可コンテンツを除外（fc_only / 期限切れ limited）
@@ -64,10 +65,7 @@ export default function NewsPage() {
         )}
 
         {error && (
-          <div className="rounded border border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/20 px-4 py-3">
-            <p className="text-sm font-medium text-red-600 dark:text-red-400">{t('common.error')}</p>
-            <p className="mt-1 font-mono text-xs text-red-400 dark:text-red-600">{error}</p>
-          </div>
+          <ErrorState message={error} onRetry={refetch} />
         )}
 
         {!loading && !error && visibleItems !== null && visibleItems.length === 0 && (

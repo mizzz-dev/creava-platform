@@ -10,6 +10,7 @@ const extraOrigins = (process.env.FRONTEND_URL ?? '')
 const config: Core.Config.Middlewares = [
   'strapi::logger',
   'strapi::errors',
+  'global::json-api-error',
   'strapi::security',
   {
     name: 'strapi::cors',

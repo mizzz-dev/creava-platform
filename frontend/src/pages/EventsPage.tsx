@@ -6,6 +6,7 @@ import { formatDate } from '@/utils'
 import { detailPath } from '@/lib/routeConstants'
 import PageHead from '@/components/seo/PageHead'
 import SkeletonListItem from '@/components/common/SkeletonListItem'
+import ErrorState from '@/components/common/ErrorState'
 import type { Event } from '@/types'
 
 function EventStatusBadge({ event }: { event: Event }) {
@@ -37,8 +38,8 @@ function EventStatusBadge({ event }: { event: Event }) {
 export default function EventsPage() {
   const { t } = useTranslation()
 
-  const { items, loading, error } = useStrapiCollection<Event>(
-    () => getEventsList({ pagination: { pageSize: 20 } }),
+  const { items, loading, error, refetch } = useStrapiCollection<Event>(
+    () => getEventsList({ pagination: { pageSize: 16, withCount: false } }),
   )
 
   return (
@@ -64,10 +65,7 @@ export default function EventsPage() {
       )}
 
       {error && (
-        <div className="rounded border border-red-200 bg-red-50 px-4 py-3">
-          <p className="text-sm font-medium text-red-600">{t('common.error')}</p>
-          <p className="mt-1 font-mono text-xs text-red-400">{error}</p>
-        </div>
+        <ErrorState message={error} onRetry={refetch} />
       )}
 
       {!loading && !error && items !== null && items.length === 0 && (

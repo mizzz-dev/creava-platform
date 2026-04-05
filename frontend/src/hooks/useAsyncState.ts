@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import type { AsyncState } from '@/types'
+import { StrapiApiError } from '@/lib/api/client'
 
 /**
  * 非同期処理の loading / error / data を管理する汎用フック
@@ -18,7 +19,25 @@ export function useAsyncState<T>(initialData: T | null = null) {
       setState({ data, loading: false, error: null })
       return data
     } catch (err) {
+      if (import.meta.env.DEV) {
+        console.error('[useAsyncState] request failed', err)
+      }
+
       const error = err instanceof Error ? err.message : 'Unknown error'
+
+      // 開発時の診断情報（本番ユーザー向け UI には出さない）
+      if (import.meta.env.DEV && err instanceof StrapiApiError && err.details) {
+        console.error('[Strapi diagnostics]', {
+          status: err.status,
+          statusText: err.statusText,
+          retried: err.details.retried,
+          url: err.details.url,
+          contentType: err.details.contentType,
+          responseSnippet: err.details.responseSnippet,
+          requestId: err.details.requestId,
+        })
+      }
+
       setState((prev) => ({ ...prev, loading: false, error }))
       return null
     }

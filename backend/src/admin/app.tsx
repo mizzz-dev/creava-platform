@@ -1,5 +1,25 @@
 import type { StrapiApp } from '@strapi/strapi/admin'
 
+function EmojiIcon({ symbol, label }: { symbol: string; label: string }) {
+  return (
+    <span
+      aria-label={label}
+      role="img"
+      style={{
+        display: 'inline-flex',
+        width: 18,
+        height: 18,
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 14,
+        lineHeight: 1,
+      }}
+    >
+      {symbol}
+    </span>
+  )
+}
+
 export default {
   config: {
     // 管理画面で利用できる言語
@@ -67,37 +87,39 @@ export default {
     // ──────────────────────────────────────────────────
     // Quick Actions — サイドバーにショートカットを追加
     // Strapi v5 の addMenuLink API を利用
+    // icon: () => null にすると視認上「アイコンが欠けて見える」ため
+    // テーマ依存しない絵文字アイコンを明示的に描画する
     // ──────────────────────────────────────────────────
     const quickLinks: Parameters<typeof app.addMenuLink>[0][] = [
       {
-        intlLabel: { id: 'mizzz.menu.news', defaultMessage: '📰 ニュース追加' },
+        intlLabel: { id: 'mizzz.menu.news', defaultMessage: 'ニュース追加' },
         to: '/content-manager/collection-types/api::news-item.news-item/create',
-        icon: () => null,
+        icon: () => <EmojiIcon symbol="📰" label="ニュース" />,
       },
       {
-        intlLabel: { id: 'mizzz.menu.blog', defaultMessage: '✍️ ブログ追加' },
+        intlLabel: { id: 'mizzz.menu.blog', defaultMessage: 'ブログ追加' },
         to: '/content-manager/collection-types/api::blog-post.blog-post/create',
-        icon: () => null,
+        icon: () => <EmojiIcon symbol="✍️" label="ブログ" />,
       },
       {
-        intlLabel: { id: 'mizzz.menu.works', defaultMessage: '🎬 作品追加' },
+        intlLabel: { id: 'mizzz.menu.works', defaultMessage: '作品追加' },
         to: '/content-manager/collection-types/api::work.work/create',
-        icon: () => null,
+        icon: () => <EmojiIcon symbol="🎬" label="作品" />,
       },
       {
-        intlLabel: { id: 'mizzz.menu.events', defaultMessage: '📅 イベント追加' },
+        intlLabel: { id: 'mizzz.menu.events', defaultMessage: 'イベント追加' },
         to: '/content-manager/collection-types/api::event.event/create',
-        icon: () => null,
+        icon: () => <EmojiIcon symbol="📅" label="イベント" />,
       },
       {
-        intlLabel: { id: 'mizzz.menu.store', defaultMessage: '🛍️ 商品追加' },
+        intlLabel: { id: 'mizzz.menu.store', defaultMessage: '商品追加' },
         to: '/content-manager/collection-types/api::store-product.store-product/create',
-        icon: () => null,
+        icon: () => <EmojiIcon symbol="🛍️" label="商品" />,
       },
       {
-        intlLabel: { id: 'mizzz.menu.fanclub', defaultMessage: '⭐ FC記事追加' },
+        intlLabel: { id: 'mizzz.menu.fanclub', defaultMessage: 'FC記事追加' },
         to: '/content-manager/collection-types/api::fanclub-content.fanclub-content/create',
-        icon: () => null,
+        icon: () => <EmojiIcon symbol="⭐" label="ファンクラブ" />,
       },
     ]
 
