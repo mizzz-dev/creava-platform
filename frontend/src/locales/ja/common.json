@@ -13,7 +13,8 @@
     "store": "ストア",
     "openMenu": "メニューを開く",
     "closeMenu": "メニューを閉じる",
-    "member": "マイページ"
+    "member": "マイページ",
+    "skipToContent": "コンテンツへスキップ"
   },
   "footer": {
     "copyright": "© 2026 mizzz. All rights reserved.",

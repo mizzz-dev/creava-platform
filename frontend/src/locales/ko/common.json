@@ -13,7 +13,8 @@
     "store": "스토어",
     "openMenu": "메뉴 열기",
     "closeMenu": "메뉴 닫기",
-    "member": "Member"
+    "member": "Member",
+    "skipToContent": "본문으로 건너뛰기"
   },
   "footer": {
     "copyright": "© 2026 mizzz. All rights reserved.",
