@@ -76,7 +76,19 @@
     "statusSoldout": "Sold out. Restock updates will be posted in News/Fanclub.",
     "statusMembers": "Members-only item. Check your status on Member page.",
     "emptySupport": "Upcoming drops are announced first through member channels.",
-    "fcMemberCheck": "Check member status"
+    "fcMemberCheck": "Check member status",
+    "currencyLabel": "Display currency",
+    "currencyNotice": "Display currency only. Checkout uses the currency listed on each product page.",
+    "rankingTitle": "Sales ranking",
+    "ranking7d": "Last 7 days",
+    "ranking30d": "Last 30 days",
+    "restockTitle": "Restock alert",
+    "restockDescription": "Register your email and we will notify you when this item is restocked.",
+    "restockPlaceholder": "you@example.com",
+    "restockSubmit": "Notify me",
+    "restockSubmitting": "Sending...",
+    "restockDone": "Your restock alert request has been submitted.",
+    "restockError": "Failed to submit the alert request. Please try again later."
   },
   "form": {
     "required": "Required",

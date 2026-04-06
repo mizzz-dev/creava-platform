@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
@@ -11,14 +12,20 @@ import { ROUTES } from '@/lib/routeConstants'
 import Badge from '@/components/common/Badge'
 import { SITE_URL } from '@/lib/seo'
 import { useListPageWebVitals } from '@/modules/analytics/webVitals'
+import { DISPLAY_CURRENCIES } from '@/modules/store/lib/currency'
+import { useDisplayCurrency } from '@/modules/store/hooks/useDisplayCurrency'
+import { getRankedProducts, type RankingRange } from '@/modules/store/lib/ranking'
 
 export default function StorePage() {
   const { t } = useTranslation()
   useListPageWebVitals('store-list')
   const { products, loading, error } = useProductList(12)
   const { filterVisible } = useContentAccess()
+  const { currency, updateCurrency } = useDisplayCurrency('JPY')
+  const [rankingRange, setRankingRange] = useState<RankingRange>('7d')
 
   const visibleProducts = filterVisible(products)
+  const rankingProducts = getRankedProducts(visibleProducts, rankingRange, 3)
 
   return (
     <section className="mx-auto max-w-5xl px-4 py-20">
@@ -74,6 +81,56 @@ export default function StorePage() {
             </span>
           </div>
         </div>
+        <div className="mt-4 rounded border border-gray-200 px-3 py-3 dark:border-gray-800">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <label className="text-xs text-gray-500 dark:text-gray-400">
+              {t('store.currencyLabel', { defaultValue: '表示通貨' })}
+              <select
+                value={currency}
+                onChange={(event) => updateCurrency(event.target.value as typeof currency)}
+                className="ml-2 rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
+              >
+                {DISPLAY_CURRENCIES.map((code) => (
+                  <option key={code} value={code}>
+                    {code}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <p className="text-[11px] text-gray-400 dark:text-gray-500">
+              {t('store.currencyNotice', { defaultValue: '表示通貨のみ切替。決済は商品ページ記載の通貨が適用されます。' })}
+            </p>
+          </div>
+        </div>
+        {rankingProducts.length > 0 && (
+          <div className="mt-4 rounded border border-gray-200 px-3 py-3 dark:border-gray-800">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="font-mono text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-600">
+                {t('store.rankingTitle', { defaultValue: '売上ランキング' })}
+              </p>
+              <div className="inline-flex rounded border border-gray-200 dark:border-gray-800 p-0.5">
+                {(['7d', '30d'] as const).map((range) => (
+                  <button
+                    key={range}
+                    type="button"
+                    onClick={() => setRankingRange(range)}
+                    className={`px-2 py-1 text-[11px] ${rankingRange === range ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'text-gray-500 dark:text-gray-400'}`}
+                  >
+                    {range === '7d' ? t('store.ranking7d', { defaultValue: '直近7日' }) : t('store.ranking30d', { defaultValue: '直近30日' })}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+              {rankingProducts.map((product, index) => (
+                <div key={product.id} className="rounded border border-gray-100 p-2 dark:border-gray-800">
+                  <p className="font-mono text-[10px] text-violet-500">#{index + 1}</p>
+                  <p className="mt-1 line-clamp-1 text-xs text-gray-700 dark:text-gray-200">{product.title}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="mt-4 rounded border border-gray-200 px-3 py-3 dark:border-gray-800">
           <p className="font-mono text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-600">status guide</p>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
@@ -145,7 +202,7 @@ export default function StorePage() {
       {visibleProducts.length > 0 && (
         <div id="store-products" className="mt-10 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
           {visibleProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product.id} product={product} displayCurrency={currency} />
           ))}
         </div>
       )}

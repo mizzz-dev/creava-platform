@@ -2,14 +2,16 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { detailPath } from '@/lib/routeConstants'
 import { formatPriceNum } from '@/utils'
+import { convertPrice, type DisplayCurrency } from '../lib/currency'
 import Badge from '@/components/common/Badge'
 import type { StoreProductSummary } from '../types'
 
 interface Props {
   product: StoreProductSummary
+  displayCurrency?: DisplayCurrency
 }
 
-export default function ProductCard({ product }: Props) {
+export default function ProductCard({ product, displayCurrency = "JPY" }: Props) {
   const { t } = useTranslation()
   const isUnavailable = product.purchaseStatus !== 'available'
 
@@ -18,7 +20,7 @@ export default function ProductCard({ product }: Props) {
       ? t('store.soldOut')
       : product.purchaseStatus === 'coming_soon'
         ? t('store.comingSoon')
-        : formatPriceNum(product.price, product.currency)
+        : formatPriceNum(convertPrice(product.price, product.currency, displayCurrency), displayCurrency)
 
   return (
     <Link to={detailPath.product(product.slug)} className="group block" aria-label={`${product.title} ${t('store.detailCta')}`}>
