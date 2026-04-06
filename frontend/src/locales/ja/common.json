@@ -384,7 +384,7 @@
     "authGoogle": "Google ログイン",
     "authApple": "Apple ログイン",
     "authAvailable": "対応",
-    "authHelp": "実際のログイン方式は、Clerk ダイアログで表示される有効なプロバイダー設定に従います。",
+    "authHelp": "「対応」は環境変数で有効化済みの候補です。実際のログイン方式は、Clerk ダイアログで表示される有効なプロバイダー設定に従います。",
     "checklistLead": "次のアクションを進めると、マイページの活用がスムーズになります。",
     "todoGuestSignIn": "ログイン状態を維持して、公開状態を正しく確認する",
     "todoGuestFanclub": "Fanclub の参加プランを確認して、必要なら加入する",
@@ -431,7 +431,10 @@
     "withdrawDescription": "退会前に、未配送注文と会員期限をご確認ください。",
     "withdrawAction": "退会申請を開始する",
     "withdrawRequested": "退会申請を受け付けました。運営より登録メール宛にご連絡します。",
-    "withdrawCancel": "申請を取り消す"
+    "withdrawCancel": "申請を取り消す",
+    "authSetupRequired": "要設定",
+    "authTrySignIn": "この方法でログインする",
+    "authUnavailable": "Clerk未設定"
   },
   "memberGuide": {
     "label": "Member Guide",

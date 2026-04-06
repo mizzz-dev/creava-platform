@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import PageHead from '@/components/seo/PageHead'
+import SocialAuthProviderStatus from '@/components/auth/SocialAuthProviderStatus'
 import { useCurrentUser } from '@/hooks'
 import { ROUTES } from '@/lib/routeConstants'
 import { clearWithdrawRequest, getMemberDashboard, requestWithdraw, updateMemberPreferences } from '@/modules/member/api'
@@ -92,12 +93,6 @@ const ACCOUNT_MANAGEMENT_ITEMS = [
   },
 ]
 
-const SOCIAL_AUTH_PROVIDERS = [
-  { key: 'member.authGoogle' },
-  { key: 'member.authApple' },
-  { key: 'member.authX' },
-  { key: 'member.authFacebook' },
-]
 
 function maskUserId(userId: string): string {
   if (userId.length <= 8) return userId
@@ -350,16 +345,7 @@ export default function MemberPage() {
             <div className="rounded border border-gray-200 p-5 dark:border-gray-800">
               <p className="font-mono text-[11px] text-gray-400">auth</p>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{t('member.authLead', { defaultValue: 'ソーシャルログイン連携の対応状況を確認できます。' })}</p>
-              <ul className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                {SOCIAL_AUTH_PROVIDERS.map((provider) => (
-                  <li key={provider.key} className="flex items-center justify-between rounded border border-gray-200 px-3 py-2 dark:border-gray-700">
-                    <span>{t(provider.key, { defaultValue: provider.key })}</span>
-                    <span className="rounded-full bg-emerald-50 px-2 py-1 text-[11px] text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-                      {t('member.authAvailable', { defaultValue: '対応' })}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <SocialAuthProviderStatus isSignedIn={isSignedIn} />
               <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">{t('member.authHelp', { defaultValue: '実際のログイン方式は、Clerk ダイアログで表示される有効なプロバイダー設定に従います。' })}</p>
             </div>
           </div>

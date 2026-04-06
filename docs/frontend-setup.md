@@ -180,6 +180,27 @@ frontend/src/
 - `pk_live_...` キーを `.env.production` に設定
 - Clerk Dashboard でドメインを登録（Allowed Origins に追加）
 
+
+### ソーシャルログイン拡張（Phase 4）
+
+Clerk Dashboard の **Social Connections** で以下を有効化してください。
+
+- Google
+- Apple
+- X
+- Facebook
+
+さらに `.env.local` / `.env.production` の各フラグを、Dashboard 側で有効化したプロバイダーと一致させます。
+
+```bash
+VITE_CLERK_SOCIAL_GOOGLE_ENABLED=true
+VITE_CLERK_SOCIAL_APPLE_ENABLED=true
+VITE_CLERK_SOCIAL_X_ENABLED=true
+VITE_CLERK_SOCIAL_FACEBOOK_ENABLED=true
+```
+
+> 注意: これらは UI 上の「設定状態表示」を合わせるためのフラグです。実際のログイン可否は Clerk Dashboard 側の設定（審査・Client ID/Secret・コールバック URL）に依存します。
+
 ---
 
 ## i18n（国際化）
