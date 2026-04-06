@@ -11,7 +11,7 @@ creava-platform の本番公開に必要な手順の全体像です。
                │
        ┌───────▼────────┐
        │  ロリポップ      │  ← 静的ファイルホスティング
-       │  (frontend)     │    Vite build → dist/ をアップロード
+       │  (frontend x3)  │    mizzz.jp / store.mizzz.jp / fc.mizzz.jp
        └───────┬────────┘
                │ API リクエスト
        ┌───────▼────────┐
@@ -30,6 +30,38 @@ creava-platform の本番公開に必要な手順の全体像です。
 | Formspree | お問い合わせフォーム | Formspree Dashboard |
 
 ---
+
+
+## サブドメイン分離（main / store / fanclub）
+
+2026-04 の運用から、frontend は同一コードベースを 3 ターゲットに分けてデプロイします。
+
+- `main`: `https://mizzz.jp`（ホームハブ）
+- `store`: `https://store.mizzz.jp`（Store）
+- `fanclub`: `https://fc.mizzz.jp`（Fanclub）
+
+GitHub Actions（`.github/workflows/deploy.yml`）では、`VITE_SITE_TYPE` と `VITE_SITE_URL` をターゲットごとに切り替えてビルドします。
+
+### 追加で必要な GitHub Secrets
+
+| 用途 | Secret |
+|---|---|
+| main FTP | `FTP_SERVER_MAIN` / `FTP_USERNAME_MAIN` / `FTP_PASSWORD_MAIN` / `FTP_SERVER_DIR_MAIN` |
+| store FTP | `FTP_SERVER_STORE` / `FTP_USERNAME_STORE` / `FTP_PASSWORD_STORE` / `FTP_SERVER_DIR_STORE` |
+| fanclub FTP | `FTP_SERVER_FC` / `FTP_USERNAME_FC` / `FTP_PASSWORD_FC` / `FTP_SERVER_DIR_FC` |
+
+> 同一 FTP サーバー運用でも問題ありません。`*_DIR_*` で公開先ディレクトリだけ分離します。
+
+### 追加で必要な frontend 環境変数
+
+| 変数 | 例 | 説明 |
+|---|---|---|
+| `VITE_SITE_TYPE` | `main` / `store` / `fanclub` | ビルド対象サイト識別 |
+| `VITE_SITE_URL` | `https://store.mizzz.jp` | canonical / og:url の基準 URL |
+| `VITE_MAIN_SITE_URL` | `https://mizzz.jp` | クロスサイトリンク用 |
+| `VITE_STORE_SITE_URL` | `https://store.mizzz.jp` | クロスサイトリンク用 |
+| `VITE_FANCLUB_SITE_URL` | `https://fc.mizzz.jp` | クロスサイトリンク用 |
+
 
 ## 本番公開チェックリスト
 
@@ -69,7 +101,8 @@ npm run build:prod
 
 - [ ] Strapi Cloud にデプロイ済み
 - [ ] 本番環境変数が Strapi Cloud Dashboard に設定済み
-- [ ] `FRONTEND_URL=https://your-domain.com` が設定済み（CORS）
+- [ ] `FRONTEND_URL` に main/store/fanclub をカンマ区切りで設定済み（CORS）
+  - 例: `FRONTEND_URL=https://mizzz.jp,https://store.mizzz.jp,https://fc.mizzz.jp`
 - [ ] コンテンツタイプが定義済み
 - [ ] Public Role の `find` / `findOne` 権限が設定済み
 - [ ] API トークンが発行済み

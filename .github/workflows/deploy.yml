@@ -1,14 +1,40 @@
-name: Deploy to ロリポップ
+name: Deploy Frontend (main / store / fanclub)
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 jobs:
   build-and-deploy:
-    name: Build & Deploy
+    name: Build & Deploy (${{ matrix.site }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - site: main
+            site_url: https://mizzz.jp
+            ftp_server: ${{ secrets.FTP_SERVER_MAIN }}
+            ftp_username: ${{ secrets.FTP_USERNAME_MAIN }}
+            ftp_password: ${{ secrets.FTP_PASSWORD_MAIN }}
+            ftp_dir: ${{ secrets.FTP_SERVER_DIR_MAIN }}
+          - site: store
+            site_url: https://store.mizzz.jp
+            ftp_server: ${{ secrets.FTP_SERVER_STORE }}
+            ftp_username: ${{ secrets.FTP_USERNAME_STORE }}
+            ftp_password: ${{ secrets.FTP_PASSWORD_STORE }}
+            ftp_dir: ${{ secrets.FTP_SERVER_DIR_STORE }}
+          - site: fanclub
+            site_url: https://fc.mizzz.jp
+            ftp_server: ${{ secrets.FTP_SERVER_FC }}
+            ftp_username: ${{ secrets.FTP_USERNAME_FC }}
+            ftp_password: ${{ secrets.FTP_PASSWORD_FC }}
+            ftp_dir: ${{ secrets.FTP_SERVER_DIR_FC }}
+
     defaults:
       run:
         working-directory: frontend
@@ -27,10 +53,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Prepare sitemap for target site
+        run: cp ./public/sitemaps/sitemap-${{ matrix.site }}.xml ./public/sitemap.xml
+
       - name: Build (production)
         run: npm run build:prod
         env:
-          VITE_SITE_URL: ${{ secrets.VITE_SITE_URL }}
+          VITE_SITE_TYPE: ${{ matrix.site }}
+          VITE_SITE_URL: ${{ matrix.site_url }}
+          VITE_MAIN_SITE_URL: https://mizzz.jp
+          VITE_STORE_SITE_URL: https://store.mizzz.jp
+          VITE_FANCLUB_SITE_URL: https://fc.mizzz.jp
           VITE_STRAPI_API_URL: ${{ secrets.VITE_STRAPI_API_URL }}
           VITE_STRAPI_API_TOKEN: ${{ secrets.VITE_STRAPI_API_TOKEN }}
           VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
@@ -46,13 +79,11 @@ jobs:
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
+          server: ${{ matrix.ftp_server }}
+          username: ${{ matrix.ftp_username }}
+          password: ${{ matrix.ftp_password }}
           local-dir: ./frontend/dist/
-          # ロリポップの公開ディレクトリは mizzz/ (FTPルートからの相対パス)
-          # 異なる場合は GitHub Secrets の FTP_SERVER_DIR で上書きすること
-          server-dir: ${{ secrets.FTP_SERVER_DIR || 'mizzz/' }}
+          server-dir: ${{ matrix.ftp_dir }}
           dangerous-clean-slate: false
           exclude: |
             **/.git*

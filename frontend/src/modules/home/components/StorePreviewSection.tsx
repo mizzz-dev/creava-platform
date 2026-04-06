@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { useProductList } from '@/modules/store/hooks/useProductList'
+import { fanclubLink, storeLink } from '@/lib/siteLinks'
 import { ROUTES, detailPath } from '@/lib/routeConstants'
 import SectionHeader from '@/components/common/SectionHeader'
 import Badge from '@/components/common/Badge'
@@ -28,7 +29,7 @@ export default function StorePreviewSection() {
       <div className="mx-auto max-w-5xl">
         <SectionHeader
           label={t('home.store.title')}
-          viewAllTo={ROUTES.STORE}
+          viewAllTo={storeLink(ROUTES.STORE)}
           viewAllLabel={t('home.store.viewAll')}
         />
         <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-gray-300 dark:text-gray-700">
@@ -133,7 +134,7 @@ export default function StorePreviewSection() {
 
         <div className="mt-7 flex flex-wrap items-center gap-4">
           <Link
-            to={ROUTES.STORE}
+            to={storeLink(ROUTES.STORE)}
             onClick={() => trackHomeCta('store')}
             className="focus-ring inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
           >
@@ -141,7 +142,7 @@ export default function StorePreviewSection() {
             <span>→</span>
           </Link>
           <Link
-            to={ROUTES.FANCLUB}
+            to={fanclubLink(ROUTES.FANCLUB)}
             onClick={() => trackHomeCta('fanclub')}
             className="focus-ring inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-widest text-violet-500 hover:text-violet-400"
           >

@@ -1,3 +1,5 @@
+import { fanclubLink, storeLink } from '@/lib/siteLinks'
+
 /** ルートパスの定数 */
 export const ROUTES = {
   HOME: '/',
@@ -31,7 +33,7 @@ export const detailPath = {
   news: (slug: string) => `/news/${slug}`,
   blog: (slug: string) => `/blog/${slug}`,
   work: (slug: string) => `/works/${slug}`,
-  fanclub: (slug: string) => `/fanclub/${slug}`,
+  fanclub: (slug: string) => fanclubLink(`/fanclub/${slug}`),
   event: (slug: string) => `/events/${slug}`,
-  product: (handle: string) => `/store/${handle}`,
+  product: (handle: string) => storeLink(`/store/${handle}`),
 } as const

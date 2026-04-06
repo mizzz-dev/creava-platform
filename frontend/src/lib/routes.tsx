@@ -4,6 +4,7 @@ import MainLayout from '@/components/layout/MainLayout'
 import HomePage from '@/pages/HomePage'
 import SkeletonDetail from '@/components/common/SkeletonDetail'
 import { ROUTES } from './routeConstants'
+import { isMainSite } from './siteLinks'
 
 // Lazy-loaded pages — excluded from the initial bundle
 const WorksPage = lazy(() => import('@/pages/WorksPage'))
@@ -30,6 +31,7 @@ const PreviewPage = lazy(() => import('@/pages/PreviewPage'))
 const AboutPage = lazy(() => import('@/pages/AboutPage'))
 const PricingPage = lazy(() => import('@/pages/PricingPage'))
 const FAQPage = lazy(() => import('@/pages/FAQPage'))
+const LegacySubdomainRedirectPage = lazy(() => import('@/pages/LegacySubdomainRedirectPage'))
 
 // 定数は循環参照を避けるため routeConstants から取得し re-export する
 export { ROUTES, detailPath } from './routeConstants'
@@ -54,14 +56,14 @@ export function AppRoutes() {
           <Route path={ROUTES.NEWS_DETAIL} element={<NewsDetailPage />} />
           <Route path={ROUTES.BLOG} element={<BlogPage />} />
           <Route path={ROUTES.BLOG_DETAIL} element={<BlogDetailPage />} />
-          <Route path={ROUTES.FANCLUB} element={<FanclubPage />} />
-          <Route path={ROUTES.FANCLUB_DETAIL} element={<FanclubDetailPage />} />
+          <Route path={ROUTES.FANCLUB} element={isMainSite ? <LegacySubdomainRedirectPage target="fanclub" /> : <FanclubPage />} />
+          <Route path={ROUTES.FANCLUB_DETAIL} element={isMainSite ? <LegacySubdomainRedirectPage target="fanclub" /> : <FanclubDetailPage />} />
           <Route path={ROUTES.EVENTS} element={<EventsPage />} />
           <Route path={ROUTES.EVENT_DETAIL} element={<EventDetailPage />} />
           <Route path={ROUTES.CONTACT} element={<ContactPage />} />
-          <Route path={ROUTES.STORE} element={<StorePage />} />
-          <Route path={ROUTES.STORE_DETAIL} element={<StoreDetailPage />} />
-          <Route path={ROUTES.CART} element={<CartPage />} />
+          <Route path={ROUTES.STORE} element={isMainSite ? <LegacySubdomainRedirectPage target="store" /> : <StorePage />} />
+          <Route path={ROUTES.STORE_DETAIL} element={isMainSite ? <LegacySubdomainRedirectPage target="store" /> : <StoreDetailPage />} />
+          <Route path={ROUTES.CART} element={isMainSite ? <LegacySubdomainRedirectPage target="store" /> : <CartPage />} />
           <Route path={ROUTES.MEMBER} element={<MemberPage />} />
           <Route path={ROUTES.ABOUT} element={<AboutPage />} />
           <Route path={ROUTES.PRICING} element={<PricingPage />} />
