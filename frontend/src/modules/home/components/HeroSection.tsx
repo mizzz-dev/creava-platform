@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
+import { fanclubLink } from '@/lib/siteLinks'
 import { ROUTES } from '@/lib/routeConstants'
 import { useHomeCtaAnalytics } from '@/modules/analytics/useHomeCtaAnalytics'
 
@@ -135,7 +136,7 @@ export default function HeroSection() {
 
                 {/* fanclub — tertiary */}
                 <Link
-                  to={ROUTES.FANCLUB}
+                  to={fanclubLink(ROUTES.FANCLUB)}
                   onClick={() => trackHomeCta('fanclub')}
                   className="focus-ring inline-flex items-center gap-1.5 px-4 py-3 text-sm tracking-wide text-gray-400 transition-colors duration-200 hover:text-gray-900"
                 >

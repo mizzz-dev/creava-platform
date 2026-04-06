@@ -1,6 +1,11 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
+  readonly VITE_SITE_TYPE?: 'main' | 'store' | 'fanclub'
+  readonly VITE_SITE_URL?: string
+  readonly VITE_MAIN_SITE_URL?: string
+  readonly VITE_STORE_SITE_URL?: string
+  readonly VITE_FANCLUB_SITE_URL?: string
   readonly VITE_STRAPI_API_URL: string
   readonly VITE_STRAPI_API_TOKEN: string
   readonly VITE_CLERK_PUBLISHABLE_KEY: string

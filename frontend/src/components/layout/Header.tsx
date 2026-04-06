@@ -1,8 +1,10 @@
 import { useRef, useState, useEffect, type PointerEvent as ReactPointerEvent } from 'react'
 import { NavLink, useLocation, Link } from 'react-router-dom'
+import SmartLink from '@/components/common/SmartLink'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ROUTES } from '@/lib/routeConstants'
+import { fanclubLink, storeLink, isAbsoluteUrl } from '@/lib/siteLinks'
 import AuthButton from '@/components/auth/AuthButton'
 import ThemeToggle from '@/components/common/ThemeToggle'
 import LangSwitcher from '@/components/common/LangSwitcher'
@@ -14,8 +16,8 @@ const NAV_ITEMS = [
   { key: 'nav.news', to: ROUTES.NEWS },
   { key: 'nav.blog', to: ROUTES.BLOG },
   { key: 'nav.events', to: ROUTES.EVENTS },
-  { key: 'nav.store', to: ROUTES.STORE },
-  { key: 'nav.fanclub', to: ROUTES.FANCLUB },
+  { key: 'nav.store', to: storeLink(ROUTES.STORE) },
+  { key: 'nav.fanclub', to: fanclubLink(ROUTES.FANCLUB) },
   { key: 'nav.request', to: `${ROUTES.CONTACT}?tab=request` },
   { key: 'nav.contact', to: ROUTES.CONTACT },
 ] as const
@@ -221,21 +223,30 @@ export default function Header() {
             <ul className="flex items-center gap-0.5">
               {NAV_ITEMS.map(({ key, to }) => (
                 <li key={to}>
-                  <NavLink
-                    to={to}
-                    onMouseEnter={() => prefetchRoute(to)}
-                    onFocus={() => prefetchRoute(to)}
-                    onTouchStart={() => prefetchRoute(to)}
-                    className={({ isActive }) =>
-                      `focus-ring relative rounded-md px-3 py-1.5 text-sm transition-colors duration-150 ${
-                        isActive
-                          ? 'bg-gray-100/80 font-medium text-gray-900 dark:bg-gray-800/80 dark:text-gray-100'
-                          : 'text-gray-500 hover:bg-gray-100/50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/50 dark:hover:text-gray-100'
-                      }`
-                    }
-                  >
-                    {t(key)}
-                  </NavLink>
+                  {isAbsoluteUrl(to) ? (
+                    <a
+                      href={to}
+                      className="focus-ring relative rounded-md px-3 py-1.5 text-sm text-gray-500 transition-colors duration-150 hover:bg-gray-100/50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/50 dark:hover:text-gray-100"
+                    >
+                      {t(key)}
+                    </a>
+                  ) : (
+                    <NavLink
+                      to={to}
+                      onMouseEnter={() => prefetchRoute(to)}
+                      onFocus={() => prefetchRoute(to)}
+                      onTouchStart={() => prefetchRoute(to)}
+                      className={({ isActive }) =>
+                        `focus-ring relative rounded-md px-3 py-1.5 text-sm transition-colors duration-150 ${
+                          isActive
+                            ? 'bg-gray-100/80 font-medium text-gray-900 dark:bg-gray-800/80 dark:text-gray-100'
+                            : 'text-gray-500 hover:bg-gray-100/50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/50 dark:hover:text-gray-100'
+                        }`
+                      }
+                    >
+                      {t(key)}
+                    </NavLink>
+                  )}
                 </li>
               ))}
             </ul>
@@ -278,21 +289,15 @@ export default function Header() {
               <ul className="flex flex-col divide-y divide-gray-50 dark:divide-gray-800">
                 {NAV_ITEMS.map(({ key, to }) => (
                   <li key={to}>
-                    <NavLink
+                    <SmartLink
                       to={to}
-                      onMouseEnter={() => prefetchRoute(to)}
-                      onFocus={() => prefetchRoute(to)}
-                      onTouchStart={() => prefetchRoute(to)}
-                      className={({ isActive }) =>
-                        `block py-3 text-sm transition-colors ${
-                          isActive
-                            ? 'font-medium text-gray-900 dark:text-gray-100'
-                            : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100'
-                        }`
-                      }
+                      onMouseEnter={() => !isAbsoluteUrl(to) && prefetchRoute(to)}
+                      onFocus={() => !isAbsoluteUrl(to) && prefetchRoute(to)}
+                      onTouchStart={() => !isAbsoluteUrl(to) && prefetchRoute(to)}
+                      className="block py-3 text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
                     >
                       {t(key)}
-                    </NavLink>
+                    </SmartLink>
                   </li>
                 ))}
               </ul>

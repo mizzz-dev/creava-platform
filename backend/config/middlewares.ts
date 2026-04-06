@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/strapi';
 
 // FRONTEND_URL はカンマ区切りで複数指定可能
-// 例: FRONTEND_URL=https://mizzz.jp,https://www.mizzz.jp
+// 例: FRONTEND_URL=https://mizzz.jp,https://store.mizzz.jp,https://fc.mizzz.jp
 const extraOrigins = (process.env.FRONTEND_URL ?? '')
   .split(',')
   .map((s) => s.trim())
@@ -47,6 +47,8 @@ const config: Core.Config.Middlewares = [
         'http://localhost:4173',
         'https://mizzz.jp',
         'https://www.mizzz.jp',
+        'https://store.mizzz.jp',
+        'https://fc.mizzz.jp',
         ...extraOrigins,
       ],
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],

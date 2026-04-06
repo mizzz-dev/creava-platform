@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { useClerk } from '@clerk/clerk-react'
 import { useCurrentUser } from '@/hooks'
+import { fanclubLink } from '@/lib/siteLinks'
 import { ROUTES } from '@/lib/routeConstants'
 import { useHomeCtaAnalytics } from '@/modules/analytics/useHomeCtaAnalytics'
 
@@ -95,7 +96,7 @@ function FanclubCTASectionWithClerk() {
 
       {isLoaded && isMember && (
         <Link
-          to={ROUTES.FANCLUB}
+          to={fanclubLink(ROUTES.FANCLUB)}
           onClick={() => trackHomeCta('fanclub')}
           className="focus-ring group inline-flex items-center gap-2 border border-white/20 px-8 py-3 text-sm font-medium tracking-wide text-white transition-all duration-200 hover:border-violet-400/60 hover:bg-violet-500/10"
         >
@@ -118,7 +119,7 @@ function FanclubCTASectionWithClerk() {
           </button>
         ) : (
           <Link
-            to={ROUTES.FANCLUB}
+            to={fanclubLink(ROUTES.FANCLUB)}
             onClick={() => trackHomeCta('fanclub')}
             className="focus-ring group inline-flex items-center gap-2 bg-white px-8 py-3 text-sm font-medium tracking-wide text-gray-900 transition-colors hover:bg-gray-100"
           >
@@ -138,7 +139,7 @@ function FanclubCTASectionNoClerk() {
   return (
     <FanclubCTALayout>
       <Link
-        to={ROUTES.FANCLUB}
+        to={fanclubLink(ROUTES.FANCLUB)}
         onClick={() => trackHomeCta('fanclub')}
         className="focus-ring group inline-flex items-center gap-2 bg-white px-8 py-3 text-sm font-medium tracking-wide text-gray-900 transition-colors hover:bg-gray-100"
       >

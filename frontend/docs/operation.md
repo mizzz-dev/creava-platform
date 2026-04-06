@@ -20,6 +20,18 @@ GitHub Actions が自動ビルド → FTP デプロイ（約2〜3分）
 本番サイトで確認
 ```
 
+
+### サブドメイン分離後のデプロイ
+
+GitHub Actions は 1 回の push で以下 3 ターゲットを並列デプロイします。
+
+- `https://mizzz.jp`（main）
+- `https://store.mizzz.jp`（store）
+- `https://fc.mizzz.jp`（fanclub）
+
+ワークフロー側で `VITE_SITE_TYPE` / `VITE_SITE_URL` / `sitemap.xml` をターゲット別に切り替えます。
+旧 URL（`/store*` / `/fanclub*`）は main 側で各サブドメインへリダイレクトされます。
+
 ### 手動デプロイが必要な場合
 
 GitHub Actions が使えない場合や、緊急で反映したい場合。
@@ -91,7 +103,7 @@ Shopify の管理画面から商品を追加・編集します。こちらもコ
 **確認手順:**
 
 1. Clerk ダッシュボード → **Production** インスタンスを開く
-2. **Domains** → 本番ドメイン（`https://your-domain.com`）が登録されているか確認
+2. **Domains** → 本番ドメイン（`https://mizzz.jp` / `https://store.mizzz.jp` / `https://fc.mizzz.jp`）が登録されているか確認
 3. Publishable Key が `pk_live_` から始まっているか確認（`pk_test_` は開発用）
 
 **よくあるケース:**

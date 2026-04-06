@@ -48,7 +48,7 @@ openssl rand -base64 32
 | `TRANSFER_TOKEN_SALT` | データ転送トークンソルト | ランダム32文字 |
 | `JWT_SECRET` | ユーザー JWT シークレット | ランダム32文字 |
 | `ENCRYPTION_KEY` | 暗号化キー | ランダム32文字 |
-| `FRONTEND_URL` | フロントエンドの本番 URL | `https://your-domain.com` |
+| `FRONTEND_URL` | 許可するフロントエンド URL（カンマ区切り） | `https://mizzz.jp,https://store.mizzz.jp,https://fc.mizzz.jp` |
 
 > ⚠️ `backend/.env.production.example` をテンプレートとして使用してください。  
 > ⚠️ 本番の値は絶対に Git にコミットしないでください。
@@ -271,8 +271,9 @@ npx strapi export --no-encrypt -f backup-$(date +%Y%m%d)
 
 ### CORS エラー
 
-Strapi Cloud Dashboard の Variables に `FRONTEND_URL=https://your-domain.com` が  
-設定されているか確認してください。
+Strapi Cloud Dashboard の Variables に `FRONTEND_URL` がカンマ区切りで設定されているか確認してください。
+
+例: `FRONTEND_URL=https://mizzz.jp,https://store.mizzz.jp,https://fc.mizzz.jp`
 
 ---
 
@@ -281,3 +282,10 @@ Strapi Cloud Dashboard の Variables に `FRONTEND_URL=https://your-domain.com` 
 `backend/.env.production.example` には PostgreSQL の設定コメントがあります。  
 AWS RDS + EC2/ECS での運用も同じ環境変数で対応可能です。  
 移行時は `DATABASE_CLIENT=postgres` に切り替えてください。
+
+
+### サブドメイン分離時の注意
+
+- frontend は `main/store/fanclub` の 3 デプロイに分離されても、backend は Strapi Cloud 1系統のままで運用します。
+- CORS の許可元は `FRONTEND_URL` で一元管理し、追加・削除時はカンマ区切りを更新して再デプロイしてください。
+- Clerk / Formspree / Shopify 側の Allowed Origins も 3 ドメインを登録してください。
