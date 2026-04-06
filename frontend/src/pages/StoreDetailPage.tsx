@@ -19,6 +19,9 @@ import Badge from '@/components/common/Badge'
 import MemberGuideCard from '@/components/common/MemberGuideCard'
 import type { PurchaseStatus } from '@/modules/store/types'
 import { useCart } from '@/modules/cart/context'
+import { convertPrice, DISPLAY_CURRENCIES } from '@/modules/store/lib/currency'
+import { useDisplayCurrency } from '@/modules/store/hooks/useDisplayCurrency'
+import RestockNotifyForm from '@/modules/store/components/RestockNotifyForm'
 
 function purchaseStatusToAvailability(status: PurchaseStatus): 'InStock' | 'OutOfStock' | 'PreOrder' {
   if (status === 'available') return 'InStock'
@@ -32,6 +35,7 @@ export default function StoreDetailPage() {
   const { product, loading, error, notFound } = useProductDetail(handle)
   const { products } = useProductList(8)
   const { addItem } = useCart()
+  const { currency, updateCurrency } = useDisplayCurrency('JPY')
 
   const canAddCart = product?.purchaseStatus === 'available' && product?.accessStatus !== 'fc_only'
 
@@ -48,7 +52,7 @@ export default function StoreDetailPage() {
       : product?.purchaseStatus === 'coming_soon'
         ? t('store.comingSoon')
         : product
-          ? formatPriceNum(product.price, product.currency)
+          ? formatPriceNum(convertPrice(product.price, product.currency, currency), currency)
           : ''
 
   return (
@@ -136,6 +140,22 @@ export default function StoreDetailPage() {
               </h1>
 
               <p className="mt-3 font-mono text-lg text-gray-700 dark:text-gray-300">{purchaseSummary}</p>
+              <div className="mt-2">
+                <label className="text-xs text-gray-500 dark:text-gray-400">
+                  {t('store.currencyLabel', { defaultValue: '表示通貨' })}
+                  <select
+                    value={currency}
+                    onChange={(event) => updateCurrency(event.target.value as typeof currency)}
+                    className="ml-2 rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
+                  >
+                    {DISPLAY_CURRENCIES.map((code) => (
+                      <option key={code} value={code}>
+                        {code}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
 
               <p className="mt-2 text-xs text-gray-400 dark:text-gray-600">
                 {product.purchaseStatus === 'coming_soon' ? t('store.comingSoonDetail') : t('store.stripeNote')}
@@ -178,6 +198,13 @@ export default function StoreDetailPage() {
                 className="mt-8"
                 onAddToCart={canAddCart ? () => addItem(product, 1) : undefined}
               />
+              {product.purchaseStatus === 'soldout' && (
+                <RestockNotifyForm
+                  productId={product.id}
+                  productSlug={product.slug}
+                  productTitle={product.title}
+                />
+              )}
 
               <Link
                 to={ROUTES.CART}
@@ -224,7 +251,7 @@ export default function StoreDetailPage() {
               </p>
               <div className="mt-6 grid grid-cols-2 gap-5 sm:grid-cols-4">
                 {related.map((p) => (
-                  <ProductCard key={p.id} product={p} />
+                  <ProductCard key={p.id} product={p} displayCurrency={currency} />
                 ))}
               </div>
             </motion.div>
