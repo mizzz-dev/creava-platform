@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import PageHead from '@/components/seo/PageHead'
 import { useCurrentUser } from '@/hooks'
 import { ROUTES } from '@/lib/routeConstants'
+import { getMemberDashboard, updateMemberPreferences } from '@/modules/member/api'
+import type { MemberDashboardData } from '@/modules/member/types'
 
 const MEMBER_BENEFITS = [
   'member.benefitEarly',
@@ -92,6 +95,8 @@ const ACCOUNT_MANAGEMENT_ITEMS = [
 const SOCIAL_AUTH_PROVIDERS = [
   { key: 'member.authGoogle' },
   { key: 'member.authApple' },
+  { key: 'member.authX' },
+  { key: 'member.authFacebook' },
 ]
 
 function maskUserId(userId: string): string {
@@ -102,13 +107,62 @@ function maskUserId(userId: string): string {
 export default function MemberPage() {
   const { t } = useTranslation()
   const { user, isLoaded, isSignedIn } = useCurrentUser()
+  const [dashboardData, setDashboardData] = useState<MemberDashboardData | null>(null)
+  const [dashboardLoading, setDashboardLoading] = useState(false)
+  const [dashboardError, setDashboardError] = useState<string | null>(null)
+  const [withdrawRequested, setWithdrawRequested] = useState(false)
   const role = user?.role ?? 'guest'
   const isMember = role === 'member'
   const isAdmin = role === 'admin'
+  const canViewMemberNotices = isMember || isAdmin
   const roleTodo = isAdmin ? ADMIN_TODO : isMember ? MEMBER_TODO : GUEST_TODO
   const progressTotal = roleTodo.length
   const progressDone = isAdmin ? progressTotal : isMember ? 2 : isSignedIn ? 1 : 0
   const progressPercent = Math.round((progressDone / progressTotal) * 100)
+
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn) {
+      setDashboardData(null)
+      return
+    }
+
+    let cancelled = false
+    setDashboardLoading(true)
+    setDashboardError(null)
+
+    getMemberDashboard(canViewMemberNotices)
+      .then((data) => {
+        if (!cancelled) {
+          setDashboardData(data)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setDashboardError(t('member.dashboardLoadError', { defaultValue: 'データの読み込みに失敗しました。時間をおいて再度お試しください。' }))
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setDashboardLoading(false)
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [canViewMemberNotices, isLoaded, isSignedIn, t])
+
+  const visibleNotices = useMemo(() => {
+    if (!dashboardData) return []
+    return dashboardData.notices.filter((notice) => notice.audience === 'all' || canViewMemberNotices)
+  }, [canViewMemberNotices, dashboardData])
+
+  const handlePreferenceChange = async (key: 'newsletterOptIn' | 'loginAlertOptIn', checked: boolean) => {
+    if (!dashboardData) return
+    const nextPreferences = { ...dashboardData.preferences, [key]: checked }
+    const saved = await updateMemberPreferences(nextPreferences)
+    setDashboardData({ ...dashboardData, preferences: saved })
+  }
 
   return (
     <section className="mx-auto max-w-5xl px-4 py-20">
@@ -286,6 +340,106 @@ export default function MemberPage() {
               </ul>
               <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">{t('member.authHelp', { defaultValue: '実際のログイン方式は、Clerk ダイアログで表示される有効なプロバイダー設定に従います。' })}</p>
             </div>
+          </div>
+
+          <div className="rounded border border-gray-200 p-5 dark:border-gray-800">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="font-mono text-[11px] text-gray-400">operations</p>
+                <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{t('member.operationsLead', { defaultValue: '注文・配送・通知設定などの実運用項目を確認できます。' })}</p>
+              </div>
+              {dashboardLoading && <p className="text-xs text-gray-500 dark:text-gray-400">{t('common.loading')}</p>}
+            </div>
+
+            {dashboardError && (
+              <p className="mt-3 rounded border border-rose-300 bg-rose-50 p-2 text-xs text-rose-700 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-300">{dashboardError}</p>
+            )}
+
+            {dashboardData && (
+              <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                <section className="rounded border border-gray-200 p-4 dark:border-gray-700">
+                  <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t('member.ordersTitle', { defaultValue: '注文履歴' })}</h2>
+                  <ul className="mt-3 space-y-2 text-xs text-gray-600 dark:text-gray-300">
+                    {dashboardData.orders.map((order) => (
+                      <li key={order.externalOrderId} className="rounded bg-gray-50 p-2 dark:bg-gray-900/40">
+                        <p className="font-mono text-[11px] text-gray-500">{order.externalOrderId}</p>
+                        <p className="mt-1">{order.lines.map((line) => `${line.productName} ×${line.quantity}`).join(' / ')}</p>
+                        <p className="mt-1 text-gray-500 dark:text-gray-400">{t('member.orderSummary', { status: order.status, total: order.total.toLocaleString(), currency: order.currency, defaultValue: '状態: {{status}} / 合計: {{total}} {{currency}}' })}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+
+                <section className="rounded border border-gray-200 p-4 dark:border-gray-700">
+                  <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t('member.shipmentsTitle', { defaultValue: '配送状況' })}</h2>
+                  <ul className="mt-3 space-y-2 text-xs text-gray-600 dark:text-gray-300">
+                    {dashboardData.shipments.map((shipment) => (
+                      <li key={shipment.id} className="rounded bg-gray-50 p-2 dark:bg-gray-900/40">
+                        <p className="font-mono text-[11px] text-gray-500">{shipment.orderExternalId}</p>
+                        <p className="mt-1">{shipment.carrier} / {shipment.trackingNumber}</p>
+                        <p className="mt-1 text-gray-500 dark:text-gray-400">{t('member.shipmentSummary', { status: shipment.status, defaultValue: '配送状態: {{status}}' })}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+
+                <section className="rounded border border-gray-200 p-4 dark:border-gray-700">
+                  <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t('member.noticesTitle', { defaultValue: '重要なお知らせ' })}</h2>
+                  <ul className="mt-3 space-y-2 text-xs text-gray-600 dark:text-gray-300">
+                    {visibleNotices.map((notice) => (
+                      <li key={notice.id} className="rounded bg-gray-50 p-2 dark:bg-gray-900/40">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="font-medium text-gray-900 dark:text-gray-100">{notice.title}</p>
+                          {notice.priority === 'high' && <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">{t('member.noticeHighPriority', { defaultValue: '重要' })}</span>}
+                        </div>
+                        <p className="mt-1">{notice.body}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+
+                <section className="rounded border border-gray-200 p-4 dark:border-gray-700">
+                  <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t('member.preferencesTitle', { defaultValue: '通知設定' })}</h2>
+                  <div className="mt-3 space-y-2 text-xs text-gray-600 dark:text-gray-300">
+                    <label className="flex items-center justify-between gap-3 rounded bg-gray-50 p-2 dark:bg-gray-900/40">
+                      <span>{t('member.newsletterOptIn', { defaultValue: 'メールマガジンを受け取る' })}</span>
+                      <input type="checkbox" checked={dashboardData.preferences.newsletterOptIn} onChange={(event) => void handlePreferenceChange('newsletterOptIn', event.target.checked)} />
+                    </label>
+                    <label className="flex items-center justify-between gap-3 rounded bg-gray-50 p-2 dark:bg-gray-900/40">
+                      <span>{t('member.loginAlertOptIn', { defaultValue: 'ログイン通知を受け取る' })}</span>
+                      <input type="checkbox" checked={dashboardData.preferences.loginAlertOptIn} onChange={(event) => void handlePreferenceChange('loginAlertOptIn', event.target.checked)} />
+                    </label>
+                  </div>
+                </section>
+
+                <section className="rounded border border-gray-200 p-4 dark:border-gray-700">
+                  <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t('member.auditLogsTitle', { defaultValue: 'ログ履歴' })}</h2>
+                  <ul className="mt-3 space-y-2 text-xs text-gray-600 dark:text-gray-300">
+                    {dashboardData.auditLogs.map((log) => (
+                      <li key={log.id} className="rounded bg-gray-50 p-2 dark:bg-gray-900/40">
+                        <p>{log.eventType}</p>
+                        <p className="mt-1 text-gray-500 dark:text-gray-400">{new Date(log.createdAt).toLocaleString()}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+
+                <section className="rounded border border-gray-200 p-4 dark:border-gray-700">
+                  <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t('member.withdrawTitle', { defaultValue: '退会手続き' })}</h2>
+                  <p className="mt-2 text-xs text-gray-600 dark:text-gray-300">{t('member.withdrawDescription', { defaultValue: '退会前に、未配送注文と会員期限をご確認ください。' })}</p>
+                  <button
+                    type="button"
+                    onClick={() => setWithdrawRequested(true)}
+                    className="mt-3 rounded border border-rose-400 px-3 py-1 text-xs text-rose-600 hover:bg-rose-50 dark:border-rose-700 dark:text-rose-300 dark:hover:bg-rose-900/30"
+                  >
+                    {t('member.withdrawAction', { defaultValue: '退会申請を開始する' })}
+                  </button>
+                  {withdrawRequested && (
+                    <p className="mt-2 text-xs text-emerald-600 dark:text-emerald-300">{t('member.withdrawRequested', { defaultValue: '退会申請を受け付けました。運営より登録メール宛にご連絡します。' })}</p>
+                  )}
+                </section>
+              </div>
+            )}
           </div>
         </div>
       )}
