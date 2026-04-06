@@ -401,18 +401,37 @@
     "dashboardLoadError": "Failed to load member data. Please try again later.",
     "ordersTitle": "Order history",
     "orderSummary": "Status: {{status}} / Total: {{total}} {{currency}}",
+    "orderStatus": {
+      "placed": "Placed",
+      "processing": "Processing",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
+    },
+    "ordersEmpty": "No order history is available.",
     "shipmentsTitle": "Shipment tracking",
     "shipmentSummary": "Shipment status: {{status}}",
+    "shipmentStatus": {
+      "label_created": "Label created",
+      "in_transit": "In transit",
+      "out_for_delivery": "Out for delivery",
+      "delivered": "Delivered"
+    },
+    "shipmentsEmpty": "No shipment data is available.",
     "noticesTitle": "Important notices",
     "noticeHighPriority": "High",
+    "noticesEmpty": "No notices are available right now.",
     "preferencesTitle": "Notification settings",
     "newsletterOptIn": "Receive newsletter emails",
     "loginAlertOptIn": "Receive login alerts",
+    "preferencesSaveError": "Failed to save notification settings. Please try again later.",
     "auditLogsTitle": "Activity logs",
+    "auditLogsEmpty": "No activity logs are available.",
     "withdrawTitle": "Account withdrawal",
     "withdrawDescription": "Before withdrawing, confirm undelivered orders and membership period.",
     "withdrawAction": "Start withdrawal request",
-    "withdrawRequested": "Withdrawal request received. We will contact your registered email."
+    "withdrawRequested": "Withdrawal request received. We will contact your registered email.",
+    "withdrawCancel": "Cancel request"
   },
   "memberGuide": {
     "label": "Member Guide",

@@ -80,5 +80,6 @@ export function createMockMemberDashboardData(isMember: boolean): MemberDashboar
     ],
     preferences: BASE_PREFERENCES,
     auditLogs: BASE_LOGS,
+    withdrawRequested: false,
   }
 }

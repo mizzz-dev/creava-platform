@@ -401,18 +401,37 @@
     "dashboardLoadError": "데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
     "ordersTitle": "주문 내역",
     "orderSummary": "상태: {{status}} / 합계: {{total}} {{currency}}",
+    "orderStatus": {
+      "placed": "주문 접수",
+      "processing": "처리 중",
+      "shipped": "배송 시작",
+      "delivered": "배송 완료",
+      "cancelled": "취소됨"
+    },
+    "ordersEmpty": "표시할 주문 내역이 없습니다.",
     "shipmentsTitle": "배송 현황",
     "shipmentSummary": "배송 상태: {{status}}",
+    "shipmentStatus": {
+      "label_created": "운송장 생성",
+      "in_transit": "배송 중",
+      "out_for_delivery": "배달 중",
+      "delivered": "배달 완료"
+    },
+    "shipmentsEmpty": "배송 현황이 없습니다.",
     "noticesTitle": "중요 공지",
     "noticeHighPriority": "중요",
+    "noticesEmpty": "표시 가능한 공지가 없습니다.",
     "preferencesTitle": "알림 설정",
     "newsletterOptIn": "뉴스레터 수신",
     "loginAlertOptIn": "로그인 알림 수신",
+    "preferencesSaveError": "알림 설정 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.",
     "auditLogsTitle": "로그 이력",
+    "auditLogsEmpty": "로그 이력이 없습니다.",
     "withdrawTitle": "탈퇴 절차",
     "withdrawDescription": "탈퇴 전 미배송 주문과 회원 기간을 확인해 주세요.",
     "withdrawAction": "탈퇴 신청 시작",
-    "withdrawRequested": "탈퇴 신청이 접수되었습니다. 등록된 이메일로 안내드립니다."
+    "withdrawRequested": "탈퇴 신청이 접수되었습니다. 등록된 이메일로 안내드립니다.",
+    "withdrawCancel": "신청 취소"
   },
   "memberGuide": {
     "label": "Member Guide",

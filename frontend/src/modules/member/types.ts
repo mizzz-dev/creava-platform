@@ -56,4 +56,5 @@ export interface MemberDashboardData {
   notices: MemberNotice[]
   preferences: MemberPreferences
   auditLogs: AuditLog[]
+  withdrawRequested: boolean
 }

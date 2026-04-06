@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next'
 import PageHead from '@/components/seo/PageHead'
 import { useCurrentUser } from '@/hooks'
 import { ROUTES } from '@/lib/routeConstants'
-import { getMemberDashboard, updateMemberPreferences } from '@/modules/member/api'
-import type { MemberDashboardData } from '@/modules/member/types'
+import { clearWithdrawRequest, getMemberDashboard, requestWithdraw, updateMemberPreferences } from '@/modules/member/api'
+import type { MemberDashboardData, MemberOrderStatus, ShipmentStatus } from '@/modules/member/types'
 
 const MEMBER_BENEFITS = [
   'member.benefitEarly',
@@ -110,7 +110,6 @@ export default function MemberPage() {
   const [dashboardData, setDashboardData] = useState<MemberDashboardData | null>(null)
   const [dashboardLoading, setDashboardLoading] = useState(false)
   const [dashboardError, setDashboardError] = useState<string | null>(null)
-  const [withdrawRequested, setWithdrawRequested] = useState(false)
   const role = user?.role ?? 'guest'
   const isMember = role === 'member'
   const isAdmin = role === 'admin'
@@ -160,8 +159,31 @@ export default function MemberPage() {
   const handlePreferenceChange = async (key: 'newsletterOptIn' | 'loginAlertOptIn', checked: boolean) => {
     if (!dashboardData) return
     const nextPreferences = { ...dashboardData.preferences, [key]: checked }
-    const saved = await updateMemberPreferences(nextPreferences)
-    setDashboardData({ ...dashboardData, preferences: saved })
+    try {
+      const saved = await updateMemberPreferences(nextPreferences)
+      setDashboardData({ ...dashboardData, preferences: saved })
+    } catch {
+      setDashboardError(t('member.preferencesSaveError', { defaultValue: '通知設定の保存に失敗しました。時間をおいて再度お試しください。' }))
+    }
+  }
+
+  const handleWithdrawRequest = async () => {
+    if (!dashboardData || dashboardData.withdrawRequested) return
+    const requested = await requestWithdraw()
+    setDashboardData({ ...dashboardData, withdrawRequested: requested })
+  }
+
+  const handleWithdrawCancel = async () => {
+    if (!dashboardData || !dashboardData.withdrawRequested) return
+    const requested = await clearWithdrawRequest()
+    setDashboardData({ ...dashboardData, withdrawRequested: requested })
+  }
+
+  const orderStatusLabel = (status: MemberOrderStatus) => t(`member.orderStatus.${status}`, { defaultValue: status })
+  const shipmentStatusLabel = (status: ShipmentStatus) => t(`member.shipmentStatus.${status}`, { defaultValue: status })
+  const formatDateTime = (value: string) => {
+    const date = new Date(value)
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleString()
   }
 
   return (
@@ -359,43 +381,55 @@ export default function MemberPage() {
               <div className="mt-4 grid gap-4 lg:grid-cols-2">
                 <section className="rounded border border-gray-200 p-4 dark:border-gray-700">
                   <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t('member.ordersTitle', { defaultValue: '注文履歴' })}</h2>
-                  <ul className="mt-3 space-y-2 text-xs text-gray-600 dark:text-gray-300">
-                    {dashboardData.orders.map((order) => (
-                      <li key={order.externalOrderId} className="rounded bg-gray-50 p-2 dark:bg-gray-900/40">
-                        <p className="font-mono text-[11px] text-gray-500">{order.externalOrderId}</p>
-                        <p className="mt-1">{order.lines.map((line) => `${line.productName} ×${line.quantity}`).join(' / ')}</p>
-                        <p className="mt-1 text-gray-500 dark:text-gray-400">{t('member.orderSummary', { status: order.status, total: order.total.toLocaleString(), currency: order.currency, defaultValue: '状態: {{status}} / 合計: {{total}} {{currency}}' })}</p>
-                      </li>
-                    ))}
-                  </ul>
+                  {dashboardData.orders.length > 0 ? (
+                    <ul className="mt-3 space-y-2 text-xs text-gray-600 dark:text-gray-300">
+                      {dashboardData.orders.map((order) => (
+                        <li key={order.externalOrderId} className="rounded bg-gray-50 p-2 dark:bg-gray-900/40">
+                          <p className="font-mono text-[11px] text-gray-500">{order.externalOrderId}</p>
+                          <p className="mt-1">{order.lines.map((line) => `${line.productName} ×${line.quantity}`).join(' / ')}</p>
+                          <p className="mt-1 text-gray-500 dark:text-gray-400">{t('member.orderSummary', { status: orderStatusLabel(order.status), total: order.total.toLocaleString(), currency: order.currency, defaultValue: '状態: {{status}} / 合計: {{total}} {{currency}}' })}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">{t('member.ordersEmpty', { defaultValue: '表示できる注文履歴はありません。' })}</p>
+                  )}
                 </section>
 
                 <section className="rounded border border-gray-200 p-4 dark:border-gray-700">
                   <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t('member.shipmentsTitle', { defaultValue: '配送状況' })}</h2>
-                  <ul className="mt-3 space-y-2 text-xs text-gray-600 dark:text-gray-300">
-                    {dashboardData.shipments.map((shipment) => (
-                      <li key={shipment.id} className="rounded bg-gray-50 p-2 dark:bg-gray-900/40">
-                        <p className="font-mono text-[11px] text-gray-500">{shipment.orderExternalId}</p>
-                        <p className="mt-1">{shipment.carrier} / {shipment.trackingNumber}</p>
-                        <p className="mt-1 text-gray-500 dark:text-gray-400">{t('member.shipmentSummary', { status: shipment.status, defaultValue: '配送状態: {{status}}' })}</p>
-                      </li>
-                    ))}
-                  </ul>
+                  {dashboardData.shipments.length > 0 ? (
+                    <ul className="mt-3 space-y-2 text-xs text-gray-600 dark:text-gray-300">
+                      {dashboardData.shipments.map((shipment) => (
+                        <li key={shipment.id} className="rounded bg-gray-50 p-2 dark:bg-gray-900/40">
+                          <p className="font-mono text-[11px] text-gray-500">{shipment.orderExternalId}</p>
+                          <p className="mt-1">{shipment.carrier} / {shipment.trackingNumber}</p>
+                          <p className="mt-1 text-gray-500 dark:text-gray-400">{t('member.shipmentSummary', { status: shipmentStatusLabel(shipment.status), defaultValue: '配送状態: {{status}}' })}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">{t('member.shipmentsEmpty', { defaultValue: '配送状況はありません。' })}</p>
+                  )}
                 </section>
 
                 <section className="rounded border border-gray-200 p-4 dark:border-gray-700">
                   <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t('member.noticesTitle', { defaultValue: '重要なお知らせ' })}</h2>
-                  <ul className="mt-3 space-y-2 text-xs text-gray-600 dark:text-gray-300">
-                    {visibleNotices.map((notice) => (
-                      <li key={notice.id} className="rounded bg-gray-50 p-2 dark:bg-gray-900/40">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="font-medium text-gray-900 dark:text-gray-100">{notice.title}</p>
-                          {notice.priority === 'high' && <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">{t('member.noticeHighPriority', { defaultValue: '重要' })}</span>}
-                        </div>
-                        <p className="mt-1">{notice.body}</p>
-                      </li>
-                    ))}
-                  </ul>
+                  {visibleNotices.length > 0 ? (
+                    <ul className="mt-3 space-y-2 text-xs text-gray-600 dark:text-gray-300">
+                      {visibleNotices.map((notice) => (
+                        <li key={notice.id} className="rounded bg-gray-50 p-2 dark:bg-gray-900/40">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="font-medium text-gray-900 dark:text-gray-100">{notice.title}</p>
+                            {notice.priority === 'high' && <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">{t('member.noticeHighPriority', { defaultValue: '重要' })}</span>}
+                          </div>
+                          <p className="mt-1">{notice.body}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">{t('member.noticesEmpty', { defaultValue: '表示可能なお知らせはありません。' })}</p>
+                  )}
                 </section>
 
                 <section className="rounded border border-gray-200 p-4 dark:border-gray-700">
@@ -414,14 +448,18 @@ export default function MemberPage() {
 
                 <section className="rounded border border-gray-200 p-4 dark:border-gray-700">
                   <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{t('member.auditLogsTitle', { defaultValue: 'ログ履歴' })}</h2>
-                  <ul className="mt-3 space-y-2 text-xs text-gray-600 dark:text-gray-300">
-                    {dashboardData.auditLogs.map((log) => (
-                      <li key={log.id} className="rounded bg-gray-50 p-2 dark:bg-gray-900/40">
-                        <p>{log.eventType}</p>
-                        <p className="mt-1 text-gray-500 dark:text-gray-400">{new Date(log.createdAt).toLocaleString()}</p>
-                      </li>
-                    ))}
-                  </ul>
+                  {dashboardData.auditLogs.length > 0 ? (
+                    <ul className="mt-3 space-y-2 text-xs text-gray-600 dark:text-gray-300">
+                      {dashboardData.auditLogs.map((log) => (
+                        <li key={log.id} className="rounded bg-gray-50 p-2 dark:bg-gray-900/40">
+                          <p>{log.eventType}</p>
+                          <p className="mt-1 text-gray-500 dark:text-gray-400">{formatDateTime(log.createdAt)}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">{t('member.auditLogsEmpty', { defaultValue: 'ログ履歴はありません。' })}</p>
+                  )}
                 </section>
 
                 <section className="rounded border border-gray-200 p-4 dark:border-gray-700">
@@ -429,13 +467,23 @@ export default function MemberPage() {
                   <p className="mt-2 text-xs text-gray-600 dark:text-gray-300">{t('member.withdrawDescription', { defaultValue: '退会前に、未配送注文と会員期限をご確認ください。' })}</p>
                   <button
                     type="button"
-                    onClick={() => setWithdrawRequested(true)}
+                    onClick={() => void handleWithdrawRequest()}
+                    disabled={dashboardData.withdrawRequested}
                     className="mt-3 rounded border border-rose-400 px-3 py-1 text-xs text-rose-600 hover:bg-rose-50 dark:border-rose-700 dark:text-rose-300 dark:hover:bg-rose-900/30"
                   >
                     {t('member.withdrawAction', { defaultValue: '退会申請を開始する' })}
                   </button>
-                  {withdrawRequested && (
-                    <p className="mt-2 text-xs text-emerald-600 dark:text-emerald-300">{t('member.withdrawRequested', { defaultValue: '退会申請を受け付けました。運営より登録メール宛にご連絡します。' })}</p>
+                  {dashboardData.withdrawRequested && (
+                    <>
+                      <p className="mt-2 text-xs text-emerald-600 dark:text-emerald-300">{t('member.withdrawRequested', { defaultValue: '退会申請を受け付けました。運営より登録メール宛にご連絡します。' })}</p>
+                      <button
+                        type="button"
+                        onClick={() => void handleWithdrawCancel()}
+                        className="mt-2 text-xs text-gray-500 underline hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      >
+                        {t('member.withdrawCancel', { defaultValue: '申請を取り消す' })}
+                      </button>
+                    </>
                   )}
                 </section>
               </div>
