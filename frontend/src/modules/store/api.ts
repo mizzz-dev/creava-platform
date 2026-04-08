@@ -3,7 +3,7 @@ import { getMockStoreProducts, getMockStoreProduct } from '@/lib/mock/store-prod
 import { isStrapiForbiddenError } from '@/lib/api/fallback'
 import type { StrapiQueryParams } from '@/lib/api/strapi'
 import type { StrapiListResponse } from '@/types'
-import type { StoreProduct, StoreProductSummary, PurchaseStatus } from './types'
+import type { StoreProduct, StoreProductSummary, PurchaseStatus, RelatedContentLink } from './types'
 import { API_ENDPOINTS } from '@/lib/api/endpoints'
 import { StrapiApiError } from '@/lib/api/client'
 
@@ -36,7 +36,24 @@ function normalizeStoreProduct(item: Partial<StoreProductSummary>): StoreProduct
     sortOrder: typeof item.sortOrder === 'number' ? item.sortOrder : 0,
     featured: Boolean(item.featured),
     isNewArrival: Boolean(item.isNewArrival),
+    pickup: Boolean(item.pickup),
+    memberBenefit: typeof item.memberBenefit === 'string' ? item.memberBenefit : null,
+    membersOnlyNotice: typeof item.membersOnlyNotice === 'string' ? item.membersOnlyNotice : null,
+    earlyAccess: Boolean(item.earlyAccess),
+    specialOffer: typeof item.specialOffer === 'string' ? item.specialOffer : null,
   }
+}
+
+function normalizeRelatedLinks(items: unknown): RelatedContentLink[] {
+  if (!Array.isArray(items)) return []
+  return items
+    .map((item) => {
+      if (!item || typeof item !== 'object') return null
+      const link = item as Partial<RelatedContentLink>
+      if (!link.id || !link.slug || !link.title) return null
+      return { id: Number(link.id), slug: String(link.slug), title: String(link.title) }
+    })
+    .filter((item): item is RelatedContentLink => item !== null)
 }
 
 function validateStoreListResponse(res: StrapiListResponse<StoreProductSummary>): StrapiListResponse<StoreProductSummary> {
@@ -59,7 +76,7 @@ export function getProducts(
   }
 
   const merged = {
-    fields: ['title', 'slug', 'price', 'currency', 'accessStatus', 'limitedEndAt', 'archiveVisibleForFC', 'stripeLink', 'baseLink', 'purchaseStatus', 'stock', 'category', 'tags', 'sortOrder', 'featured', 'isNewArrival'],
+    fields: ['title', 'slug', 'price', 'currency', 'accessStatus', 'limitedEndAt', 'archiveVisibleForFC', 'stripeLink', 'baseLink', 'purchaseStatus', 'stock', 'category', 'tags', 'sortOrder', 'featured', 'isNewArrival', 'pickup', 'memberBenefit', 'membersOnlyNotice', 'earlyAccess', 'specialOffer'],
     populate: {
       previewImage: { fields: ['url', 'alternativeText', 'width', 'height'] },
     },
@@ -85,9 +102,14 @@ export async function getProduct(slug: string, signal?: AbortSignal): Promise<St
   }
   try {
     const product = await fetchBySlug<StoreProduct>(ENDPOINT, slug, {
-      fields: ['title', 'slug', 'price', 'currency', 'accessStatus', 'limitedEndAt', 'archiveVisibleForFC', 'stripeLink', 'baseLink', 'purchaseStatus', 'description', 'externalPurchaseNote', 'stock', 'category', 'tags', 'sortOrder', 'featured', 'isNewArrival', 'cautionNotes', 'shippingNotes', 'digitalDeliveryNotes'],
+      fields: ['title', 'slug', 'price', 'currency', 'accessStatus', 'limitedEndAt', 'archiveVisibleForFC', 'stripeLink', 'baseLink', 'purchaseStatus', 'description', 'externalPurchaseNote', 'stock', 'category', 'tags', 'sortOrder', 'featured', 'isNewArrival', 'pickup', 'memberBenefit', 'membersOnlyNotice', 'earlyAccess', 'specialOffer', 'cautionNotes', 'shippingNotes', 'digitalDeliveryNotes'],
       populate: {
         previewImage: { fields: ['url', 'alternativeText', 'width', 'height'] },
+        relatedProducts: { fields: ['slug', 'title'] },
+        relatedNews: { fields: ['slug', 'title'] },
+        relatedEvents: { fields: ['slug', 'title'] },
+        relatedBlogPosts: { fields: ['slug', 'title'] },
+        relatedFanclubContents: { fields: ['slug', 'title'] },
       },
     }, { signal })
 
@@ -99,6 +121,11 @@ export async function getProduct(slug: string, signal?: AbortSignal): Promise<St
       cautionNotes: product.cautionNotes ?? null,
       shippingNotes: product.shippingNotes ?? null,
       digitalDeliveryNotes: product.digitalDeliveryNotes ?? null,
+      relatedProducts: normalizeRelatedLinks((product as unknown as Record<string, unknown>).relatedProducts),
+      relatedNews: normalizeRelatedLinks((product as unknown as Record<string, unknown>).relatedNews),
+      relatedEvents: normalizeRelatedLinks((product as unknown as Record<string, unknown>).relatedEvents),
+      relatedBlogPosts: normalizeRelatedLinks((product as unknown as Record<string, unknown>).relatedBlogPosts),
+      relatedFanclubContents: normalizeRelatedLinks((product as unknown as Record<string, unknown>).relatedFanclubContents),
     }
   } catch (error) {
     if (isStrapiForbiddenError(error) || (error instanceof StrapiApiError && (error.status === 0 || error.status === 408))) {

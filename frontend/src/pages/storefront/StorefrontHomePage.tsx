@@ -12,6 +12,8 @@ import { getFaqList } from '@/modules/faq/api'
 import type { FAQItem, NewsItem } from '@/types'
 import { trackApiFailure, trackCtaClick, trackEmptyState } from '@/modules/analytics/tracking'
 import { useEffect } from 'react'
+import { fanclubLink } from '@/lib/siteLinks'
+import { ROUTES } from '@/lib/routeConstants'
 
 export default function StorefrontHomePage() {
   const { products, loading, error, refetch } = useProductList(24)
@@ -26,6 +28,7 @@ export default function StorefrontHomePage() {
   const featured = useMemo(() => products.filter((product) => product.accessStatus !== 'fc_only').slice(0, 4), [products])
   const digitalGoods = useMemo(() => products.filter((product) => inferCollectionSlug(product) === 'digital').slice(0, 4), [products])
   const pickup = useMemo(() => products.filter((product) => product.purchaseStatus === 'available').slice(0, 2), [products])
+  const memberPickup = useMemo(() => products.filter((product) => product.earlyAccess || product.accessStatus === 'fc_only' || product.memberBenefit).slice(0, 3), [products])
   useEffect(() => {
     if (error) trackApiFailure('store_home_products', error)
   }, [error])
@@ -48,6 +51,7 @@ export default function StorefrontHomePage() {
             <div className="mt-6 flex flex-wrap gap-3">
               <Link to="/products" onClick={() => trackCtaClick('store_home_hero', 'all_products')} className="rounded-full bg-gray-900 px-5 py-2.5 text-sm font-medium text-white dark:bg-white dark:text-gray-900">全商品を見る</Link>
               <Link to="/collections/digital" onClick={() => trackCtaClick('store_home_hero', 'digital_collection')} className="rounded-full border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 dark:border-gray-700 dark:text-gray-200">Digital Goods</Link>
+              <Link to={fanclubLink(ROUTES.FC_JOIN)} onClick={() => trackCtaClick('store_home_hero', 'to_fanclub_join')} className="rounded-full border border-violet-300 bg-violet-50 px-5 py-2.5 text-sm font-medium text-violet-700 dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-300">FC先行案内を見る</Link>
               <Link to="/guide" onClick={() => trackCtaClick('store_home_hero', 'guide')} className="rounded-full border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 dark:border-gray-700 dark:text-gray-200">Guide</Link>
             </div>
           </div>
@@ -98,6 +102,30 @@ export default function StorefrontHomePage() {
           </Link>
         ))}
       </section>
+
+      {!loading && !error && memberPickup.length > 0 && (
+        <section className="mt-12 rounded-3xl border border-violet-200/70 bg-violet-50/60 p-5 dark:border-violet-900/60 dark:bg-violet-950/20 sm:p-7">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-violet-600 dark:text-violet-300">member benefit / early access</p>
+              <h2 className="mt-2 text-xl font-semibold text-gray-900 dark:text-gray-100">会員向け販売・先行導線</h2>
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">FC先行・会員特典つき商品の導線をまとめて表示します。</p>
+            </div>
+            <Link to={fanclubLink(ROUTES.FC_MYPAGE)} onClick={() => trackCtaClick('store_home_member_pickup', 'to_fc_mypage')} className="rounded-full border border-violet-300 px-4 py-2 text-xs font-medium text-violet-700 dark:border-violet-700 dark:text-violet-300">
+              FCマイページで特典を確認
+            </Link>
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            {memberPickup.map((item) => (
+              <Link key={item.id} to={`/products/${item.slug}`} onClick={() => trackCtaClick('store_home_member_pickup', 'product_click', { slug: item.slug })} className="rounded-2xl border border-violet-200 bg-white/85 p-4 dark:border-violet-900/70 dark:bg-gray-900/80">
+                <p className="font-mono text-[10px] uppercase tracking-wider text-violet-500">{item.earlyAccess ? 'EARLY ACCESS' : 'MEMBER BENEFIT'}</p>
+                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">{item.title}</h3>
+                <p className="mt-1 line-clamp-2 text-xs text-gray-600 dark:text-gray-300">{item.specialOffer ?? item.memberBenefit ?? '会員向け販売情報を商品詳細で確認できます。'}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="mt-12 grid gap-10 lg:grid-cols-2">
         {!loading && !error && featured.length > 0 && (

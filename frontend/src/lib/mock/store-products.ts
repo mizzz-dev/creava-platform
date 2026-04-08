@@ -7,7 +7,7 @@
 import type { StoreProductSummary, StoreProduct } from '@/modules/store/types'
 import type { StrapiListResponse, StrapiSingleResponse } from '@/types'
 
-const BASE_PRODUCTS: Omit<StoreProduct, 'stock' | 'category' | 'tags' | 'sortOrder' | 'featured' | 'isNewArrival'>[] = [
+const BASE_PRODUCTS: Omit<StoreProduct, 'stock' | 'category' | 'tags' | 'sortOrder' | 'featured' | 'isNewArrival' | 'pickup' | 'memberBenefit' | 'membersOnlyNotice' | 'earlyAccess' | 'specialOffer' | 'relatedProducts' | 'relatedNews' | 'relatedEvents' | 'relatedBlogPosts' | 'relatedFanclubContents'>[] = [
   {
     id: 1,
     documentId: 'mock-001',
@@ -194,6 +194,16 @@ const MOCK_PRODUCTS: StoreProduct[] = BASE_PRODUCTS.map((item, index) => ({
   sortOrder: index,
   featured: index < 4,
   isNewArrival: index < 4,
+  pickup: index < 2,
+  memberBenefit: item.accessStatus === 'fc_only' ? '会員向け限定特典: サイン入りポストカード' : null,
+  membersOnlyNotice: item.accessStatus === 'fc_only' ? '会員認証後に購入可能です。' : null,
+  earlyAccess: index % 3 === 0,
+  specialOffer: index % 4 === 0 ? '今週のFC先行対象' : null,
+  relatedProducts: [],
+  relatedNews: [{ id: 100 + index, slug: 'weekly-drop-update', title: '今週のドロップ更新' }],
+  relatedEvents: [{ id: 200 + index, slug: 'live-2026-tokyo', title: 'LIVE 2026 TOKYO' }],
+  relatedBlogPosts: [{ id: 300 + index, slug: 'studio-notes-spring', title: '制作ノート / Spring' }],
+  relatedFanclubContents: [{ id: 400 + index, slug: 'members-backstage-note', title: '会員限定バックステージ' }],
 }))
 
 export function getMockStoreProducts(

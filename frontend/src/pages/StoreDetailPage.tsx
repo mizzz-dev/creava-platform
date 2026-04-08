@@ -9,7 +9,7 @@ import PurchaseActions from '@/modules/store/components/PurchaseActions'
 import ProductCard from '@/modules/store/components/ProductCard'
 import { formatPriceNum } from '@/utils'
 import { ROUTES, detailPath } from '@/lib/routeConstants'
-import { isStoreSite } from '@/lib/siteLinks'
+import { fanclubLink, isStoreSite } from '@/lib/siteLinks'
 import { SITE_URL, SITE_NAME } from '@/lib/seo'
 import ContentAccessGuard from '@/components/guards/ContentAccessGuard'
 import NotFoundState from '@/components/common/NotFoundState'
@@ -175,6 +175,22 @@ export default function StoreDetailPage() {
               <p className="mt-2 text-xs text-gray-400 dark:text-gray-600">
                 {product.purchaseStatus === 'coming_soon' ? t('store.comingSoonDetail') : t('store.stripeNote')}
               </p>
+              {(product.memberBenefit || product.membersOnlyNotice || product.specialOffer || product.earlyAccess) && (
+                <div className="mt-4 rounded-xl border border-violet-200 bg-violet-50/80 p-3 dark:border-violet-900/60 dark:bg-violet-950/30">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-300">{t('store.memberOfferTitle', { defaultValue: '会員向け販売情報' })}</p>
+                  {product.specialOffer && <p className="mt-1 text-sm text-violet-800 dark:text-violet-200">{product.specialOffer}</p>}
+                  {product.memberBenefit && <p className="mt-1 text-xs text-violet-700 dark:text-violet-300">{product.memberBenefit}</p>}
+                  {product.membersOnlyNotice && <p className="mt-1 text-xs text-violet-700 dark:text-violet-300">{product.membersOnlyNotice}</p>}
+                  {product.earlyAccess && <p className="mt-1 text-xs text-violet-700 dark:text-violet-300">{t('store.earlyAccessNote', { defaultValue: '会員向け先行公開の対象に設定されています。' })}</p>}
+                  <Link
+                    to={fanclubLink(ROUTES.FC_JOIN)}
+                    onClick={() => trackCtaClick('store_detail', 'to_fanclub_join', { slug: product.slug })}
+                    className="mt-2 inline-flex text-xs font-medium text-violet-700 underline dark:text-violet-300"
+                  >
+                    {t('store.toFanclubCta', { defaultValue: 'ファンクラブ入会で特典を確認' })}
+                  </Link>
+                </div>
+              )}
 
               {/* 商品説明 */}
               {product.description && (
@@ -288,6 +304,33 @@ export default function StoreDetailPage() {
                 ))}
               </div>
             </motion.div>
+          )}
+          {(product.relatedNews.length > 0 || product.relatedBlogPosts.length > 0 || product.relatedEvents.length > 0 || product.relatedFanclubContents.length > 0) && (
+            <section className="mt-10 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900/60">
+              <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">{t('store.relatedContentTitle', { defaultValue: 'この商品に関連するコンテンツ' })}</h2>
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                {product.relatedNews.map((item) => (
+                  <Link key={`news-${item.id}`} to={detailPath.news(item.slug)} onClick={() => trackCtaClick('store_detail_related_content', 'news', { slug: item.slug })} className="rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:border-gray-400 dark:border-gray-700 dark:text-gray-200">
+                    News: {item.title}
+                  </Link>
+                ))}
+                {product.relatedBlogPosts.map((item) => (
+                  <Link key={`blog-${item.id}`} to={detailPath.blog(item.slug)} onClick={() => trackCtaClick('store_detail_related_content', 'blog', { slug: item.slug })} className="rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:border-gray-400 dark:border-gray-700 dark:text-gray-200">
+                    Blog: {item.title}
+                  </Link>
+                ))}
+                {product.relatedEvents.map((item) => (
+                  <Link key={`event-${item.id}`} to={detailPath.event(item.slug)} onClick={() => trackCtaClick('store_detail_related_content', 'event', { slug: item.slug })} className="rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:border-gray-400 dark:border-gray-700 dark:text-gray-200">
+                    Event: {item.title}
+                  </Link>
+                ))}
+                {product.relatedFanclubContents.map((item) => (
+                  <Link key={`fc-${item.id}`} to={fanclubLink(`/movies/${item.slug}`)} onClick={() => trackCtaClick('store_detail_related_content', 'fanclub_content', { slug: item.slug })} className="rounded-xl border border-violet-200 bg-violet-50 px-3 py-2 text-sm text-violet-700 hover:border-violet-400 dark:border-violet-900/70 dark:bg-violet-950/30 dark:text-violet-200">
+                    FC: {item.title}
+                  </Link>
+                ))}
+              </div>
+            </section>
           )}
         </ContentAccessGuard>
       )}

@@ -65,6 +65,36 @@
       ],
       "default": "fc_only",
       "required": true
+    },
+    "relatedProducts": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::store-product.store-product"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "pickup": {
+      "type": "boolean",
+      "default": false
+    },
+    "memberBenefit": {
+      "type": "text"
+    },
+    "membersOnlyNotice": {
+      "type": "text"
+    },
+    "earlyAccess": {
+      "type": "boolean",
+      "default": false
+    },
+    "specialOffer": {
+      "type": "text"
+    },
+    "sortOrder": {
+      "type": "integer",
+      "default": 0
     }
   }
 }
