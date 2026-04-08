@@ -126,6 +126,15 @@ export interface Award extends StrapiBase {
   organization: string | null
 }
 
+export type FaqCategory = 'general' | 'fanclub' | 'store' | 'works' | 'events' | 'contact'
+
+export interface FAQItem extends StrapiBase {
+  question: string
+  answer: string
+  category: FaqCategory
+  order: number
+}
+
 /**
  * サイト設定（Strapi Single Type: site-setting）
  */

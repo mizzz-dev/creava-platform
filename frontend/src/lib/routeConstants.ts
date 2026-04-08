@@ -37,6 +37,8 @@ export const ROUTES = {
   STORE_RETURNS: '/returns',
   STORE_CONTACT: '/contact',
   STORE_LEGAL: '/legal',
+  STORE_TERMS: '/terms',
+  STORE_PRIVACY: '/privacy',
   STORE_CART: '/cart',
 
   FC_ABOUT: '/about',
