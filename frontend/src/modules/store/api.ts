@@ -41,6 +41,12 @@ function normalizeStoreProduct(item: Partial<StoreProductSummary>): StoreProduct
     membersOnlyNotice: typeof item.membersOnlyNotice === 'string' ? item.membersOnlyNotice : null,
     earlyAccess: Boolean(item.earlyAccess),
     specialOffer: typeof item.specialOffer === 'string' ? item.specialOffer : null,
+    campaignLabel: typeof item.campaignLabel === 'string' ? item.campaignLabel : null,
+    shortHighlight: typeof item.shortHighlight === 'string' ? item.shortHighlight : null,
+    heroCopy: typeof item.heroCopy === 'string' ? item.heroCopy : null,
+    isTrending: Boolean(item.isTrending),
+    isLimited: Boolean(item.isLimited),
+    displayPriority: typeof item.displayPriority === 'number' ? item.displayPriority : 0,
   }
 }
 
@@ -76,7 +82,7 @@ export function getProducts(
   }
 
   const merged = {
-    fields: ['title', 'slug', 'price', 'currency', 'accessStatus', 'limitedEndAt', 'archiveVisibleForFC', 'stripeLink', 'baseLink', 'purchaseStatus', 'stock', 'category', 'tags', 'sortOrder', 'featured', 'isNewArrival', 'pickup', 'memberBenefit', 'membersOnlyNotice', 'earlyAccess', 'specialOffer'],
+    fields: ['title', 'slug', 'price', 'currency', 'accessStatus', 'limitedEndAt', 'archiveVisibleForFC', 'stripeLink', 'baseLink', 'purchaseStatus', 'stock', 'category', 'tags', 'sortOrder', 'featured', 'isNewArrival', 'pickup', 'memberBenefit', 'membersOnlyNotice', 'earlyAccess', 'specialOffer', 'campaignLabel', 'shortHighlight', 'heroCopy', 'isTrending', 'isLimited', 'displayPriority'],
     populate: {
       previewImage: { fields: ['url', 'alternativeText', 'width', 'height'] },
     },
@@ -102,7 +108,7 @@ export async function getProduct(slug: string, signal?: AbortSignal): Promise<St
   }
   try {
     const product = await fetchBySlug<StoreProduct>(ENDPOINT, slug, {
-      fields: ['title', 'slug', 'price', 'currency', 'accessStatus', 'limitedEndAt', 'archiveVisibleForFC', 'stripeLink', 'baseLink', 'purchaseStatus', 'description', 'externalPurchaseNote', 'stock', 'category', 'tags', 'sortOrder', 'featured', 'isNewArrival', 'pickup', 'memberBenefit', 'membersOnlyNotice', 'earlyAccess', 'specialOffer', 'cautionNotes', 'shippingNotes', 'digitalDeliveryNotes'],
+      fields: ['title', 'slug', 'price', 'currency', 'accessStatus', 'limitedEndAt', 'archiveVisibleForFC', 'stripeLink', 'baseLink', 'purchaseStatus', 'description', 'externalPurchaseNote', 'stock', 'category', 'tags', 'sortOrder', 'featured', 'isNewArrival', 'pickup', 'memberBenefit', 'membersOnlyNotice', 'earlyAccess', 'specialOffer', 'campaignLabel', 'shortHighlight', 'heroCopy', 'isTrending', 'isLimited', 'displayPriority', 'cautionNotes', 'shippingNotes', 'digitalDeliveryNotes'],
       populate: {
         previewImage: { fields: ['url', 'alternativeText', 'width', 'height'] },
         relatedProducts: { fields: ['slug', 'title'] },

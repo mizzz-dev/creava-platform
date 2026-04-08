@@ -5,6 +5,7 @@ import SmartLink from '@/components/common/SmartLink'
 import { ROUTES } from '@/lib/routeConstants'
 import { mainLink, fanclubLink, storeLink } from '@/lib/siteLinks'
 import { trackCtaClick } from '@/modules/analytics/tracking'
+import SnsLinks from '@/components/common/SnsLinks'
 
 interface FooterLink {
   to: string
@@ -49,7 +50,14 @@ export default function SubdomainFooter({ legalLinks }: SubdomainFooterProps) {
                 <li key={link.to}><NavLink to={link.to} onClick={() => trackCtaClick('footer', 'legal_link', { target: link.to })}>{t(link.labelKey)}</NavLink></li>
               ))}
             </ul>
+            <div className="mt-5 rounded-2xl border border-gray-200 bg-gray-50/70 p-3 dark:border-gray-800 dark:bg-gray-900/60">
+              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-gray-500">campaign / pickup</p>
+              <p className="mt-1 text-xs leading-relaxed text-gray-600 dark:text-gray-300">期間限定のお知らせやピックアップはトップ特集から確認できます。</p>
+            </div>
           </div>
+        </div>
+        <div className="mt-8 border-t border-gray-100 pt-6 dark:border-gray-900">
+          <SnsLinks compact />
         </div>
 
         <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-5 dark:border-gray-900">

@@ -7,7 +7,7 @@
 import type { StoreProductSummary, StoreProduct } from '@/modules/store/types'
 import type { StrapiListResponse, StrapiSingleResponse } from '@/types'
 
-const BASE_PRODUCTS: Omit<StoreProduct, 'stock' | 'category' | 'tags' | 'sortOrder' | 'featured' | 'isNewArrival' | 'pickup' | 'memberBenefit' | 'membersOnlyNotice' | 'earlyAccess' | 'specialOffer' | 'relatedProducts' | 'relatedNews' | 'relatedEvents' | 'relatedBlogPosts' | 'relatedFanclubContents'>[] = [
+const BASE_PRODUCTS: Omit<StoreProduct, 'stock' | 'category' | 'tags' | 'sortOrder' | 'featured' | 'isNewArrival' | 'pickup' | 'memberBenefit' | 'membersOnlyNotice' | 'earlyAccess' | 'specialOffer' | 'campaignLabel' | 'shortHighlight' | 'heroCopy' | 'isTrending' | 'isLimited' | 'displayPriority' | 'relatedProducts' | 'relatedNews' | 'relatedEvents' | 'relatedBlogPosts' | 'relatedFanclubContents'>[] = [
   {
     id: 1,
     documentId: 'mock-001',
@@ -199,6 +199,12 @@ const MOCK_PRODUCTS: StoreProduct[] = BASE_PRODUCTS.map((item, index) => ({
   membersOnlyNotice: item.accessStatus === 'fc_only' ? '会員認証後に購入可能です。' : null,
   earlyAccess: index % 3 === 0,
   specialOffer: index % 4 === 0 ? '今週のFC先行対象' : null,
+  campaignLabel: index < 3 ? 'SPRING EDIT 2026' : null,
+  shortHighlight: index < 5 ? '静けさのある質感と、日常で使える実用性を両立したセレクト。' : null,
+  heroCopy: index < 2 ? '今週の特集として公開中。数量限定ドロップ。' : null,
+  isTrending: index < 4,
+  isLimited: item.accessStatus === 'limited' || index === 1,
+  displayPriority: Math.max(0, 10 - index),
   relatedProducts: [],
   relatedNews: [{ id: 100 + index, slug: 'weekly-drop-update', title: '今週のドロップ更新' }],
   relatedEvents: [{ id: 200 + index, slug: 'live-2026-tokyo', title: 'LIVE 2026 TOKYO' }],

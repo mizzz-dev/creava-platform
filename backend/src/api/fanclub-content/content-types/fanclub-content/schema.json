@@ -92,6 +92,27 @@
     "specialOffer": {
       "type": "text"
     },
+    "campaignLabel": {
+      "type": "string"
+    },
+    "heroCopy": {
+      "type": "text"
+    },
+    "shortHighlight": {
+      "type": "text"
+    },
+    "isTrending": {
+      "type": "boolean",
+      "default": false
+    },
+    "isLimited": {
+      "type": "boolean",
+      "default": false
+    },
+    "displayPriority": {
+      "type": "integer",
+      "default": 0
+    },
     "sortOrder": {
       "type": "integer",
       "default": 0
