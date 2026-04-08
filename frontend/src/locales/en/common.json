@@ -88,7 +88,20 @@
     "restockSubmit": "Notify me",
     "restockSubmitting": "Sending...",
     "restockDone": "Your restock alert request has been submitted.",
-    "restockError": "Failed to submit the alert request. Please try again later."
+    "restockError": "Failed to submit the alert request. Please try again later.",
+    "ecHeroCopyA": "New drops, limited sales, and early access in one page. Reach checkout in the fastest flow.",
+    "ecHeroCopyB": "Campaigns, rankings, and restock notifications are integrated for a faster shopping journey.",
+    "heroCtaPrimary": "Shop now",
+    "heroCtaPrimaryAlt": "View trending items",
+    "campaignTitle": "Spring limited drop",
+    "campaignBody": "Limited bundles, member pre-sale, and restock alerts are managed in one campaign block.",
+    "campaignPeriod": "Campaign period: 4/8 - 4/30",
+    "campaignShip": "Shipping estimate: 5-8 business days after order",
+    "campaignCta": "See pre-sale details",
+    "filterAll": "All",
+    "filterAvailable": "Available",
+    "filterComingSoon": "Coming soon",
+    "filterSoldOut": "Sold out"
   },
   "form": {
     "required": "Required",
