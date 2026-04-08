@@ -49,6 +49,7 @@ export default function ProductCard({ product, displayCurrency = 'JPY', tracking
           <div className="absolute inset-0 bg-gradient-to-t from-gray-950/35 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
           <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
+            {product.pickup && <Badge variant="pickup" size="sm" />}
             {product.purchaseStatus === 'soldout' && <Badge variant="soldout" size="sm" />}
             {product.purchaseStatus === 'coming_soon' && <Badge variant="coming_soon" size="sm" />}
             {product.isNewArrival && <Badge variant="new" size="sm" />}
@@ -57,6 +58,8 @@ export default function ProductCard({ product, displayCurrency = 'JPY', tracking
           <div className="absolute bottom-2 left-2 flex items-center gap-1">
             {product.accessStatus === 'fc_only' && <Badge variant="fc" size="sm" label="MEMBERS" />}
             {product.accessStatus === 'limited' && <Badge variant="limited" size="sm" />}
+            {product.earlyAccess && <Badge variant="early" size="sm" label={t('store.badgeEarly', { defaultValue: '先行' })} />}
+            {product.memberBenefit && <Badge variant="benefit" size="sm" label={t('store.badgeBenefit', { defaultValue: '特典' })} />}
           </div>
         </div>
 

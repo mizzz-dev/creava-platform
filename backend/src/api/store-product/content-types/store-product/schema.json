@@ -71,6 +71,23 @@
       "type": "boolean",
       "default": false
     },
+    "pickup": {
+      "type": "boolean",
+      "default": false
+    },
+    "memberBenefit": {
+      "type": "text"
+    },
+    "membersOnlyNotice": {
+      "type": "text"
+    },
+    "earlyAccess": {
+      "type": "boolean",
+      "default": false
+    },
+    "specialOffer": {
+      "type": "text"
+    },
     "seoTitle": {
       "type": "string"
     },
@@ -129,6 +146,31 @@
       ],
       "default": "public",
       "required": true
+    },
+    "relatedProducts": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::store-product.store-product"
+    },
+    "relatedNews": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::news-item.news-item"
+    },
+    "relatedEvents": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::event.event"
+    },
+    "relatedBlogPosts": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::blog-post.blog-post"
+    },
+    "relatedFanclubContents": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::fanclub-content.fanclub-content"
     }
   }
 }

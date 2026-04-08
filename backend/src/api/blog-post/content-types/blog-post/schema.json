@@ -54,6 +54,23 @@
       ],
       "default": "public",
       "required": true
+    },
+    "relatedProducts": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::store-product.store-product"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "pickup": {
+      "type": "boolean",
+      "default": false
+    },
+    "sortOrder": {
+      "type": "integer",
+      "default": 0
     }
   }
 }

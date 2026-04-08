@@ -23,6 +23,17 @@ export interface StoreProductSummary {
   sortOrder: number
   featured: boolean
   isNewArrival: boolean
+  pickup: boolean
+  memberBenefit: string | null
+  membersOnlyNotice: string | null
+  earlyAccess: boolean
+  specialOffer: string | null
+}
+
+export interface RelatedContentLink {
+  id: number
+  slug: string
+  title: string
 }
 
 export interface StoreProduct extends StoreProductSummary {
@@ -31,4 +42,9 @@ export interface StoreProduct extends StoreProductSummary {
   cautionNotes?: string | null
   shippingNotes?: string | null
   digitalDeliveryNotes?: string | null
+  relatedProducts: RelatedContentLink[]
+  relatedNews: RelatedContentLink[]
+  relatedEvents: RelatedContentLink[]
+  relatedBlogPosts: RelatedContentLink[]
+  relatedFanclubContents: RelatedContentLink[]
 }

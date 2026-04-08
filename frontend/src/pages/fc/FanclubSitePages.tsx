@@ -7,6 +7,8 @@ import { ROUTES } from '@/lib/routeConstants'
 import { useCurrentUser } from '@/hooks'
 import { canAccessByRole, type VisibilityScope } from '@/lib/auth/membership'
 import { trackCtaClick } from '@/modules/analytics/tracking'
+import { useProductList } from '@/modules/store/hooks/useProductList'
+import { storeLink } from '@/lib/siteLinks'
 
 type Visibility = VisibilityScope
 
@@ -90,6 +92,9 @@ function FcSectionTemplate({
 }
 
 export function FanclubHomeHubPage() {
+  const { products } = useProductList(8)
+  const storeBenefits = useMemo(() => products.filter((item) => item.earlyAccess || item.memberBenefit || item.accessStatus === 'fc_only').slice(0, 3), [products])
+
   return (
     <section className="mx-auto max-w-6xl px-4 py-10 md:py-16">
       <PageHead
@@ -123,9 +128,28 @@ export function FanclubHomeHubPage() {
         <div className="mt-10 flex flex-wrap gap-3">
           <Link to={ROUTES.FC_JOIN} onClick={() => trackCtaClick('fc_home', 'join')} className="rounded-full bg-gray-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-gray-700 dark:bg-gray-100 dark:text-gray-900">入会する</Link>
           <Link to={ROUTES.FC_LOGIN} onClick={() => trackCtaClick('fc_home', 'login')} className="rounded-full border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-800 hover:border-gray-500 dark:border-gray-700 dark:text-gray-100">ログイン</Link>
+          <Link to={storeLink(ROUTES.STORE_HOME)} onClick={() => trackCtaClick('fc_home', 'to_store')} className="rounded-full border border-violet-300 bg-violet-50 px-5 py-2.5 text-sm font-medium text-violet-700 dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-300">会員向けストアを見る</Link>
           <Link to={ROUTES.FAQ} onClick={() => trackCtaClick('fc_home', 'faq')} className="rounded-full border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 dark:border-gray-700 dark:text-gray-200">FAQ</Link>
         </div>
       </header>
+
+      {storeBenefits.length > 0 && (
+        <section className="mt-8 rounded-3xl border border-violet-200 bg-violet-50/70 p-6 dark:border-violet-900/60 dark:bg-violet-950/20">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">会員向け販売・先行案内</h2>
+            <Link to={storeLink('/products')} onClick={() => trackCtaClick('fc_home_store_bridge', 'to_store_products')} className="text-xs text-violet-700 underline dark:text-violet-300">ストア一覧へ</Link>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            {storeBenefits.map((item) => (
+              <Link key={item.id} to={storeLink(`/products/${item.slug}`)} onClick={() => trackCtaClick('fc_home_store_bridge', 'store_product_click', { slug: item.slug })} className="rounded-2xl border border-violet-200 bg-white p-4 dark:border-violet-900/70 dark:bg-gray-900/70">
+                <p className="font-mono text-[10px] uppercase tracking-wider text-violet-600">{item.earlyAccess ? 'EARLY ACCESS' : 'MEMBER BENEFIT'}</p>
+                <p className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">{item.title}</p>
+                <p className="mt-1 line-clamp-2 text-xs text-gray-600 dark:text-gray-300">{item.specialOffer ?? item.memberBenefit ?? '会員向け販売情報あり'}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </section>
   )
 }
@@ -269,6 +293,8 @@ export function FanclubVerifyEmailPage() {
 
 export function FanclubMyPageSite() {
   const { user } = useCurrentUser()
+  const { products } = useProductList(8)
+  const memberStoreItems = useMemo(() => products.filter((item) => item.earlyAccess || item.accessStatus === 'fc_only' || item.memberBenefit).slice(0, 4), [products])
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
@@ -320,6 +346,23 @@ export function FanclubMyPageSite() {
           </div>
         </article>
       </div>
+
+      {memberStoreItems.length > 0 && (
+        <article className="mt-8 rounded-2xl border border-violet-200 bg-violet-50/60 p-5 dark:border-violet-900/60 dark:bg-violet-950/20">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">会員向けストア導線</h2>
+            <Link to={storeLink('/products')} onClick={() => trackCtaClick('fc_mypage_member_store', 'to_store')} className="text-xs text-violet-700 underline dark:text-violet-300">ストアへ</Link>
+          </div>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            {memberStoreItems.map((item) => (
+              <Link key={item.id} to={storeLink(`/products/${item.slug}`)} onClick={() => trackCtaClick('fc_mypage_member_store', 'store_item_click', { slug: item.slug })} className="rounded-xl border border-violet-200 bg-white/90 px-3 py-2 text-sm text-gray-700 dark:border-violet-900/70 dark:bg-gray-900/70 dark:text-gray-200">
+                <span className="font-medium">{item.title}</span>
+                <span className="ml-1 text-xs text-violet-600 dark:text-violet-300">{item.earlyAccess ? '先行' : '特典'}</span>
+              </Link>
+            ))}
+          </div>
+        </article>
+      )}
     </section>
   )
 }

@@ -1,4 +1,4 @@
-type BadgeVariant = 'fc' | 'new' | 'featured' | 'archive' | 'limited' | 'soldout' | 'coming_soon'
+type BadgeVariant = 'fc' | 'new' | 'featured' | 'archive' | 'limited' | 'soldout' | 'coming_soon' | 'early' | 'benefit' | 'pickup'
 
 interface Props {
   variant: BadgeVariant
@@ -37,6 +37,20 @@ const CONFIGS: Record<BadgeVariant, { defaultLabel: string; className: string; d
   coming_soon: {
     defaultLabel: 'SOON',
     className: 'border-dashed border-gray-200 bg-transparent text-gray-300',
+  },
+  early: {
+    defaultLabel: 'EARLY',
+    className: 'border-indigo-200 bg-indigo-50 text-indigo-600',
+    dot: 'bg-indigo-400',
+  },
+  benefit: {
+    defaultLabel: 'BENEFIT',
+    className: 'border-fuchsia-200 bg-fuchsia-50 text-fuchsia-600',
+    dot: 'bg-fuchsia-400',
+  },
+  pickup: {
+    defaultLabel: 'PICKUP',
+    className: 'border-amber-200 bg-amber-50 text-amber-700',
   },
 }
 
