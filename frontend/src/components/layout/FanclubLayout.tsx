@@ -7,21 +7,21 @@ import SubdomainHeader from '@/components/layout/SubdomainHeader'
 import SubdomainFooter from '@/components/layout/SubdomainFooter'
 
 const NAV_ITEMS = [
-  { label: 'About', to: ROUTES.FC_ABOUT },
-  { label: 'Join', to: ROUTES.FC_JOIN },
-  { label: 'News', to: ROUTES.NEWS },
-  { label: 'Blog', to: ROUTES.BLOG },
-  { label: 'Movies', to: ROUTES.FC_MOVIES },
-  { label: 'Gallery', to: ROUTES.FC_GALLERY },
-  { label: 'Events', to: ROUTES.EVENTS },
-  { label: 'My Page', to: ROUTES.FC_MYPAGE },
+  { labelKey: 'nav.about', to: ROUTES.FC_ABOUT },
+  { labelKey: 'subdomain.fanclubNav.join', to: ROUTES.FC_JOIN },
+  { labelKey: 'nav.news', to: ROUTES.NEWS },
+  { labelKey: 'nav.blog', to: ROUTES.BLOG },
+  { labelKey: 'subdomain.fanclubNav.movies', to: ROUTES.FC_MOVIES },
+  { labelKey: 'subdomain.fanclubNav.gallery', to: ROUTES.FC_GALLERY },
+  { labelKey: 'nav.events', to: ROUTES.EVENTS },
+  { labelKey: 'subdomain.fanclubNav.mypage', to: ROUTES.FC_MYPAGE },
 ]
 
 const LEGAL_LINKS = [
-  { to: ROUTES.FC_TERMS, label: '利用規約' },
-  { to: ROUTES.FC_PRIVACY, label: 'プライバシー' },
-  { to: ROUTES.FC_COMMERCE_LAW, label: '特商法表記' },
-  { to: ROUTES.FC_SUBSCRIPTION_POLICY, label: 'サブスクポリシー' },
+  { to: ROUTES.FC_TERMS, labelKey: 'footer.terms' },
+  { to: ROUTES.FC_PRIVACY, labelKey: 'footer.privacy' },
+  { to: ROUTES.FC_COMMERCE_LAW, labelKey: 'footer.trade' },
+  { to: ROUTES.FC_SUBSCRIPTION_POLICY, labelKey: 'fanclub.subscriptionPolicy' },
 ]
 
 export default function FanclubLayout() {

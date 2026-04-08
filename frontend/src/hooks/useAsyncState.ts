@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import type { AsyncState } from '@/types'
 import { StrapiApiError } from '@/lib/api/client'
+import { trackEvent } from '@/modules/analytics'
 
 function toUserSafeError(err: unknown): string {
   const isProd = import.meta.env.PROD
@@ -61,6 +62,13 @@ export function useAsyncState<T>(initialData: T | null = null) {
           contentType: err.details.contentType,
           responseSnippet: err.details.responseSnippet,
           requestId: err.details.requestId,
+        })
+      }
+
+      if (err instanceof StrapiApiError && import.meta.env.PROD) {
+        trackEvent('api_error', {
+          status: err.status || 0,
+          retried: err.details?.retried ?? 0,
         })
       }
 
