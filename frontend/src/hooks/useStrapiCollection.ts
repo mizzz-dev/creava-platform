@@ -2,6 +2,8 @@ import { useEffect } from 'react'
 import { useAsyncState } from './useAsyncState'
 import type { StrapiListResponse, StrapiSingleResponse } from '@/types'
 
+type FetcherWithAbort<T> = (signal?: AbortSignal) => Promise<T>
+
 /**
  * Strapi Collection Type の一覧を取得するフック
  *
@@ -9,18 +11,21 @@ import type { StrapiListResponse, StrapiSingleResponse } from '@/types'
  *
  * @example
  * const { items, loading, error } = useStrapiCollection(
- *   () => getNewsList({ pagination: { pageSize: 10 } })
+ *   (signal) => getNewsList({ pagination: { pageSize: 10 } }, { signal })
  * )
  */
 export function useStrapiCollection<T>(
-  fetcher: () => Promise<StrapiListResponse<T>>,
+  fetcher: FetcherWithAbort<StrapiListResponse<T>>,
 ) {
   const { data, loading, error, execute } = useAsyncState<StrapiListResponse<T>>()
 
   useEffect(() => {
-    execute(fetcher)
+    const controller = new AbortController()
+    void execute(() => fetcher(controller.signal))
+
     // fetcher は呼び出し元で安定した参照を渡すことを前提とする
     // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => controller.abort()
   }, [])
 
   return {
@@ -31,7 +36,10 @@ export function useStrapiCollection<T>(
     loading,
     error,
     /** 再取得 */
-    refetch: () => execute(fetcher),
+    refetch: () => {
+      const controller = new AbortController()
+      return execute(() => fetcher(controller.signal))
+    },
   }
 }
 
@@ -41,16 +49,18 @@ export function useStrapiCollection<T>(
  * @param fetcher - API 関数を呼び出すコールバック
  *
  * @example
- * const { item, loading, error } = useStrapiSingle(() => getSiteSettings())
+ * const { item, loading, error } = useStrapiSingle((signal) => getSiteSettings(undefined, { signal }))
  */
 export function useStrapiSingle<T>(
-  fetcher: () => Promise<StrapiSingleResponse<T>>,
+  fetcher: FetcherWithAbort<StrapiSingleResponse<T>>,
 ) {
   const { data, loading, error, execute } = useAsyncState<StrapiSingleResponse<T>>()
 
   useEffect(() => {
-    execute(fetcher)
+    const controller = new AbortController()
+    void execute(() => fetcher(controller.signal))
     // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => controller.abort()
   }, [])
 
   return {
@@ -58,6 +68,9 @@ export function useStrapiSingle<T>(
     item: data?.data ?? null,
     loading,
     error,
-    refetch: () => execute(fetcher),
+    refetch: () => {
+      const controller = new AbortController()
+      return execute(() => fetcher(controller.signal))
+    },
   }
 }
