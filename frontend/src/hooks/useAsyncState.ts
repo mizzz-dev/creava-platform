@@ -64,6 +64,11 @@ export function useAsyncState<T>(initialData: T | null = null) {
         })
       }
 
+      if (err instanceof StrapiApiError && err.status === 499) {
+        setState((prev) => ({ ...prev, loading: false }))
+        return null
+      }
+
       setState((prev) => ({ ...prev, loading: false, error: toUserSafeError(err) }))
       return null
     }
