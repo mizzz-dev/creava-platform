@@ -4,15 +4,34 @@ import MainLayout from '@/components/layout/MainLayout'
 import HomePage from '@/pages/HomePage'
 import SkeletonDetail from '@/components/common/SkeletonDetail'
 import { ROUTES } from './routeConstants'
-import { isMainSite } from './siteLinks'
+import { isMainSite, isFanclubSite } from './siteLinks'
 import { isStoreSite } from './siteLinks'
 import StoreLayout from '@/components/layout/StoreLayout'
+import FanclubLayout from '@/components/layout/FanclubLayout'
 import StorefrontHomePage from '@/pages/storefront/StorefrontHomePage'
 import StorefrontProductsPage from '@/pages/storefront/StorefrontProductsPage'
 import StorefrontCollectionPage from '@/pages/storefront/StorefrontCollectionPage'
 import StorefrontGuidePage from '@/pages/storefront/StorefrontGuidePage'
 import StorefrontShippingPolicyPage from '@/pages/storefront/StorefrontShippingPolicyPage'
 import StorefrontReturnsPage from '@/pages/storefront/StorefrontReturnsPage'
+import {
+  FanclubAboutSitePage,
+  FanclubGalleryDetailPage,
+  FanclubGalleryPage,
+  FanclubGuidePage,
+  FanclubHomeHubPage,
+  FanclubJoinPage,
+  FanclubLegalIndexPage,
+  FanclubLoginPage,
+  FanclubMemberStorePage,
+  FanclubMoviesDetailPage,
+  FanclubMoviesPage,
+  FanclubMyPageSite,
+  FanclubSchedulePage,
+  FanclubSubscriptionPolicyPage,
+  FanclubTicketsDetailPage,
+  FanclubTicketsPage,
+} from '@/pages/fc/FanclubSitePages'
 
 // Lazy-loaded pages — excluded from the initial bundle
 const WorksPage = lazy(() => import('@/pages/WorksPage'))
@@ -74,6 +93,46 @@ export function AppRoutes() {
             <Route path={ROUTES.LEGAL_PRIVACY} element={<PrivacyPolicyPage />} />
             <Route path={ROUTES.LEGAL_TERMS} element={<TermsPage />} />
             <Route path={ROUTES.LEGAL_TRADE} element={<TokushohoPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
+        </Routes>
+      </Suspense>
+    )
+  }
+
+  if (isFanclubSite) {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route element={<FanclubLayout />}>
+            <Route path={ROUTES.HOME} element={<FanclubHomeHubPage />} />
+            <Route path={ROUTES.FC_ABOUT} element={<FanclubAboutSitePage />} />
+            <Route path={ROUTES.FC_JOIN} element={<FanclubJoinPage />} />
+            <Route path={ROUTES.FC_LOGIN} element={<FanclubLoginPage />} />
+            <Route path={ROUTES.FC_MYPAGE} element={<FanclubMyPageSite />} />
+            <Route path={ROUTES.MEMBER} element={<MemberPage />} />
+            <Route path={ROUTES.NEWS} element={<NewsPage />} />
+            <Route path={ROUTES.NEWS_DETAIL} element={<NewsDetailPage />} />
+            <Route path={ROUTES.BLOG} element={<BlogPage />} />
+            <Route path={ROUTES.BLOG_DETAIL} element={<BlogDetailPage />} />
+            <Route path={ROUTES.FC_MOVIES} element={<FanclubMoviesPage />} />
+            <Route path={ROUTES.FC_MOVIE_DETAIL} element={<FanclubMoviesDetailPage />} />
+            <Route path={ROUTES.FC_GALLERY} element={<FanclubGalleryPage />} />
+            <Route path={ROUTES.FC_GALLERY_DETAIL} element={<FanclubGalleryDetailPage />} />
+            <Route path={ROUTES.FC_SCHEDULE} element={<FanclubSchedulePage />} />
+            <Route path={ROUTES.EVENTS} element={<EventsPage />} />
+            <Route path={ROUTES.EVENT_DETAIL} element={<EventDetailPage />} />
+            <Route path={ROUTES.FC_TICKETS} element={<FanclubTicketsPage />} />
+            <Route path={ROUTES.FC_TICKET_DETAIL} element={<FanclubTicketsDetailPage />} />
+            <Route path={ROUTES.FC_MEMBER_STORE} element={<FanclubMemberStorePage />} />
+            <Route path={ROUTES.FAQ} element={<FAQPage />} />
+            <Route path={ROUTES.FC_GUIDE} element={<FanclubGuidePage />} />
+            <Route path={ROUTES.CONTACT} element={<ContactPage />} />
+            <Route path={ROUTES.FC_LEGAL} element={<FanclubLegalIndexPage />} />
+            <Route path={ROUTES.LEGAL_PRIVACY} element={<PrivacyPolicyPage />} />
+            <Route path={ROUTES.LEGAL_TERMS} element={<TermsPage />} />
+            <Route path={ROUTES.FC_COMMERCE_LAW} element={<TokushohoPage />} />
+            <Route path={ROUTES.FC_SUBSCRIPTION_POLICY} element={<FanclubSubscriptionPolicyPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>

@@ -38,6 +38,23 @@ export const ROUTES = {
   STORE_CONTACT: '/contact',
   STORE_LEGAL: '/legal',
   STORE_CART: '/cart',
+
+  FC_ABOUT: '/about',
+  FC_JOIN: '/join',
+  FC_LOGIN: '/login',
+  FC_MYPAGE: '/mypage',
+  FC_MOVIES: '/movies',
+  FC_MOVIE_DETAIL: '/movies/:slug',
+  FC_GALLERY: '/gallery',
+  FC_GALLERY_DETAIL: '/gallery/:slug',
+  FC_SCHEDULE: '/schedule',
+  FC_TICKETS: '/tickets',
+  FC_TICKET_DETAIL: '/tickets/:slug',
+  FC_MEMBER_STORE: '/member-store',
+  FC_GUIDE: '/guide',
+  FC_LEGAL: '/legal',
+  FC_COMMERCE_LAW: '/commerce-law',
+  FC_SUBSCRIPTION_POLICY: '/subscription-policy',
 } as const
 
 /** 詳細ページへの URL を生成する */
