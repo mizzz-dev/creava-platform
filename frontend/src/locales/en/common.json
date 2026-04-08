@@ -101,7 +101,9 @@
     "filterAll": "All",
     "filterAvailable": "Available",
     "filterComingSoon": "Coming soon",
-    "filterSoldOut": "Sold out"
+    "filterSoldOut": "Sold out",
+    "shippingPolicy": "Shipping Policy",
+    "returnsPolicy": "Returns"
   },
   "form": {
     "required": "Required",
@@ -481,5 +483,28 @@
     "guestTitle": "Sign in to confirm your membership status",
     "guestBody": "Please sign in first, then verify your status from My Page.",
     "cta": "Go to My Page"
+  },
+  "subdomain": {
+    "storeLabel": "STORE",
+    "fanclubLabel": "FANCLUB",
+    "noticeMainContact": "For inquiries, please use the contact form on mizzz.jp.",
+    "navigateTitle": "Navigate",
+    "legalTitle": "Legal",
+    "contactMain": "Contact (mizzz.jp)",
+    "language": "Language",
+    "storeNav": {
+      "products": "Products",
+      "digital": "Digital",
+      "guide": "Guide"
+    },
+    "fanclubNav": {
+      "join": "Join",
+      "movies": "Movies",
+      "gallery": "Gallery",
+      "mypage": "My Page"
+    }
+  },
+  "fanclub": {
+    "subscriptionPolicy": "Subscription Policy"
   }
 }

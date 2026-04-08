@@ -101,7 +101,9 @@
     "filterAll": "すべて",
     "filterAvailable": "販売中",
     "filterComingSoon": "販売準備中",
-    "filterSoldOut": "完売"
+    "filterSoldOut": "完売",
+    "shippingPolicy": "配送ポリシー",
+    "returnsPolicy": "返品・交換"
   },
   "form": {
     "required": "必須",
@@ -481,5 +483,28 @@
     "guestTitle": "ログインして会員状態を確認しましょう",
     "guestBody": "まずはログインして、マイページで会員状態を確認してください。",
     "cta": "マイページへ"
+  },
+  "subdomain": {
+    "storeLabel": "STORE",
+    "fanclubLabel": "FANCLUB",
+    "noticeMainContact": "お問い合わせは mizzz.jp メインサイトで受け付けています。",
+    "navigateTitle": "回遊導線",
+    "legalTitle": "法務",
+    "contactMain": "お問い合わせ (mizzz.jp)",
+    "language": "言語",
+    "storeNav": {
+      "products": "商品一覧",
+      "digital": "デジタル",
+      "guide": "ガイド"
+    },
+    "fanclubNav": {
+      "join": "入会",
+      "movies": "動画",
+      "gallery": "ギャラリー",
+      "mypage": "マイページ"
+    }
+  },
+  "fanclub": {
+    "subscriptionPolicy": "サブスクポリシー"
   }
 }

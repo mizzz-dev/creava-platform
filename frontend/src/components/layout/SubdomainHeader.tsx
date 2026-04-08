@@ -11,7 +11,7 @@ import AuthButton from '@/components/auth/AuthButton'
 
 interface NavItem {
   to: string
-  label: string
+  labelKey: string
 }
 
 interface SubdomainHeaderProps {
@@ -31,7 +31,9 @@ export default function SubdomainHeader({ site, navItems, showAuth = false }: Su
           <SiteLogo />
           <div className="hidden sm:block">
             <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">mizzz</p>
-            <p className="text-xs font-medium tracking-[0.14em] text-gray-800 dark:text-gray-100">{site === 'store' ? 'STORE' : 'FANCLUB'}</p>
+            <p className="text-xs font-medium tracking-[0.14em] text-gray-800 dark:text-gray-100">
+              {site === 'store' ? t('subdomain.storeLabel') : t('subdomain.fanclubLabel')}
+            </p>
           </div>
         </SmartLink>
 
@@ -42,7 +44,7 @@ export default function SubdomainHeader({ site, navItems, showAuth = false }: Su
               to={item.to}
               className={({ isActive }) => `rounded-full px-3 py-1.5 text-sm transition-colors ${isActive ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-white'}`}
             >
-              {item.label}
+              {t(item.labelKey)}
             </NavLink>
           ))}
         </nav>
@@ -53,7 +55,7 @@ export default function SubdomainHeader({ site, navItems, showAuth = false }: Su
               to={mainLink(ROUTES.CONTACT)}
               className="rounded-full border border-gray-200 bg-white/85 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:border-gray-400 hover:text-gray-900 dark:border-gray-700 dark:bg-gray-900/80 dark:text-gray-200 dark:hover:border-gray-500"
             >
-              {t('nav.contact')} · mizzz.jp
+              {t('subdomain.contactMain')}
             </SmartLink>
           </div>
           <LangSwitcher />
@@ -80,11 +82,11 @@ export default function SubdomainHeader({ site, navItems, showAuth = false }: Su
                 onClick={() => setMobileOpen(false)}
                 className={({ isActive }) => `rounded-xl px-3 py-2.5 text-sm ${isActive ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'}`}
               >
-                {item.label}
+                {t(item.labelKey)}
               </NavLink>
             ))}
             <SmartLink to={mainLink(ROUTES.CONTACT)} className="rounded-xl border border-gray-200 px-3 py-2.5 text-sm text-gray-700 dark:border-gray-700 dark:text-gray-200">
-              {t('nav.contact')} (mizzz.jp)
+              {t('subdomain.contactMain')}
             </SmartLink>
           </div>
         </div>
