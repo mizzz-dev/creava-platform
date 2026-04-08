@@ -10,6 +10,7 @@ import { trackCtaClick } from '@/modules/analytics/tracking'
 import { useProductList } from '@/modules/store/hooks/useProductList'
 import { storeLink } from '@/lib/siteLinks'
 import UpdateDigestSection, { type UpdateDigestItem } from '@/components/common/UpdateDigestSection'
+import EditorialSpotlightSection from '@/components/common/EditorialSpotlightSection'
 
 type Visibility = VisibilityScope
 
@@ -121,6 +122,41 @@ export function FanclubHomeHubPage() {
       location: 'fc_home_digest',
     },
   ]), [])
+  const fanclubSpotlights = useMemo(
+    () => [
+      {
+        id: 'fc-weekly-update',
+        eyebrow: 'THIS WEEK',
+        title: '今週の更新をまとめてチェック',
+        description: 'Movies / Gallery / Tickets の限定更新を1画面で確認できます。',
+        href: ROUTES.FC_MYPAGE,
+        ctaLabel: 'マイページへ',
+        tone: 'member' as const,
+        trackingLocation: 'fc_home_spotlight',
+      },
+      {
+        id: 'fc-campaign',
+        eyebrow: 'LIMITED BENEFIT',
+        title: '会員向け先行・特典導線',
+        description: '限定販売・先行販売の情報をストア連携で見逃さず確認。',
+        href: storeLink('/products'),
+        ctaLabel: '特典を見る',
+        tone: 'campaign' as const,
+        trackingLocation: 'fc_home_spotlight',
+      },
+      {
+        id: 'fc-join-guide',
+        eyebrow: 'JOIN FLOW',
+        title: '入会後に迷わない導線設計',
+        description: 'join → login → mypage の流れをシンプルに案内します。',
+        href: ROUTES.FC_JOIN,
+        ctaLabel: '入会フローへ',
+        tone: 'default' as const,
+        trackingLocation: 'fc_home_spotlight',
+      },
+    ],
+    [],
+  )
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-10 md:py-16">
@@ -164,6 +200,11 @@ export function FanclubHomeHubPage() {
         title="今週の更新・限定・先行"
         subtitle="再訪時に価値が分かる導線を先頭で確認"
         items={homeDigestItems}
+      />
+      <EditorialSpotlightSection
+        title="Members Spotlight"
+        subtitle="限定体験・先行導線・次に見るべき更新を編集表示"
+        items={fanclubSpotlights}
       />
 
       {storeBenefits.length > 0 && (
@@ -354,6 +395,14 @@ export function FanclubMyPageSite() {
       location: 'fc_mypage_digest',
     },
   ]), [])
+  const weeklyUpdates = useMemo(
+    () => [
+      { id: 'weekly-movie', label: 'NEW', title: '限定ムービーを追加', href: ROUTES.FC_MOVIES },
+      { id: 'weekly-gallery', label: 'UPDATE', title: 'ギャラリーを更新', href: ROUTES.FC_GALLERY },
+      { id: 'weekly-ticket', label: 'EARLY', title: '先行チケット情報を公開', href: ROUTES.FC_TICKETS },
+    ],
+    [],
+  )
 
   useEffect(() => {
     trackCtaClick('fc_mypage', 'dashboard_view', {
@@ -403,10 +452,15 @@ export function FanclubMyPageSite() {
       <div className="mt-8 grid gap-4 md:grid-cols-2">
         <article className="rounded-2xl border border-gray-200 p-5 dark:border-gray-800">
           <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">最近の更新</h2>
-          <ul className="mt-3 space-y-2 text-sm text-gray-700 dark:text-gray-200">
-            <li>・限定ブログを1件更新しました</li>
-            <li>・次回イベント情報を公開しました</li>
-            <li>・会員限定動画を追加しました</li>
+          <ul className="mt-3 space-y-2">
+            {weeklyUpdates.map((item) => (
+              <li key={item.id}>
+                <Link to={item.href} onClick={() => trackCtaClick('fc_mypage_weekly', 'weekly_update_click', { id: item.id })} className="flex items-center justify-between rounded-xl border border-gray-200 bg-gray-50/70 px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-900/50 dark:text-gray-200 dark:hover:bg-gray-900">
+                  <span className="line-clamp-1">{item.title}</span>
+                  <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-violet-700 dark:bg-violet-900/50 dark:text-violet-300">{item.label}</span>
+                </Link>
+              </li>
+            ))}
           </ul>
         </article>
         <article className="rounded-2xl border border-gray-200 p-5 dark:border-gray-800">

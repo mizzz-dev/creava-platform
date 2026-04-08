@@ -54,6 +54,11 @@ export default function SubdomainHeader({ site, navItems, showAuth = false }: Su
         </nav>
 
         <div className="flex items-center gap-1.5">
+          <div className="hidden md:flex items-center gap-1 rounded-full border border-gray-200/80 bg-white/80 px-1 py-1 text-[11px] dark:border-gray-700 dark:bg-gray-900/80">
+            <SmartLink to={storeLink('/')} onClick={() => trackCtaClick(`header_${site}`, 'network_store')} className="rounded-full px-2 py-1 text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100">Store</SmartLink>
+            <SmartLink to={fanclubLink('/')} onClick={() => trackCtaClick(`header_${site}`, 'network_fanclub')} className="rounded-full px-2 py-1 text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100">FC</SmartLink>
+            <SmartLink to={mainLink('/')} onClick={() => trackCtaClick(`header_${site}`, 'network_main')} className="rounded-full px-2 py-1 text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100">Main</SmartLink>
+          </div>
           <div className="hidden lg:block">
             <SmartLink
               to={mainLink(ROUTES.CONTACT)}
@@ -70,7 +75,10 @@ export default function SubdomainHeader({ site, navItems, showAuth = false }: Su
             type="button"
             className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-300 text-gray-700 md:hidden dark:border-gray-700 dark:text-gray-300"
             aria-label={mobileOpen ? t('nav.closeMenu') : t('nav.openMenu')}
-            onClick={() => setMobileOpen((prev) => !prev)}
+            onClick={() => {
+              trackCtaClick(`mobile_header_${site}`, 'drawer_toggle', { open: !mobileOpen })
+              setMobileOpen((prev) => !prev)
+            }}
           >
             {mobileOpen ? '×' : '☰'}
           </button>

@@ -50,9 +50,11 @@ export default function ProductCard({ product, displayCurrency = 'JPY', tracking
 
           <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
             {product.pickup && <Badge variant="pickup" size="sm" />}
+            {product.isTrending && <Badge variant="featured" size="sm" label="TRENDING" />}
             {product.purchaseStatus === 'soldout' && <Badge variant="soldout" size="sm" />}
             {product.purchaseStatus === 'coming_soon' && <Badge variant="coming_soon" size="sm" />}
             {product.isNewArrival && <Badge variant="new" size="sm" />}
+            {product.isLimited && <Badge variant="limited" size="sm" label="LIMITED" />}
           </div>
 
           <div className="absolute bottom-2 left-2 flex items-center gap-1">
@@ -68,6 +70,9 @@ export default function ProductCard({ product, displayCurrency = 'JPY', tracking
             {product.title}
           </h3>
           <p className="font-mono text-xs text-gray-500 dark:text-gray-400">{statusLabel}</p>
+          {product.shortHighlight && (
+            <p className="line-clamp-2 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">{product.shortHighlight}</p>
+          )}
           <div className="flex items-center justify-between gap-3">
             <span className="line-clamp-1 text-[11px] text-gray-500 dark:text-gray-500">
               {product.accessStatus === 'fc_only'

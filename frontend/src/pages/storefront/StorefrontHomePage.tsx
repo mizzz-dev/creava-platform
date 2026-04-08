@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useProductList } from '@/modules/store/hooks/useProductList'
 import ProductCard from '@/modules/store/components/ProductCard'
 import SkeletonProductCard from '@/components/common/SkeletonProductCard'
@@ -11,10 +11,10 @@ import { getNewsList } from '@/modules/news/api'
 import { getFaqList } from '@/modules/faq/api'
 import type { FAQItem, NewsItem } from '@/types'
 import { trackApiFailure, trackCtaClick, trackEmptyState } from '@/modules/analytics/tracking'
-import { useEffect } from 'react'
 import { fanclubLink } from '@/lib/siteLinks'
 import { ROUTES } from '@/lib/routeConstants'
 import UpdateDigestSection, { type UpdateDigestItem } from '@/components/common/UpdateDigestSection'
+import EditorialSpotlightSection from '@/components/common/EditorialSpotlightSection'
 
 export default function StorefrontHomePage() {
   const { products, loading, error, refetch } = useProductList(24)
@@ -25,11 +25,34 @@ export default function StorefrontHomePage() {
     () => getFaqList({ pagination: { pageSize: 4, withCount: false } }),
   )
 
-  const newArrivals = useMemo(() => products.slice(0, 8), [products])
+  const priorityProducts = useMemo(() => [...products].sort((a, b) => (b.displayPriority ?? 0) - (a.displayPriority ?? 0)), [products])
+  const newArrivals = useMemo(() => priorityProducts.slice(0, 8), [priorityProducts])
   const featured = useMemo(() => products.filter((product) => product.accessStatus !== 'fc_only').slice(0, 4), [products])
   const digitalGoods = useMemo(() => products.filter((product) => inferCollectionSlug(product) === 'digital').slice(0, 4), [products])
   const pickup = useMemo(() => products.filter((product) => product.purchaseStatus === 'available').slice(0, 2), [products])
   const memberPickup = useMemo(() => products.filter((product) => product.earlyAccess || product.accessStatus === 'fc_only' || product.memberBenefit).slice(0, 3), [products])
+  const campaignItems = useMemo(
+    () =>
+      products
+        .filter((product) => product.campaignLabel || product.isTrending || product.isLimited)
+        .sort((a, b) => (b.displayPriority ?? 0) - (a.displayPriority ?? 0))
+        .slice(0, 3),
+    [products],
+  )
+  const spotlightItems = useMemo(
+    () =>
+      campaignItems.map((item) => ({
+        id: `spotlight-${item.id}`,
+        eyebrow: item.campaignLabel ?? (item.isLimited ? 'LIMITED OFFER' : 'TREND EDIT'),
+        title: item.title,
+        description: item.heroCopy ?? item.shortHighlight ?? 'キャンペーン・限定販売・先行情報を商品詳細で確認できます。',
+        href: `/products/${item.slug}`,
+        ctaLabel: '詳細を見る',
+        tone: (item.earlyAccess || item.accessStatus === 'fc_only' ? 'member' : item.campaignLabel ? 'campaign' : 'default') as 'default' | 'campaign' | 'member',
+        trackingLocation: 'store_home_spotlight',
+      })),
+    [campaignItems],
+  )
   const digestItems = useMemo<UpdateDigestItem[]>(() => {
     const next: UpdateDigestItem[] = []
     if (products[0]) {
@@ -115,6 +138,12 @@ export default function StorefrontHomePage() {
           </Link>
         </section>
       )}
+
+      <EditorialSpotlightSection
+        title="特集・キャンペーン"
+        subtitle="今見てほしい商品を編集視点で再構成"
+        items={spotlightItems}
+      />
 
       <section className="mt-12">
         <div className="mb-4 flex items-center justify-between">

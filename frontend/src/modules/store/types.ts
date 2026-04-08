@@ -28,6 +28,12 @@ export interface StoreProductSummary {
   membersOnlyNotice: string | null
   earlyAccess: boolean
   specialOffer: string | null
+  campaignLabel: string | null
+  shortHighlight: string | null
+  heroCopy: string | null
+  isTrending: boolean
+  isLimited: boolean
+  displayPriority: number
 }
 
 export interface RelatedContentLink {

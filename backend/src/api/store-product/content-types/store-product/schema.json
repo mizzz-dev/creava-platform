@@ -88,6 +88,27 @@
     "specialOffer": {
       "type": "text"
     },
+    "campaignLabel": {
+      "type": "string"
+    },
+    "shortHighlight": {
+      "type": "text"
+    },
+    "heroCopy": {
+      "type": "text"
+    },
+    "isTrending": {
+      "type": "boolean",
+      "default": false
+    },
+    "isLimited": {
+      "type": "boolean",
+      "default": false
+    },
+    "displayPriority": {
+      "type": "integer",
+      "default": 0
+    },
     "seoTitle": {
       "type": "string"
     },

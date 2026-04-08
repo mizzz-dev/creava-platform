@@ -7,6 +7,7 @@ import ErrorState from '@/components/common/ErrorState'
 import PageHead from '@/components/seo/PageHead'
 import { DEFAULT_COLLECTIONS, inferCollectionSlug } from '@/modules/store/lib/catalog'
 import { trackApiFailure, trackCtaClick, trackEmptyState } from '@/modules/analytics/tracking'
+import EditorialSpotlightSection from '@/components/common/EditorialSpotlightSection'
 
 export default function StorefrontProductsPage() {
   const { products, loading, error, refetch } = useProductList(120)
@@ -34,6 +35,23 @@ export default function StorefrontProductsPage() {
     if (sort === 'newest') return [...base].sort((a, b) => Number(b.isNewArrival) - Number(a.isNewArrival))
     return [...base].sort((a, b) => a.sortOrder - b.sortOrder)
   }, [collection, products, search, sort, status, tag])
+  const campaignSpotlights = useMemo(
+    () =>
+      filtered
+        .filter((item) => item.campaignLabel || item.isTrending || item.isLimited)
+        .slice(0, 3)
+        .map((item) => ({
+          id: `products-spotlight-${item.id}`,
+          eyebrow: item.campaignLabel ?? (item.isLimited ? 'LIMITED DROP' : 'TRENDING'),
+          title: item.title,
+          description: item.shortHighlight ?? item.heroCopy ?? '特集で紹介中のアイテムです。',
+          href: `/products/${item.slug}`,
+          ctaLabel: '商品詳細へ',
+          tone: (item.earlyAccess || item.accessStatus === 'fc_only' ? 'member' : item.campaignLabel ? 'campaign' : 'default') as 'default' | 'campaign' | 'member',
+          trackingLocation: 'store_products_spotlight',
+        })),
+    [filtered],
+  )
 
   useEffect(() => {
     if (error) {
@@ -126,6 +144,13 @@ export default function StorefrontProductsPage() {
       </div>
 
       <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">表示件数: {loading ? '...' : filtered.length}件</p>
+      {!loading && !error && (
+        <EditorialSpotlightSection
+          title="ピックアップ"
+          subtitle="キャンペーン・限定・トレンド商品を優先表示"
+          items={campaignSpotlights}
+        />
+      )}
 
       {loading && <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">{Array.from({ length: 8 }).map((_, idx) => <SkeletonProductCard key={idx} />)}</div>}
       {error && <div className="mt-8"><ErrorState message={error} onRetry={refetch} location="store_products" /></div>}
