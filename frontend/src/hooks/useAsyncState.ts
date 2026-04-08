@@ -23,7 +23,12 @@ export function useAsyncState<T>(initialData: T | null = null) {
         console.error('[useAsyncState] request failed', err)
       }
 
-      const error = err instanceof Error ? err.message : 'Unknown error'
+      const isProd = import.meta.env.PROD
+      const error = isProd
+        ? 'データの取得に失敗しました。時間をおいて再試行してください。'
+        : err instanceof Error
+          ? err.message
+          : 'Unknown error'
 
       // 開発時の診断情報（本番ユーザー向け UI には出さない）
       if (import.meta.env.DEV && err instanceof StrapiApiError && err.details) {

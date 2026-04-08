@@ -2,10 +2,15 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useStrapiCollection } from '@/hooks'
 import PageHead from '@/components/seo/PageHead'
 import StructuredData from '@/components/seo/StructuredData'
+import ErrorState from '@/components/common/ErrorState'
+import SkeletonListItem from '@/components/common/SkeletonListItem'
 import { ROUTES } from '@/lib/routeConstants'
 import { SITE_URL } from '@/lib/seo'
+import { getFaqList } from '@/modules/faq/api'
+import type { FAQItem as CmsFAQItem } from '@/types'
 
 type Category = 'request' | 'production' | 'pricing' | 'other'
 
@@ -179,8 +184,31 @@ function FAQBubbles({ items }: { items: FAQItem[] }) {
 export default function FAQPage() {
   const { t } = useTranslation()
   const [activeCategory, setActiveCategory] = useState<Category | 'all'>('all')
+  const { items: cmsItems, loading, error, refetch } = useStrapiCollection<CmsFAQItem>(() => getFaqList())
 
-  const faqSchemaItems = FAQ_ITEMS.map((item) => ({
+  const mappedItems: FAQItem[] | null = cmsItems && cmsItems.length > 0
+    ? cmsItems.map((item) => {
+      const categoryMap: Record<CmsFAQItem['category'], Category> = {
+        general: 'other',
+        fanclub: 'other',
+        store: 'pricing',
+        works: 'production',
+        events: 'production',
+        contact: 'request',
+      }
+
+      return {
+        id: `cms-${item.id}`,
+        category: categoryMap[item.category] ?? 'other',
+        q: item.question,
+        a: item.answer,
+      }
+    })
+    : null
+
+  const sourceItems = mappedItems ?? FAQ_ITEMS
+
+  const faqSchemaItems = sourceItems.map((item) => ({
     question: item.q,
     answer: item.a,
   }))
@@ -247,9 +275,19 @@ export default function FAQPage() {
 
       {/* FAQ items grouped by category */}
       <div className="mt-12 space-y-14">
-        {(activeCategory === 'all' ? CATEGORIES : CATEGORIES.filter((c) => c.id === activeCategory)).map(
+        {loading && (
+          <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonListItem key={i} />
+            ))}
+          </ul>
+        )}
+
+        {error && <ErrorState message={error} onRetry={refetch} />}
+
+        {!loading && !error && (activeCategory === 'all' ? CATEGORIES : CATEGORIES.filter((c) => c.id === activeCategory)).map(
           ({ id, icon }) => {
-            const items = FAQ_ITEMS.filter((item) => item.category === id)
+            const items = sourceItems.filter((item) => item.category === id)
             if (items.length === 0) return null
             return (
               <motion.section
