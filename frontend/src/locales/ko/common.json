@@ -88,7 +88,20 @@
     "restockSubmit": "알림 받기",
     "restockSubmitting": "전송 중...",
     "restockDone": "재입고 알림 신청이 접수되었습니다.",
-    "restockError": "알림 신청에 실패했습니다. 잠시 후 다시 시도해 주세요."
+    "restockError": "알림 신청에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+    "ecHeroCopyA": "신규 드롭, 한정 판매, 선공개 안내를 한 페이지에서 제공합니다. 빠른 동선으로 바로 구매할 수 있습니다.",
+    "ecHeroCopyB": "캠페인, 랭킹, 재입고 알림을 통합해 원하는 상품까지 빠르게 도달할 수 있습니다.",
+    "heroCtaPrimary": "지금 구매하기",
+    "heroCtaPrimaryAlt": "인기 상품 보기",
+    "campaignTitle": "봄 한정 드롭",
+    "campaignBody": "기간 한정 번들, 멤버 선판매, 재입고 알림 등록을 한곳에서 안내합니다.",
+    "campaignPeriod": "진행 기간: 4/8 - 4/30",
+    "campaignShip": "배송 예정: 주문 후 5~8 영업일",
+    "campaignCta": "선판매 상세 보기",
+    "filterAll": "전체",
+    "filterAvailable": "판매중",
+    "filterComingSoon": "판매 준비중",
+    "filterSoldOut": "품절"
   },
   "form": {
     "required": "필수",

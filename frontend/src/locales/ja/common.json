@@ -88,7 +88,20 @@
     "restockSubmit": "通知を受け取る",
     "restockSubmitting": "送信中...",
     "restockDone": "通知登録を受け付けました。",
-    "restockError": "通知登録に失敗しました。時間をおいて再試行してください。"
+    "restockError": "通知登録に失敗しました。時間をおいて再試行してください。",
+    "ecHeroCopyA": "新作ドロップ・限定販売・先行案内を1ページで完結。お気に入りから最短導線で購入できます。",
+    "ecHeroCopyB": "キャンペーン、ランキング、再販通知を統合したEC体験で、欲しいアイテムに最短でアクセスできます。",
+    "heroCtaPrimary": "今すぐ購入する",
+    "heroCtaPrimaryAlt": "人気商品を見る",
+    "campaignTitle": "春の限定ドロップ",
+    "campaignBody": "期間限定バンドル、会員先行販売、再販通知登録をまとめて案内しています。",
+    "campaignPeriod": "開催期間: 4/8 - 4/30",
+    "campaignShip": "配送予定: ご注文後 5〜8 営業日",
+    "campaignCta": "先行販売の詳細を見る",
+    "filterAll": "すべて",
+    "filterAvailable": "販売中",
+    "filterComingSoon": "販売準備中",
+    "filterSoldOut": "完売"
   },
   "form": {
     "required": "必須",
