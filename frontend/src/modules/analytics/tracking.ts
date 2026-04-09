@@ -56,3 +56,11 @@ export function trackSeasonalBlockClick(location: string, theme: string, extras?
 export function trackOmikujiResult(site: string, result: string, extras?: AnalyticsParams): void {
   trackMizzzEvent('omikuji_result', { site, result, ...extras })
 }
+
+export function trackPlayfulInteraction(
+  type: string,
+  location: string,
+  extras?: AnalyticsParams,
+): void {
+  trackMizzzEvent('playful_interaction', { type, location, ...extras })
+}

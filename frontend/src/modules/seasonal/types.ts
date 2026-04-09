@@ -4,6 +4,7 @@ export type SeasonalSite = 'store' | 'fanclub' | 'main'
 
 export type SeasonalLoadingPreset = 'default' | 'christmas' | 'halloween' | 'newyear'
 export type SeasonalScrollPreset = 'default' | 'soft' | 'dramatic'
+export type SeasonalPlayfulVariant = 'default' | 'festive' | 'spooky' | 'celebration'
 
 export interface SeasonalThemeConfig {
   key: SeasonalThemeKey
@@ -16,6 +17,8 @@ export interface SeasonalThemeConfig {
   announcementVariant: 'default' | 'christmas' | 'halloween' | 'newyear'
   loadingPreset: SeasonalLoadingPreset
   scrollPreset: SeasonalScrollPreset
+  /** playful interaction の強度・バリアント */
+  playfulVariant: SeasonalPlayfulVariant
 }
 
 export interface SeasonalThemeResolution {

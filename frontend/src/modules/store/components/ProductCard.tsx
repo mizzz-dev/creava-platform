@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { detailPath } from '@/lib/routeConstants'
 import { formatPriceNum } from '@/utils'
@@ -15,6 +17,7 @@ interface Props {
 
 export default function ProductCard({ product, displayCurrency = 'JPY', trackingLocation = 'store_product_card' }: Props) {
   const { t } = useTranslation()
+  const [hovered, setHovered] = useState(false)
   const isUnavailable = product.purchaseStatus !== 'available'
 
   const statusLabel =
@@ -33,12 +36,18 @@ export default function ProductCard({ product, displayCurrency = 'JPY', tracking
       }}
       className="group block"
       aria-label={`${product.title} ${t('store.detailCta')}`}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       <article className="overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm shadow-gray-200/40 transition-all duration-300 group-hover:-translate-y-1 group-hover:border-gray-300/90 group-hover:shadow-xl dark:border-gray-800 dark:bg-gray-900/80 dark:shadow-black/20 dark:group-hover:border-gray-700">
         <div className="relative aspect-square overflow-hidden bg-gray-100 dark:bg-gray-800">
-          <div className="absolute left-3 top-3 z-10 rounded-full border border-white/70 bg-white/70 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-gray-500 backdrop-blur dark:border-white/20 dark:bg-gray-900/70 dark:text-gray-300">
+          <motion.div
+            animate={{ opacity: hovered ? 1 : 0.7 }}
+            transition={{ duration: 0.2 }}
+            className="absolute left-3 top-3 z-10 rounded-full border border-white/70 bg-white/70 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-gray-500 backdrop-blur dark:border-white/20 dark:bg-gray-900/70 dark:text-gray-300"
+          >
             curated
-          </div>
+          </motion.div>
           {product.previewImage ? (
             <img
               src={product.previewImage.url}
@@ -75,11 +84,25 @@ export default function ProductCard({ product, displayCurrency = 'JPY', tracking
         </div>
 
         <div className="space-y-1.5 px-3.5 py-3.5">
-          <h3 className="line-clamp-2 text-sm font-medium leading-relaxed text-gray-900 transition-colors group-hover:text-gray-600 dark:text-gray-100 dark:group-hover:text-gray-300">
-            {product.title}
+          <h3 className="flex items-start justify-between gap-2 line-clamp-2 text-sm font-medium leading-relaxed text-gray-900 transition-colors group-hover:text-gray-600 dark:text-gray-100 dark:group-hover:text-gray-300">
+            <span className="line-clamp-2">{product.title}</span>
+            <motion.span
+              aria-hidden
+              animate={{ x: hovered ? 3 : 0, opacity: hovered ? 1 : 0 }}
+              transition={{ duration: 0.18 }}
+              className="shrink-0 mt-0.5 text-gray-400"
+            >
+              →
+            </motion.span>
           </h3>
           <p className="font-mono text-xs text-gray-500 dark:text-gray-400">{statusLabel}</p>
-          {product.shortHighlight && (
+          {/* sold-out 時の上品な代替メッセージ */}
+          {product.purchaseStatus === 'soldout' && (
+            <p className="text-[10px] text-gray-400 dark:text-gray-500">
+              {t('store.statusSoldout', { defaultValue: '再販情報は News / Fanclub で案内します。' })}
+            </p>
+          )}
+          {product.shortHighlight && product.purchaseStatus !== 'soldout' && (
             <p className="line-clamp-2 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">{product.shortHighlight}</p>
           )}
           <div className="flex items-center justify-between gap-3">

@@ -12,6 +12,7 @@ export const SEASONAL_THEME_REGISTRY: Record<SeasonalThemeKey, SeasonalThemeConf
     announcementVariant: 'default',
     loadingPreset: 'default',
     scrollPreset: 'default',
+    playfulVariant: 'default',
   },
   christmas: {
     key: 'christmas',
@@ -24,6 +25,7 @@ export const SEASONAL_THEME_REGISTRY: Record<SeasonalThemeKey, SeasonalThemeConf
     announcementVariant: 'christmas',
     loadingPreset: 'christmas',
     scrollPreset: 'soft',
+    playfulVariant: 'festive',
   },
   halloween: {
     key: 'halloween',
@@ -36,6 +38,7 @@ export const SEASONAL_THEME_REGISTRY: Record<SeasonalThemeKey, SeasonalThemeConf
     announcementVariant: 'halloween',
     loadingPreset: 'halloween',
     scrollPreset: 'dramatic',
+    playfulVariant: 'spooky',
   },
   newyear: {
     key: 'newyear',
@@ -48,5 +51,6 @@ export const SEASONAL_THEME_REGISTRY: Record<SeasonalThemeKey, SeasonalThemeConf
     announcementVariant: 'newyear',
     loadingPreset: 'newyear',
     scrollPreset: 'soft',
+    playfulVariant: 'celebration',
   },
 }
