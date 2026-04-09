@@ -10,15 +10,63 @@
     "draftAndPublish": false
   },
   "attributes": {
-    "provider": { "type": "enumeration", "enum": ["stripe"], "default": "stripe", "required": true },
-    "membershipType": { "type": "enumeration", "enum": ["free", "paid", "premium"], "default": "paid", "required": true },
-    "accessLevel": { "type": "enumeration", "enum": ["free", "paid", "premium"], "default": "paid", "required": true },
-    "billingCycle": { "type": "enumeration", "enum": ["monthly", "yearly"], "default": "monthly" },
-    "subscriptionStatus": { "type": "string", "default": "incomplete" },
-    "customerId": { "type": "string" },
-    "subscriptionId": { "type": "string" },
-    "startAt": { "type": "datetime" },
-    "endAt": { "type": "datetime" },
-    "metadata": { "type": "json" }
+    "provider": {
+      "type": "enumeration",
+      "enum": [
+        "stripe"
+      ],
+      "default": "stripe",
+      "required": true
+    },
+    "membershipType": {
+      "type": "enumeration",
+      "enum": [
+        "free",
+        "paid",
+        "premium"
+      ],
+      "default": "paid",
+      "required": true
+    },
+    "accessLevel": {
+      "type": "enumeration",
+      "enum": [
+        "free",
+        "paid",
+        "premium"
+      ],
+      "default": "paid",
+      "required": true
+    },
+    "billingCycle": {
+      "type": "enumeration",
+      "enum": [
+        "monthly",
+        "yearly"
+      ],
+      "default": "monthly"
+    },
+    "subscriptionStatus": {
+      "type": "string",
+      "default": "incomplete"
+    },
+    "customerId": {
+      "type": "string"
+    },
+    "clerkUserId": {
+      "type": "string"
+    },
+    "subscriptionId": {
+      "type": "string"
+    },
+    "startAt": {
+      "type": "datetime"
+    },
+    "endAt": {
+      "type": "datetime"
+    },
+    "metadata": {
+      "type": "json"
+    }
   }
 }

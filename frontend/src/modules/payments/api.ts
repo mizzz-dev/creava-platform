@@ -13,13 +13,19 @@ function getApiBase(): string {
   return `${base.replace(/\/$/, '')}/api`
 }
 
-async function postJson<T>(path: string, body: unknown): Promise<T> {
+async function postJson<T>(path: string, body: unknown, authToken?: string | null): Promise<T> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  }
+
+  if (authToken) {
+    headers.Authorization = `Bearer ${authToken}`
+  }
+
   const res = await fetch(`${getApiBase()}${path}`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
+    headers,
     body: JSON.stringify(body),
   })
 
@@ -44,13 +50,17 @@ export async function createStoreCheckoutSession(input: {
 export async function createFanclubCheckoutSession(input: {
   planId: string
   locale: string
-  userId: string
+  authToken: string
 }): Promise<CheckoutSessionResponse> {
   trackMizzzEvent('fanclub_checkout_started', { planId: input.planId })
-  return postJson<CheckoutSessionResponse>('/payments/fanclub/checkout-session', input)
+  return postJson<CheckoutSessionResponse>(
+    '/payments/fanclub/checkout-session',
+    { planId: input.planId, locale: input.locale },
+    input.authToken,
+  )
 }
 
-export async function createCustomerPortalSession(input: { customerId: string }): Promise<{ url: string }> {
-  trackMizzzEvent('customer_portal_started', { customerId: input.customerId })
-  return postJson<{ url: string }>('/payments/customer-portal/session', input)
+export async function createCustomerPortalSession(input: { authToken: string }): Promise<{ url: string }> {
+  trackMizzzEvent('customer_portal_started')
+  return postJson<{ url: string }>('/payments/customer-portal/session', {}, input.authToken)
 }

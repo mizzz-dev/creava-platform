@@ -47,3 +47,13 @@
 - Clerk user と Stripe customerId の本紐付けAPI（現状は demo env で代替）。
 - `stripe` 依存の lockfile 反映（npm registry 制限によりこの環境で未取得）。
 - Webhook イベント網羅（invoice/payment_intent 失敗系の業務ルール詳細）。
+
+
+## 11. 運用ランブック
+
+本番運用・staging/production 分離・GitHub Environments 設定は以下を参照してください。
+
+- `docs/stripe-deployment-runbook.md`
+
+> 補足: `VITE_STRIPE_CUSTOMER_ID_DEMO` のような demo customer 固定値は本番運用では使用しません。
+> Customer Portal はログインユーザーと webhook 同期済み `customerId` のサーバー解決を前提にします。

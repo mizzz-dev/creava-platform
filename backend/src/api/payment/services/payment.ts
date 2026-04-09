@@ -1,5 +1,5 @@
 import { getStripeClient, getStripeMode } from '../../../lib/stripe/client'
-import { assertStripeEnv, getCheckoutUrlByKind, getPortalReturnUrl, type StripeCheckoutKind } from '../../../lib/stripe/env'
+import { assertStripeEnv, getCheckoutUrlByKind, getPortalReturnUrl } from '../../../lib/stripe/env'
 import { buildIdempotencyKey } from '../../../lib/stripe/idempotency'
 
 export type StoreCheckoutInput = {
@@ -19,6 +19,7 @@ export type FanclubCheckoutInput = {
   planName: string
   stripePriceId: string
   userId: string
+  userEmail: string | null
   locale: string
 }
 
@@ -98,6 +99,7 @@ export async function createFanclubCheckoutSession(input: FanclubCheckoutInput) 
       cancel_url: cancelUrl,
       line_items: [{ price: input.stripePriceId, quantity: 1 }],
       metadata,
+      customer_email: input.userEmail ?? undefined,
       subscription_data: {
         metadata,
       },
