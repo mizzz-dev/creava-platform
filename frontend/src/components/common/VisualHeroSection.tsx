@@ -1,8 +1,9 @@
-import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'framer-motion'
 import BrandIllustration from '@/components/common/BrandIllustration'
 import { trackCtaClick } from '@/modules/analytics/tracking'
 import { motionPresets } from '@/components/common/motionPresets'
+import Button from '@/components/common/ui/Button'
+import SemanticBadge from '@/components/common/ui/SemanticBadge'
 
 export interface VisualHeroAction {
   label: string
@@ -27,12 +28,6 @@ interface Props {
   backgroundVariant?: 'store' | 'fanclub'
   actions: VisualHeroAction[]
   metrics?: HeroMetric[]
-}
-
-const actionStyle: Record<NonNullable<VisualHeroAction['style']>, string> = {
-  primary: 'bg-gray-900 text-white hover:bg-gray-700 dark:bg-gray-100 dark:text-gray-900',
-  secondary: 'border border-gray-300 text-gray-700 hover:border-gray-500 dark:border-gray-700 dark:text-gray-200',
-  accent: 'border border-violet-300 bg-violet-50 text-violet-700 hover:bg-violet-100 dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-300',
 }
 
 const bgVariantClass = {
@@ -64,21 +59,21 @@ export default function VisualHeroSection({
       <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-gray-500">{eyebrow}</p>
       <div className="mt-4 grid gap-7 lg:grid-cols-[1.25fr_1fr] lg:items-end">
         <div>
-          <span className="inline-flex rounded-full border border-violet-300/70 bg-violet-100/80 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-violet-700 dark:border-violet-700 dark:bg-violet-900/50 dark:text-violet-200">{badge}</span>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-gray-900 dark:text-gray-100 sm:text-5xl">{title}
+          <SemanticBadge tone={backgroundVariant === 'fanclub' ? 'members' : 'featured'}>{badge}</SemanticBadge>
+          <h1 className="mt-4 text-balance text-3xl font-semibold tracking-tight text-gray-900 dark:text-gray-100 sm:text-5xl">{title}
             {subtitle && <span className="mt-1 block text-gray-500 dark:text-gray-400">{subtitle}</span>}
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-gray-600 dark:text-gray-300">{description}</p>
           <div className="mt-6 flex flex-wrap gap-3">
             {actions.map((action, index) => (
-              <Link
+              <Button
                 key={`${action.label}-${index}`}
                 to={action.to}
+                variant={action.style ?? (index === 0 ? 'primary' : 'secondary')}
                 onClick={() => trackCtaClick(location, action.cta)}
-                className={`rounded-full px-5 py-2.5 text-sm font-medium transition hover:-translate-y-0.5 ${actionStyle[action.style ?? (index === 0 ? 'primary' : 'secondary')]}`}
               >
                 {action.label}
-              </Link>
+              </Button>
             ))}
           </div>
         </div>
