@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { trackCtaClick } from '@/modules/analytics/tracking'
+import { trackLanguageSwitch } from '@/modules/analytics/tracking'
 
 const LANGS = [
   { code: 'ja', label: 'JA' },
@@ -13,7 +13,7 @@ export default function LangSwitcher() {
 
   function switchLang(code: string) {
     i18n.changeLanguage(code)
-    trackCtaClick('global', 'language_switch', { language: code })
+    trackLanguageSwitch(code, current)
   }
 
   return (
@@ -23,7 +23,7 @@ export default function LangSwitcher() {
           key={code}
           type="button"
           onClick={() => switchLang(code)}
-          className={`rounded-full px-2.5 py-1 font-mono tracking-wide transition-all ${
+          className={`focus-ring rounded-full px-2.5 py-1 font-mono tracking-wide transition-all ${
             current === code
               ? 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900'
               : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100'

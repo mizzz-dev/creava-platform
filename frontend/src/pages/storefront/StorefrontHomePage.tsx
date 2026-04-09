@@ -168,7 +168,7 @@ export default function StorefrontHomePage() {
   }, [error, loading, newArrivals.length])
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
+    <section className="ds-container py-8 sm:py-12">
       <PageHead title="mizzz Official Store" description="mizzz公式オンラインストア。新商品・デジタル商品・お知らせをまとめて確認できます。" />
 
       <VisualHeroSection

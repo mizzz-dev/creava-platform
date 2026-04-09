@@ -36,3 +36,15 @@ export function trackEmptyState(location: string, extras?: AnalyticsParams): voi
 export function trackApiFailure(location: string, error: string, extras?: AnalyticsParams): void {
   trackMizzzEvent('api_failure', { location, error, ...extras })
 }
+
+export function trackThemeToggle(fromTheme: string, toTheme: string): void {
+  trackMizzzEvent('theme_toggle', { from: fromTheme, to: toTheme })
+}
+
+export function trackLanguageSwitch(language: string, fromLanguage?: string): void {
+  trackMizzzEvent('language_switch', { language, from: fromLanguage })
+}
+
+export function trackProductCardClick(location: string, slug: string, status: string): void {
+  trackMizzzEvent('product_card_click', { location, slug, status })
+}

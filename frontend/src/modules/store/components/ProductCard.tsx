@@ -5,7 +5,7 @@ import { formatPriceNum } from '@/utils'
 import { convertPrice, type DisplayCurrency } from '../lib/currency'
 import Badge from '@/components/common/Badge'
 import type { StoreProductSummary } from '../types'
-import { trackCtaClick } from '@/modules/analytics/tracking'
+import { trackCtaClick, trackProductCardClick } from '@/modules/analytics/tracking'
 
 interface Props {
   product: StoreProductSummary
@@ -27,7 +27,10 @@ export default function ProductCard({ product, displayCurrency = 'JPY', tracking
   return (
     <Link
       to={detailPath.product(product.slug)}
-      onClick={() => trackCtaClick(trackingLocation, 'product_click', { slug: product.slug, status: product.purchaseStatus })}
+      onClick={() => {
+        trackCtaClick(trackingLocation, 'product_click', { slug: product.slug, status: product.purchaseStatus })
+        trackProductCardClick(trackingLocation, product.slug, product.purchaseStatus)
+      }}
       className="group block"
       aria-label={`${product.title} ${t('store.detailCta')}`}
     >

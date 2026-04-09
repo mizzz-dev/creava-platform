@@ -5,6 +5,50 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --ds-color-bg-default: #ffffff;
+    --ds-color-bg-muted: #f9fafb;
+    --ds-color-bg-emphasis: #111827;
+    --ds-color-fg-default: #111827;
+    --ds-color-fg-muted: #4b5563;
+    --ds-color-border-default: #e5e7eb;
+    --ds-color-accent-primary: #8b5cf6;
+    --ds-color-accent-member: #d946ef;
+
+    --ds-space-1: 0.25rem;
+    --ds-space-2: 0.5rem;
+    --ds-space-3: 0.75rem;
+    --ds-space-4: 1rem;
+    --ds-space-6: 1.5rem;
+    --ds-space-8: 2rem;
+    --ds-space-10: 2.5rem;
+    --ds-space-12: 3rem;
+
+    --ds-radius-sm: 0.5rem;
+    --ds-radius-md: 0.75rem;
+    --ds-radius-lg: 1rem;
+    --ds-radius-xl: 1.5rem;
+
+    --ds-shadow-card: 0 0 0 1px rgba(17, 24, 39, 0.06), 0 2px 8px rgba(17, 24, 39, 0.06);
+    --ds-shadow-floating: 0 10px 28px rgba(17, 24, 39, 0.12);
+
+    --ds-motion-duration-fast: 160ms;
+    --ds-motion-duration-base: 240ms;
+    --ds-motion-duration-slow: 360ms;
+    --ds-motion-ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .dark {
+    --ds-color-bg-default: #030712;
+    --ds-color-bg-muted: #111827;
+    --ds-color-bg-emphasis: #f9fafb;
+    --ds-color-fg-default: #f9fafb;
+    --ds-color-fg-muted: #d1d5db;
+    --ds-color-border-default: #374151;
+    --ds-shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 4px 14px rgba(0, 0, 0, 0.35);
+    --ds-shadow-floating: 0 12px 28px rgba(0, 0, 0, 0.45);
+  }
+
   html {
     font-family: 'Inter', 'Noto Sans JP', sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -137,5 +181,27 @@
   /* shared focus ring for interactive components */
   .focus-ring {
     @apply rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/80 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-950;
+  }
+
+  .ds-container {
+    width: min(100%, 72rem);
+    margin-inline: auto;
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    .ds-container {
+      padding-inline: 1.5rem;
+    }
+  }
+
+  .ds-section {
+    margin-top: var(--ds-space-10);
+  }
+
+  @media (min-width: 768px) {
+    .ds-section {
+      margin-top: var(--ds-space-12);
+    }
   }
 }

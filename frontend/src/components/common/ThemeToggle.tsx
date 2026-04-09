@@ -1,5 +1,5 @@
 import { useTheme } from '@/lib/theme'
-import { trackCtaClick } from '@/modules/analytics/tracking'
+import { trackThemeToggle } from '@/modules/analytics/tracking'
 
 const ICONS = {
   light: (
@@ -30,7 +30,7 @@ export default function ThemeToggle() {
     const idx = CYCLE.indexOf(theme as typeof CYCLE[number])
     const nextTheme = CYCLE[(idx + 1) % CYCLE.length]
     setTheme(nextTheme)
-    trackCtaClick('global', 'theme_switch', { from: theme, to: nextTheme })
+    trackThemeToggle(theme, nextTheme)
   }
 
   return (
@@ -38,7 +38,7 @@ export default function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={`Theme: ${theme}`}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200/80 bg-white/90 text-gray-500 shadow-sm shadow-gray-200/40 transition-all hover:-translate-y-0.5 hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-900/90 dark:text-gray-300 dark:shadow-black/20 dark:hover:border-gray-500 dark:hover:text-gray-100"
+      className="focus-ring inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200/80 bg-white/90 text-gray-500 shadow-sm shadow-gray-200/40 transition-all hover:-translate-y-0.5 hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-900/90 dark:text-gray-300 dark:shadow-black/20 dark:hover:border-gray-500 dark:hover:text-gray-100"
     >
       {ICONS[theme as keyof typeof ICONS] ?? ICONS.system}
     </button>

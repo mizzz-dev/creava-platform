@@ -24,6 +24,8 @@ import { createCustomerPortalSession, createFanclubCheckoutSession } from '@/mod
 import { getMembershipPlans } from '@/modules/payments/plans'
 import type { MembershipPlan } from '@/modules/payments/types'
 import BrandIllustration from '@/components/common/BrandIllustration'
+import Button from '@/components/common/ui/Button'
+import SemanticBadge from '@/components/common/ui/SemanticBadge'
 import SectionReveal from '@/components/common/SectionReveal'
 import CuratedBentoSection from '@/components/common/CuratedBentoSection'
 import VisualHeroSection from '@/components/common/VisualHeroSection'
@@ -77,7 +79,7 @@ function FcSectionTemplate({
   }, [role, title])
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-12 sm:py-16">
+    <section className="ds-container py-12 sm:py-16">
       <PageHead title={`${title} | mizzz official fanclub`} description={description} noindex />
       <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-gray-500">fanclub archive</p>
       <h1 className="mt-2 text-3xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">{title}</h1>
@@ -89,17 +91,17 @@ function FcSectionTemplate({
             <article key={item.slug} className="rounded-2xl border border-gray-200/80 bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-900/70">
               <div className="flex items-center justify-between gap-3">
                 <p className="font-mono text-xs text-gray-500 dark:text-gray-400">{item.publishAt}</p>
-                <span className={`rounded-full px-2.5 py-1 text-[11px] ${isLocked ? 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-300' : 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300'}`}>
+                <SemanticBadge tone={isLocked ? 'neutral' : 'members'} className="text-[11px]">
                   {isLocked ? `🔒 ${ACCESS_LABEL[item.visibility]}` : ACCESS_LABEL[item.visibility]}
-                </span>
+                </SemanticBadge>
               </div>
               <h2 className="mt-3 text-lg font-semibold text-gray-900 dark:text-gray-100">{item.title}</h2>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{item.description}</p>
               <div className="mt-5">
                 {isLocked ? (
-                  <Link to={ROUTES.FC_JOIN} onClick={() => trackCtaClick('fc_section', 'join_from_locked', { title: item.title, section: title })} className="text-sm font-medium text-violet-600 hover:text-violet-500">入会して閲覧する →</Link>
+                  <Button to={ROUTES.FC_JOIN} variant="accent" size="sm" onClick={() => trackCtaClick('fc_section', 'join_from_locked', { title: item.title, section: title })}>入会して閲覧する</Button>
                 ) : (
-                  <Link to={`${detailBase}/${item.slug}`} onClick={() => trackCtaClick('fc_section', 'content_detail', { slug: item.slug, section: title })} className="text-sm font-medium text-gray-900 hover:text-gray-600 dark:text-gray-100 dark:hover:text-gray-300">詳細を見る →</Link>
+                  <Button to={`${detailBase}/${item.slug}`} variant="ghost" size="sm" onClick={() => trackCtaClick('fc_section', 'content_detail', { slug: item.slug, section: title })}>詳細を見る</Button>
                 )}
               </div>
             </article>
@@ -254,7 +256,7 @@ export function FanclubHomeHubPage() {
   )
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-10 md:py-16">
+    <section className="ds-container py-10 md:py-16">
       <PageHead
         title={settings?.heroTitle?.trim() || 'mizzz official fanclub'}
         description="mizzz の公式ファンクラブ。ニュース、ブログ、動画、ギャラリー、チケット先行情報を会員向けに配信。"
