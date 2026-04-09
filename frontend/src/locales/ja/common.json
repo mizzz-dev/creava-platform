@@ -566,5 +566,32 @@
       "future_blessing": "末吉: 焦らず進むほど良い結果に。",
       "curse": "凶: 無理せず整える日を作ると好転します。"
     }
+  },
+  "playful": {
+    "dailyLabel": "today's word",
+    "memberDailyLabel": "today — members",
+    "dailyMessageLabel": "今日のひとこと",
+    "hiddenLabel": "you found this",
+    "memberBlockLabel": "members only",
+    "visitCount": "{{count}}回目のご訪問",
+    "visitGreeting": {
+      "0": "いらっしゃいませ。はじめての方ですか？",
+      "1": "またお越しいただけて嬉しいです。",
+      "2": "いつもありがとうございます。",
+      "3": "すっかりおなじみですね。",
+      "4": "あなたの存在が、ここを特別にしています。"
+    },
+    "surpriseTeaser": "今週のひみつを見る",
+    "storeSurpriseTitle": "今週の編集部からひとこと",
+    "storeSurpriseBody": "毎週少し視点を変えながら、ストアをキュレーションしています。今週もゆっくり見ていってください。",
+    "storeSurpriseCta": "ニュースを見る",
+    "storeHiddenQuote": "欲しいものを丁寧に選ぶことが、自分の世界観をつくる。",
+    "fcMypageSurpriseTeaser": "今週のひみつを見る",
+    "fcMypageSurpriseTitle": "会員へのひとこと",
+    "fcMypageSurpriseBody": "毎週コンテンツを選んでいます。あなたが見てくれていることが、次の制作の力になっています。",
+    "fcHiddenQuote": "会員であることは、静かな特別さだ。",
+    "fcHomeHiddenQuote": "ファンクラブは、静かに特別な場所だ。",
+    "fcEasterEggMessage": "ありがとう、見つけてくれて。",
+    "easterEggFoundLabel": "発見済み"
   }
 }

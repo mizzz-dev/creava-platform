@@ -26,6 +26,11 @@ import CuratedBentoSection from '@/components/common/CuratedBentoSection'
 import VisualHeroSection from '@/components/common/VisualHeroSection'
 import { createSectionVisibilityResolver, parseTopPageSections } from '@/lib/editorial'
 import { useSeasonalTheme } from '@/modules/seasonal/context'
+import DailyMessageCard from '@/modules/playful/components/DailyMessageCard'
+import WeeklyPickupCard from '@/modules/playful/components/WeeklyPickupCard'
+import SurpriseCard from '@/modules/playful/components/SurpriseCard'
+import HiddenQuote from '@/modules/playful/components/HiddenQuote'
+import EasterEggTrigger from '@/modules/playful/components/EasterEggTrigger'
 
 export default function StorefrontHomePage() {
   const { i18n, t } = useTranslation()
@@ -197,7 +202,17 @@ export default function StorefrontHomePage() {
           { label: 'ガイド', value: 'FAQ / 配送 / 返品導線を固定配置。' },
         ]}
       />
-      <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">{t('seasonal.themeSource', { source: resolution.source })}</p>
+      <EasterEggTrigger
+        id="store-hero-seasonal-source"
+        triggerCount={7}
+        message="🎉 見つけてくれてありがとう。"
+        location="store_home_hero"
+        className="mt-3 inline-block"
+      >
+        <p className="text-xs text-gray-500 dark:text-gray-400 cursor-default">
+          {t('seasonal.themeSource', { source: resolution.source })}
+        </p>
+      </EasterEggTrigger>
       {primaryCampaign && <CampaignHero campaign={primaryCampaign} location="store_home_campaign_hero" />}
 
       {sectionResolver('store-home-pickup', true) && !loading && !error && pickup.length > 0 && (
@@ -256,6 +271,29 @@ export default function StorefrontHomePage() {
         items={digestItems}
       />
       </div>}
+
+      {/* ── playful: 日替わり + 週替わりブロック ─────────── */}
+      <div className="mt-10 grid gap-4 sm:grid-cols-3">
+        <DailyMessageCard
+          seasonalTheme={resolution.theme}
+          location="store_home_daily"
+          className="sm:col-span-1"
+        />
+        <WeeklyPickupCard
+          location="store_home_weekly_pickup"
+          className="sm:col-span-1"
+        />
+        <SurpriseCard
+          teaser={t('playful.surpriseTeaser', { defaultValue: '今週のひみつを見る' })}
+          title={t('playful.storeSurpriseTitle', { defaultValue: '今週の編集部からひとこと' })}
+          body={t('playful.storeSurpriseBody', { defaultValue: '毎週少し視点を変えながら、ストアをキュレーションしています。今週もゆっくり見ていってください。' })}
+          href="/news"
+          ctaLabel={t('playful.storeSurpriseCta', { defaultValue: 'ニュースを見る' })}
+          periodLabel="weekly"
+          location="store_home_surprise"
+          className="sm:col-span-1"
+        />
+      </div>
 
       {sectionResolver('store-home-member-pickup', true) && !loading && !error && memberPickup.length > 0 && (
         <section className="mt-12 rounded-3xl border border-violet-200/70 bg-violet-50/60 p-5 dark:border-violet-900/60 dark:bg-violet-950/20 sm:p-7">
@@ -339,6 +377,14 @@ export default function StorefrontHomePage() {
           )}
         </div>
       </SectionReveal>}
+
+      {/* ── playful: hidden quote ─────────────────────── */}
+      <HiddenQuote
+        quote={t('playful.storeHiddenQuote', { defaultValue: '欲しいものを丁寧に選ぶことが、自分の世界観をつくる。' })}
+        author="mizzz store"
+        location="store_home_bottom"
+        className="mt-8"
+      />
     </section>
   )
 }

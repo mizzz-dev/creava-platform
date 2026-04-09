@@ -1,0 +1,71 @@
+{
+  "kind": "collectionType",
+  "collectionName": "playful_message_pools",
+  "info": {
+    "singularName": "playful-message-pool",
+    "pluralName": "playful-message-pools",
+    "displayName": "Playful Message Pool",
+    "description": "日替わり・週替わりメッセージのプール管理 / Manages daily & weekly playful message pools"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "poolType": {
+      "type": "enumeration",
+      "enum": ["daily", "weekly"],
+      "required": true,
+      "default": "daily"
+    },
+    "site": {
+      "type": "enumeration",
+      "enum": ["store", "fanclub", "main", "all"],
+      "required": true,
+      "default": "all"
+    },
+    "message": {
+      "type": "text",
+      "required": true,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "hint": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "seasonal": {
+      "type": "enumeration",
+      "enum": ["default", "christmas", "halloween", "newyear"]
+    },
+    "memberOnly": {
+      "type": "boolean",
+      "default": false
+    },
+    "displayPriority": {
+      "type": "integer",
+      "default": 0
+    },
+    "startAt": {
+      "type": "datetime"
+    },
+    "endAt": {
+      "type": "datetime"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}

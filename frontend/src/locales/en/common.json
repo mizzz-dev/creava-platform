@@ -566,5 +566,32 @@
       "future_blessing": "Future Blessing: Progress patiently and things improve.",
       "curse": "Curse: Slow down and reset your rhythm."
     }
+  },
+  "playful": {
+    "dailyLabel": "today's word",
+    "memberDailyLabel": "today — members",
+    "dailyMessageLabel": "Today's word",
+    "hiddenLabel": "you found this",
+    "memberBlockLabel": "members only",
+    "visitCount": "Visit #{{count}}",
+    "visitGreeting": {
+      "0": "Welcome. Is this your first time?",
+      "1": "Good to see you again.",
+      "2": "Thanks for coming back.",
+      "3": "You're becoming a regular.",
+      "4": "Your presence makes this place special."
+    },
+    "surpriseTeaser": "This week's secret",
+    "storeSurpriseTitle": "A note from the editors",
+    "storeSurpriseBody": "Each week we curate the store with a slightly different perspective. Take your time looking around.",
+    "storeSurpriseCta": "View news",
+    "storeHiddenQuote": "Choosing things you love with care shapes who you are.",
+    "fcMypageSurpriseTeaser": "This week's message",
+    "fcMypageSurpriseTitle": "A note for members",
+    "fcMypageSurpriseBody": "We pick content every week. Knowing you're here gives us energy for the next creation.",
+    "fcHiddenQuote": "Being a member is a quiet kind of special.",
+    "fcHomeHiddenQuote": "The fan club is quietly a special place.",
+    "fcEasterEggMessage": "Thank you for finding this.",
+    "easterEggFoundLabel": "Found"
   }
 }

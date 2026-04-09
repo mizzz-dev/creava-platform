@@ -1,6 +1,12 @@
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import DailyMessageCard from '@/modules/playful/components/DailyMessageCard'
+import WeeklyPickupCard from '@/modules/playful/components/WeeklyPickupCard'
+import SurpriseCard from '@/modules/playful/components/SurpriseCard'
+import HiddenQuote from '@/modules/playful/components/HiddenQuote'
+import MemberPlayfulBlock from '@/modules/playful/components/MemberPlayfulBlock'
+import EasterEggTrigger from '@/modules/playful/components/EasterEggTrigger'
 import { getSiteSettings } from '@/modules/settings/api'
 import { getFanclubList } from '@/modules/fanclub/api'
 import { createSectionVisibilityResolver, isWithinPublicationWindow, parseTopPageSections } from '@/lib/editorial'
@@ -292,6 +298,24 @@ export function FanclubHomeHubPage() {
         subtitle="再訪時に価値が分かる導線を先頭で確認"
         items={homeDigestItems}
       />}
+
+      {/* ── playful: 日替わり + 週替わりブロック ─────────── */}
+      <div className="mt-8 grid gap-4 sm:grid-cols-2">
+        <DailyMessageCard
+          seasonalTheme={resolution.theme}
+          location="fc_home_daily"
+        />
+        <WeeklyPickupCard
+          pool={[
+            { id: 'fc-w1', label: '今週の会員限定', description: '毎週少しずつ、会員にだけ届けているものがあります。' },
+            { id: 'fc-w2', label: '今週の発見', description: 'ゆっくり見ていってください。見つかるものがあるはずです。' },
+            { id: 'fc-w3', label: 'This week — members', description: '限定コンテンツの更新を毎週確認できます。' },
+            { id: 'fc-w4', label: '週替わりのおすすめ', description: '今週選んだコンテンツを、マイページでまとめて確認できます。' },
+          ]}
+          location="fc_home_weekly_pickup"
+        />
+      </div>
+
       <NotificationInterestButton
         location="fc_home"
         topic="weekly_update"
@@ -332,6 +356,26 @@ export function FanclubHomeHubPage() {
           </div>
         </SectionReveal>
       )}
+
+      {/* ── playful: hidden quote + easter egg ─────────── */}
+      <HiddenQuote
+        quote={t('playful.fcHomeHiddenQuote', { defaultValue: 'ファンクラブは、静かに特別な場所だ。' })}
+        author="mizzz"
+        location="fc_home_bottom"
+        className="mt-6"
+      />
+      <p className="mt-2 text-center">
+        <EasterEggTrigger
+          id="fc-home-official-label"
+          triggerCount={5}
+          message={t('playful.fcEasterEggMessage', { defaultValue: 'ありがとう、見つけてくれて。' })}
+          location="fc_home"
+        >
+          <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-200 dark:text-gray-700 cursor-default select-none">
+            official fanclub
+          </span>
+        </EasterEggTrigger>
+      </p>
     </section>
   )
 }
@@ -529,6 +573,7 @@ export function FanclubVerifyEmailPage() {
 }
 
 export function FanclubMyPageSite() {
+  const { t } = useTranslation()
   const { user } = useCurrentUser()
   const { getToken } = useAuth()
   const { products } = useProductList(8)
@@ -669,6 +714,25 @@ export function FanclubMyPageSite() {
         subtitle="未読になりやすい更新導線を上部に集約"
         items={mypageDigestItems}
       />
+
+      {/* ── playful: 会員限定ウェルカム + 日替わりメッセージ ── */}
+      <div className="mt-8 grid gap-4 sm:grid-cols-3">
+        <MemberPlayfulBlock site="fanclub" className="sm:col-span-1" />
+        <DailyMessageCard
+          memberOnly
+          location="fc_mypage_daily"
+          className="sm:col-span-1"
+        />
+        <SurpriseCard
+          teaser={t('playful.fcMypageSurpriseTeaser', { defaultValue: '今週のひみつを見る' })}
+          title={t('playful.fcMypageSurpriseTitle', { defaultValue: '会員へのひとこと' })}
+          body={t('playful.fcMypageSurpriseBody', { defaultValue: '毎週コンテンツを選んでいます。あなたが見てくれていることが、次の制作の力になっています。' })}
+          periodLabel="weekly"
+          location="fc_mypage_surprise"
+          className="sm:col-span-1"
+        />
+      </div>
+
       {mypageCampaign && <CampaignHero campaign={mypageCampaign} location="fc_mypage_campaign_hero" />}
 
       <div className="mt-8 grid gap-4 md:grid-cols-2">
@@ -722,6 +786,14 @@ export function FanclubMyPageSite() {
           />
         </article>
       )}
+
+      {/* ── playful: hidden quote ─────────────────────── */}
+      <HiddenQuote
+        quote={t('playful.fcHiddenQuote', { defaultValue: '会員であることは、静かな特別さだ。' })}
+        author="mizzz fanclub"
+        location="fc_mypage_bottom"
+        className="mt-6"
+      />
     </section>
   )
 }

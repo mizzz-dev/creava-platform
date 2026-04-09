@@ -566,5 +566,32 @@
       "future_blessing": "말길: 서두르지 않으면 운이 좋아집니다.",
       "curse": "흉: 속도를 늦추고 컨디션을 정리해 보세요."
     }
+  },
+  "playful": {
+    "dailyLabel": "오늘의 한마디",
+    "memberDailyLabel": "today — members",
+    "dailyMessageLabel": "오늘의 한마디",
+    "hiddenLabel": "발견했습니다",
+    "memberBlockLabel": "회원 전용",
+    "visitCount": "{{count}}번째 방문",
+    "visitGreeting": {
+      "0": "어서 오세요. 처음 방문이신가요?",
+      "1": "다시 와주셔서 반갑습니다.",
+      "2": "항상 감사합니다.",
+      "3": "자주 오시는군요.",
+      "4": "당신의 존재가 이곳을 특별하게 만듭니다."
+    },
+    "surpriseTeaser": "이번 주의 비밀",
+    "storeSurpriseTitle": "편집부의 한마디",
+    "storeSurpriseBody": "매주 조금씩 다른 시각으로 스토어를 큐레이션하고 있습니다. 천천히 둘러보세요.",
+    "storeSurpriseCta": "뉴스 보기",
+    "storeHiddenQuote": "좋아하는 것을 정성껏 고르는 일이 나만의 세계관을 만든다.",
+    "fcMypageSurpriseTeaser": "이번 주의 메시지",
+    "fcMypageSurpriseTitle": "회원에게 드리는 말씀",
+    "fcMypageSurpriseBody": "매주 콘텐츠를 고르고 있습니다. 여러분이 봐주시는 것이 다음 창작의 힘이 됩니다.",
+    "fcHiddenQuote": "회원이라는 것은 조용한 특별함이다.",
+    "fcHomeHiddenQuote": "팬클럽은 조용히 특별한 공간입니다.",
+    "fcEasterEggMessage": "발견해 주셔서 감사합니다.",
+    "easterEggFoundLabel": "발견됨"
   }
 }
