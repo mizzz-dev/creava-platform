@@ -1,4 +1,5 @@
 import Stripe from 'stripe'
+import { assertStripeModeSafety } from './env'
 
 let stripeClient: Stripe | null = null
 
@@ -6,11 +7,18 @@ function getStripeApiVersion(): Stripe.LatestApiVersion {
   return '2025-03-31.basil'
 }
 
+export function getStripeMode(): 'test' | 'live' {
+  const secretKey = process.env.STRIPE_SECRET_KEY ?? ''
+  return secretKey.startsWith('sk_live_') ? 'live' : 'test'
+}
+
 export function getStripeClient(): Stripe {
   const secretKey = process.env.STRIPE_SECRET_KEY
   if (!secretKey) {
     throw new Error('STRIPE_SECRET_KEY が設定されていません。')
   }
+
+  assertStripeModeSafety(getStripeMode())
 
   if (!stripeClient) {
     stripeClient = new Stripe(secretKey, {
@@ -24,9 +32,4 @@ export function getStripeClient(): Stripe {
   }
 
   return stripeClient
-}
-
-export function getStripeMode(): 'test' | 'live' {
-  const secretKey = process.env.STRIPE_SECRET_KEY ?? ''
-  return secretKey.startsWith('sk_live_') ? 'live' : 'test'
 }

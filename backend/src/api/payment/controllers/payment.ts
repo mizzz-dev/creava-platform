@@ -1,3 +1,4 @@
+import { verifyClerkToken, type AuthenticatedClerkUser } from '../../../lib/auth/clerk'
 import { parseStripeWebhookEvent } from '../../../lib/stripe/webhook'
 import {
   createFanclubCheckoutSession,
@@ -14,6 +15,23 @@ function normalizeQuantity(raw: unknown): number {
   const value = Number(raw ?? 1)
   if (!Number.isFinite(value)) return 1
   return Math.max(1, Math.min(10, Math.round(value)))
+}
+
+function parseStripeMetadata(object: Record<string, unknown>): Record<string, unknown> {
+  return (object.metadata as Record<string, unknown>) ?? {}
+}
+
+async function requireAuthenticatedClerkUser(ctx: any): Promise<AuthenticatedClerkUser> {
+  try {
+    return await verifyClerkToken(ctx.request.headers.authorization)
+  } catch (error) {
+    throw new Error(`本人認証に失敗しました: ${(error as Error).message}`)
+  }
+}
+
+function toUserId(metadata: Record<string, unknown>): string | null {
+  const userId = metadata.userId
+  return typeof userId === 'string' && userId && userId !== 'guest' ? userId : null
 }
 
 export default ({ strapi }) => ({
@@ -69,9 +87,10 @@ export default ({ strapi }) => ({
 
   async createFanclubCheckout(ctx) {
     try {
-      const { planId, locale, userId } = ctx.request.body ?? {}
+      const { planId, locale } = ctx.request.body ?? {}
       if (!planId) return ctx.badRequest('planId は必須です。')
-      if (!userId || typeof userId !== 'string') return ctx.unauthorized('userId は必須です。')
+
+      const authUser = await requireAuthenticatedClerkUser(ctx)
 
       const plan = await strapi.documents('api::membership-plan.membership-plan').findOne({
         documentId: String(planId),
@@ -86,7 +105,8 @@ export default ({ strapi }) => ({
         planId: Number(plan.id),
         planName: plan.name,
         stripePriceId: plan.stripePriceId,
-        userId,
+        userId: authUser.userId,
+        userEmail: authUser.email,
         locale: normalizeLocale(locale),
       })
 
@@ -96,8 +116,8 @@ export default ({ strapi }) => ({
           provider: 'stripe',
           status: 'created',
           locale: normalizeLocale(locale),
-          userId,
-          idempotencyKey: `fanclub:${plan.documentId}:${userId}`,
+          userId: authUser.userId,
+          idempotencyKey: `fanclub:${plan.documentId}:${authUser.userId}`,
           externalCheckoutSessionId: session.id,
           metadata: {
             planDocumentId: plan.documentId,
@@ -109,22 +129,36 @@ export default ({ strapi }) => ({
 
       ctx.body = { url: session.url, sessionId: session.id }
     } catch (error) {
-      strapi.log.error(`[payment] createFanclubCheckout failed: ${(error as Error).message}`)
+      const message = (error as Error).message
+      strapi.log.error(`[payment] createFanclubCheckout failed: ${message}`)
+      if (message.includes('本人認証')) return ctx.unauthorized(message)
       ctx.internalServerError('ファンクラブ決済セッション生成に失敗しました。')
     }
   },
 
   async createPortalSession(ctx) {
     try {
-      const { customerId } = ctx.request.body ?? {}
-      if (!customerId || typeof customerId !== 'string') {
-        return ctx.badRequest('customerId は必須です。')
+      const authUser = await requireAuthenticatedClerkUser(ctx)
+
+      const latestSubscription = await strapi.documents('api::subscription-record.subscription-record').findFirst({
+        filters: {
+          provider: { $eq: 'stripe' },
+          clerkUserId: { $eq: authUser.userId },
+          customerId: { $notNull: true },
+        },
+        sort: ['createdAt:desc'],
+      })
+
+      if (!latestSubscription?.customerId) {
+        return ctx.badRequest('customerId が未紐付けです。Webhook 同期完了後に再試行してください。')
       }
 
-      const session = await createCustomerPortalSession(customerId)
+      const session = await createCustomerPortalSession(latestSubscription.customerId)
       ctx.body = { url: session.url }
     } catch (error) {
-      strapi.log.error(`[payment] createPortalSession failed: ${(error as Error).message}`)
+      const message = (error as Error).message
+      strapi.log.error(`[payment] createPortalSession failed: ${message}`)
+      if (message.includes('本人認証')) return ctx.unauthorized(message)
       ctx.internalServerError('ポータルセッション生成に失敗しました。')
     }
   },
@@ -154,6 +188,8 @@ export default ({ strapi }) => ({
       })
 
       const object = event.data.object as Record<string, unknown>
+      const metadata = parseStripeMetadata(object)
+      const clerkUserId = toUserId(metadata)
 
       if (event.type === 'checkout.session.completed') {
         await strapi.documents('api::payment-record.payment-record').create({
@@ -162,19 +198,20 @@ export default ({ strapi }) => ({
             paymentStatus: 'succeeded',
             checkoutSessionId: String(object.id ?? ''),
             customerId: typeof object.customer === 'string' ? object.customer : null,
+            clerkUserId,
             paymentIntentId: typeof object.payment_intent === 'string' ? object.payment_intent : null,
             amountTotal: Number(object.amount_total ?? 0),
             currency: typeof object.currency === 'string' ? object.currency.toUpperCase() : 'JPY',
-            metadata: (object.metadata as Record<string, unknown>) ?? {},
+            metadata,
           },
         })
       }
 
       if (event.type === 'customer.subscription.created' || event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') {
-        const metadata = (object.metadata as Record<string, unknown>) ?? {}
         await strapi.documents('api::subscription-record.subscription-record').create({
           data: {
             provider: 'stripe',
+            clerkUserId,
             customerId: typeof object.customer === 'string' ? object.customer : null,
             subscriptionId: typeof object.id === 'string' ? object.id : null,
             subscriptionStatus: typeof object.status === 'string' ? object.status : 'incomplete',

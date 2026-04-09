@@ -15,6 +15,19 @@ export function assertStripeEnv(): void {
   }
 }
 
+export function assertStripeModeSafety(actualMode: 'test' | 'live'): void {
+  const expectedMode = (process.env.STRIPE_EXPECTED_MODE ?? '').toLowerCase()
+  if (!expectedMode) return
+
+  if (expectedMode !== 'test' && expectedMode !== 'live') {
+    throw new Error('STRIPE_EXPECTED_MODE は test か live のみ指定可能です。')
+  }
+
+  if (actualMode !== expectedMode) {
+    throw new Error(`Stripe モード不一致: expected=${expectedMode}, actual=${actualMode}`)
+  }
+}
+
 export function getCheckoutUrlByKind(kind: StripeCheckoutKind): { successUrl: string; cancelUrl: string } {
   if (kind === 'fanclub') {
     return {

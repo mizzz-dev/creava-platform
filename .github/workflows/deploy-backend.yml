@@ -1,17 +1,5 @@
 name: Deploy Backend (Strapi)
 
-# ─────────────────────────────────────────────
-# トリガー
-# - 手動実行のみ（workflow_dispatch）
-#
-# ★ Strapi Cloud の Git 連携が有効な場合:
-#   main への push で Strapi Cloud が自動デプロイするため
-#   このワークフローは不要。手動実行専用として残す。
-#
-# ★ VPS/SSH デプロイを使う場合:
-#   BACKEND_DEPLOY_TARGET=vps_ssh を GitHub Variables に設定し
-#   push トリガーを有効化することで自動デプロイが可能。
-# ─────────────────────────────────────────────
 on:
   workflow_dispatch:
     inputs:
@@ -23,26 +11,25 @@ on:
         options:
           - strapi_cloud
           - vps_ssh
+      target_env:
+        description: '対象環境（staging / production）'
+        required: true
+        default: staging
+        type: choice
+        options:
+          - staging
+          - production
 
-# ─────────────────────────────────────────────
-# 環境変数（共通）
-# ─────────────────────────────────────────────
 env:
   NODE_VERSION: '20'
   WORKING_DIR: backend
 
 jobs:
-
-  # ═══════════════════════════════════════════
-  # Job 1: Strapi Cloud デプロイ（手動実行時のみ）
-  #   必要 Secret: STRAPI_DEPLOY_TOKEN
-  #     → Strapi Cloud Dashboard → Settings → Deploy Token
-  #   注意: Strapi Cloud の Git 連携が有効な場合は不要
-  # ═══════════════════════════════════════════
   deploy-strapi-cloud:
-    name: Deploy → Strapi Cloud
+    name: Deploy → Strapi Cloud (${{ inputs.target_env }})
     runs-on: ubuntu-latest
     if: inputs.deploy_target == 'strapi_cloud'
+    environment: ${{ inputs.target_env }}
     defaults:
       run:
         working-directory: ${{ env.WORKING_DIR }}
@@ -70,8 +57,7 @@ jobs:
         run: |
           if [ -z "$STRAPI_DEPLOY_TOKEN" ]; then
             echo "::error::STRAPI_DEPLOY_TOKEN が未設定です。"
-            echo "::error::GitHub Settings → Secrets → STRAPI_DEPLOY_TOKEN を登録してください。"
-            echo "::error::取得場所: Strapi Cloud Dashboard → プロジェクト → Settings → Deploy"
+            echo "::error::GitHub Environments(${{ inputs.target_env }}) の Secrets を確認してください。"
             exit 1
           fi
         env:
@@ -82,17 +68,11 @@ jobs:
         env:
           STRAPI_DEPLOY_TOKEN: ${{ secrets.STRAPI_DEPLOY_TOKEN }}
 
-  # ═══════════════════════════════════════════
-  # Job 2: VPS / SSH デプロイ（手動実行時のみ）
-  #   必要 Secret:
-  #     VPS_HOST, VPS_USER, VPS_SSH_KEY, VPS_PORT (optional, default 22)
-  #     VPS_APP_DIR: サーバー上のリポジトリパス
-  #   前提: サーバーに Node.js・PM2・git がインストール済み
-  # ═══════════════════════════════════════════
   deploy-vps:
-    name: Deploy → VPS (SSH)
+    name: Deploy → VPS (SSH / ${{ inputs.target_env }})
     runs-on: ubuntu-latest
     if: inputs.deploy_target == 'vps_ssh'
+    environment: ${{ inputs.target_env }}
 
     steps:
       - name: Deploy via SSH
@@ -124,4 +104,3 @@ jobs:
             curl -sf http://localhost:1337/_health || (echo "Health check failed" && exit 1)
 
             echo "=== deploy done ==="
-

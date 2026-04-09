@@ -1,7 +1,7 @@
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useClerk } from '@clerk/clerk-react'
+import { useAuth, useClerk } from '@clerk/clerk-react'
 import PageHead from '@/components/seo/PageHead'
 import { ROUTES } from '@/lib/routeConstants'
 import { useCurrentUser, useStrapiCollection } from '@/hooks'
@@ -275,6 +275,7 @@ export function FanclubAboutSitePage() {
 
 export function FanclubJoinPage() {
   const { user } = useCurrentUser()
+  const { getToken } = useAuth()
   const { items: plans } = useStrapiCollection<MembershipPlan>(() => getMembershipPlans())
   const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
@@ -284,10 +285,15 @@ export function FanclubJoinPage() {
     try {
       setLoadingPlanId(planId)
       setCheckoutError(null)
+      const authToken = await getToken()
+      if (!authToken) {
+        setCheckoutError('ログインセッションの確認に失敗しました。再ログイン後にお試しください。')
+        return
+      }
       const session = await createFanclubCheckoutSession({
         planId,
         locale: String((navigator.language || 'ja').split('-')[0] || 'ja'),
-        userId: user.id,
+        authToken,
       })
       window.location.assign(session.url)
     } catch {
@@ -432,6 +438,7 @@ export function FanclubVerifyEmailPage() {
 
 export function FanclubMyPageSite() {
   const { user } = useCurrentUser()
+  const { getToken } = useAuth()
   const { products } = useProductList(8)
   const { items: campaigns } = useStrapiCollection<CampaignSummary>(() => getCampaignList())
   const memberStoreItems = useMemo(() => products.filter((item) => item.earlyAccess || item.accessStatus === 'fc_only' || item.memberBenefit).slice(0, 4), [products])
@@ -490,14 +497,14 @@ export function FanclubMyPageSite() {
 
   async function handleOpenPortal(): Promise<void> {
     try {
-      const customerId = import.meta.env.VITE_STRIPE_CUSTOMER_ID_DEMO
-      if (!customerId) {
-        setPortalError('Customer Portal連携には customerId の紐付けが必要です。')
+      const authToken = await getToken()
+      if (!authToken) {
+        setPortalError('ログインセッションの確認に失敗しました。再ログイン後にお試しください。')
         return
       }
       setPortalLoading(true)
       setPortalError(null)
-      const session = await createCustomerPortalSession({ customerId })
+      const session = await createCustomerPortalSession({ authToken })
       window.location.assign(session.url)
     } catch {
       setPortalError('Customer Portal の起動に失敗しました。')
