@@ -25,7 +25,7 @@ export default function AboutTeaserSection() {
   return (
     <section ref={sectionRef} className="relative overflow-hidden py-4">
       {/* ── Kinetic headline strip ─────────────────── */}
-      <div className="relative overflow-hidden border-y border-[rgba(6,182,212,0.08)] py-3">
+      <div className="relative overflow-hidden border-y border-[var(--ds-color-border-subtle)] py-3">
         <ParallaxText speed={4} className="opacity-[0.06] dark:opacity-[0.04]">
           {t('home.about.headline')}
         </ParallaxText>

@@ -17,12 +17,34 @@ import { useDisplayCurrency } from '@/modules/store/hooks/useDisplayCurrency'
 import { getRankedProducts, type RankingRange } from '@/modules/store/lib/ranking'
 import { forecastStockout, getAbVariant, getHistoryByKind, getRegionCommercePolicy } from '@/modules/store/lib/commerceOptimization'
 import { trackEvent } from '@/modules/analytics'
+import SectionReveal from '@/components/common/SectionReveal'
 
 const STATUS_FILTERS = ['all', 'available', 'coming_soon', 'soldout'] as const
 const SORT_OPTIONS = ['recommended', 'newest', 'priceAsc', 'priceDesc'] as const
 
 type StatusFilter = (typeof STATUS_FILTERS)[number]
 type SortOption = (typeof SORT_OPTIONS)[number]
+
+/* ── フィルターバー ──────────────────────────────── */
+function StatusChip({
+  label,
+  active,
+  onClick,
+}: {
+  label: string
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`interactive-chip ${active ? 'active' : ''}`}
+    >
+      {label}
+    </button>
+  )
+}
 
 export default function StorePage() {
   const { t } = useTranslation()
@@ -35,7 +57,7 @@ export default function StorePage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const [query, setQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const [selectedTag, setSelectedTag] = useState('all')
+  const [selectedTag] = useState('all')
   const [sortBy, setSortBy] = useState<SortOption>('recommended')
   const [hideSoldOut, setHideSoldOut] = useState(false)
 
@@ -45,48 +67,40 @@ export default function StorePage() {
   const ctaVariant = useMemo(() => getAbVariant('storeCta'), [])
   const regionPolicy = getRegionCommercePolicy(region)
   const rankingProducts = getRankedProducts(visibleProducts, rankingRange, 3)
-  const categories = useMemo(() => ['all', ...new Set(visibleProducts.map((product) => product.category).filter(Boolean))], [visibleProducts])
-  const tags = useMemo(() => ['all', ...new Set(visibleProducts.flatMap((product) => product.tags).filter(Boolean))], [visibleProducts])
+  const categories = useMemo(() => ['all', ...new Set(visibleProducts.map((p) => p.category).filter(Boolean))], [visibleProducts])
   const recentSlugs = useMemo(() => new Set(getHistoryByKind('product').slice(0, 10)), [])
 
   const filteredProducts = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
-
-    const base = visibleProducts.filter((product) => {
-      if (statusFilter !== 'all' && product.purchaseStatus !== statusFilter) return false
-      if (hideSoldOut && product.purchaseStatus === 'soldout') return false
-      if (selectedCategory !== 'all' && product.category !== selectedCategory) return false
-      if (selectedTag !== 'all' && !product.tags.includes(selectedTag)) return false
+    const base = visibleProducts.filter((p) => {
+      if (statusFilter !== 'all' && p.purchaseStatus !== statusFilter) return false
+      if (hideSoldOut && p.purchaseStatus === 'soldout') return false
+      if (selectedCategory !== 'all' && p.category !== selectedCategory) return false
+      if (selectedTag !== 'all' && !p.tags.includes(selectedTag)) return false
       if (!normalizedQuery) return true
-      return `${product.title} ${product.category} ${product.tags.join(' ')}`.toLowerCase().includes(normalizedQuery)
+      return `${p.title} ${p.category} ${p.tags.join(' ')}`.toLowerCase().includes(normalizedQuery)
     })
 
-    if (sortBy === 'newest') {
-      return [...base].sort((a, b) => Number(b.isNewArrival) - Number(a.isNewArrival) || a.sortOrder - b.sortOrder)
-    }
-    if (sortBy === 'priceAsc') {
-      return [...base].sort((a, b) => a.price - b.price)
-    }
-    if (sortBy === 'priceDesc') {
-      return [...base].sort((a, b) => b.price - a.price)
-    }
+    if (sortBy === 'newest') return [...base].sort((a, b) => Number(b.isNewArrival) - Number(a.isNewArrival) || a.sortOrder - b.sortOrder)
+    if (sortBy === 'priceAsc') return [...base].sort((a, b) => a.price - b.price)
+    if (sortBy === 'priceDesc') return [...base].sort((a, b) => b.price - a.price)
     return [...base].sort((a, b) => Number(b.featured) - Number(a.featured) || Number(b.isNewArrival) - Number(a.isNewArrival) || a.sortOrder - b.sortOrder)
   }, [hideSoldOut, query, selectedCategory, selectedTag, sortBy, statusFilter, visibleProducts])
 
-  const featuredProducts = filteredProducts.filter((product) => product.featured).slice(0, 4)
-  const viewedProducts = filteredProducts.filter((product) => recentSlugs.has(product.slug)).slice(0, 4)
+  const featuredProducts = filteredProducts.filter((p) => p.featured).slice(0, 4)
+  const viewedProducts = filteredProducts.filter((p) => recentSlugs.has(p.slug)).slice(0, 4)
 
-  const stockoutForecast = forecastStockout(visibleProducts.slice(0, 3).map((product, index) => ({
-    productId: product.id,
-    productTitle: product.title,
-    stockUnits: 30 - index * 8,
-    soldUnitsLast7d: 10 + index * 4,
+  const stockoutForecast = forecastStockout(visibleProducts.slice(0, 3).map((p, i) => ({
+    productId: p.id,
+    productTitle: p.title,
+    stockUnits: 30 - i * 8,
+    soldUnitsLast7d: 10 + i * 4,
     restockLeadDays: 14,
-    notifyWaitlist: 12 + index * 3,
+    notifyWaitlist: 12 + i * 3,
   })))
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-14 sm:py-16 lg:py-20">
+    <div className="min-h-screen">
       <PageHead
         title={t('store.title')}
         description={t('seo.store', {
@@ -103,239 +117,413 @@ export default function StorePage() {
         }}
       />
 
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="space-y-6"
-      >
-        <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr]">
-          <div className="relative overflow-hidden rounded-3xl border border-gray-200 bg-gradient-to-br from-slate-950 via-slate-900 to-violet-900 px-6 py-8 text-white dark:border-gray-700 sm:px-8 sm:py-10">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.3),transparent_46%)]" />
-            <p className="relative font-mono text-[11px] uppercase tracking-[0.2em] text-violet-200">mizzz official store</p>
-            <h1 className="relative mt-3 text-3xl font-bold tracking-tight sm:text-4xl">{t('store.title')}</h1>
-            <p className="relative mt-3 max-w-xl text-sm leading-relaxed text-violet-100/90">
-              {heroVariant === 'A'
-                ? t('store.ecHeroCopyA', { defaultValue: '新作ドロップ・限定販売・先行案内を1ページで完結。お気に入りから最短導線で購入できます。' })
-                : t('store.ecHeroCopyB', { defaultValue: 'キャンペーン、ランキング、再販通知を統合したEC体験で、欲しいアイテムに最短でアクセスできます。' })}
-            </p>
-            <div className="relative mt-6 flex flex-wrap gap-3">
-              <a href="#store-products" className="inline-flex items-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 transition hover:bg-gray-100">
-                {ctaVariant === 'A' ? t('store.heroCtaPrimary', { defaultValue: '今すぐ購入する' }) : t('store.heroCtaPrimaryAlt', { defaultValue: '人気商品を見る' })}
-              </a>
-              <Link to={ROUTES.CART} className="inline-flex items-center rounded-full border border-violet-200/70 px-5 py-2.5 text-sm font-semibold text-violet-100 transition hover:border-violet-100">
-                {t('cart.goToCart', { defaultValue: 'カートを見る' })}
-              </Link>
-            </div>
-          </div>
+      {/* ── ヒーローセクション ─────────────────────────── */}
+      <section className="relative overflow-hidden store-hero-surface">
+        {/* オーバーレイ */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(99,102,241,0.35),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(6,182,212,0.15),transparent_55%)]" />
+        <div className="cyber-grid pointer-events-none absolute inset-0 opacity-10" />
 
-          <div className="rounded-3xl border border-gray-200 bg-white px-5 py-6 dark:border-gray-800 dark:bg-gray-950">
-            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-gray-400 dark:text-gray-500">campaign</p>
-            <h2 className="mt-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
-              {t('store.campaignTitle', { defaultValue: '春の限定ドロップ' })}
-            </h2>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
-              {t('store.campaignBody', { defaultValue: '期間限定バンドル、会員先行販売、再販通知登録をまとめて案内しています。' })}
-            </p>
-            <div className="mt-5">
-              <Link to={ROUTES.FANCLUB} className="inline-flex items-center text-sm font-semibold text-violet-600 hover:text-violet-500 dark:text-violet-300 dark:hover:text-violet-200">
-                {t('store.campaignCta', { defaultValue: '先行販売の詳細を見る' })} →
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid gap-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-950 lg:grid-cols-5">
-          <label className="text-xs text-gray-500 dark:text-gray-400 lg:col-span-2">
-            {t('store.searchLabel', { defaultValue: '商品検索' })}
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder={t('store.searchPlaceholder', { defaultValue: '商品名・カテゴリ・タグで検索' })}
-              className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
-            />
-          </label>
-          <label className="text-xs text-gray-500 dark:text-gray-400">
-            {t('store.currencyLabel', { defaultValue: '表示通貨' })}
-            <select
-              value={currency}
-              onChange={(event) => updateCurrency(event.target.value as typeof currency)}
-              className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
+        <div className="relative mx-auto max-w-6xl px-4 py-14 sm:py-20">
+          <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:gap-16 lg:items-center">
+            {/* 左: コピー */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             >
-              {DISPLAY_CURRENCIES.map((code) => (
-                <option key={code} value={code}>{code}</option>
-              ))}
-            </select>
-          </label>
-          <label className="text-xs text-gray-500 dark:text-gray-400">
-            {t('store.regionLabel', { defaultValue: '配送地域' })}
-            <select
-              value={region}
-              onChange={(event) => setRegion(event.target.value as typeof region)}
-              className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"
-            >
-              <option value="JP">JP</option><option value="US">US</option><option value="EU">EU</option><option value="ROW">ROW</option>
-            </select>
-          </label>
-          <div className="rounded-lg border border-dashed border-gray-300 px-3 py-2 text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400">
-            {t('store.regionNotice', {
-              defaultValue: `通貨:${regionPolicy.currency} / 送料:${regionPolicy.shippingFee} / 税率:${Math.round(regionPolicy.taxRate * 100)}% / 配送:${regionPolicy.canShip ? '可' : '不可'}`,
-            })}
-          </div>
-        </div>
-
-        <div className="grid gap-3 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-950 md:grid-cols-2 lg:grid-cols-4">
-          <label className="text-xs text-gray-500 dark:text-gray-400">
-            {t('store.sortLabel', { defaultValue: '並び順' })}
-            <select value={sortBy} onChange={(event) => setSortBy(event.target.value as SortOption)} className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900">
-              <option value="recommended">{t('store.sortRecommended', { defaultValue: 'おすすめ順' })}</option>
-              <option value="newest">{t('store.sortNewest', { defaultValue: '新着順' })}</option>
-              <option value="priceAsc">{t('store.sortPriceAsc', { defaultValue: '価格が安い順' })}</option>
-              <option value="priceDesc">{t('store.sortPriceDesc', { defaultValue: '価格が高い順' })}</option>
-            </select>
-          </label>
-          <label className="text-xs text-gray-500 dark:text-gray-400">
-            {t('store.filterCategory', { defaultValue: 'カテゴリ' })}
-            <select value={selectedCategory} onChange={(event) => setSelectedCategory(event.target.value)} className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900">
-              {categories.map((category) => (
-                <option key={category} value={category}>{category === 'all' ? t('store.filterAll', { defaultValue: 'すべて' }) : category}</option>
-              ))}
-            </select>
-          </label>
-          <label className="text-xs text-gray-500 dark:text-gray-400">
-            {t('store.filterTag', { defaultValue: 'タグ' })}
-            <select value={selectedTag} onChange={(event) => setSelectedTag(event.target.value)} className="mt-1 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900">
-              {tags.map((tag) => (
-                <option key={tag} value={tag}>{tag === 'all' ? t('store.filterAll', { defaultValue: 'すべて' }) : tag}</option>
-              ))}
-            </select>
-          </label>
-          <label className="mt-5 inline-flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
-            <input type="checkbox" checked={hideSoldOut} onChange={(event) => setHideSoldOut(event.target.checked)} />
-            {t('store.hideSoldOut', { defaultValue: '完売商品を非表示' })}
-          </label>
-        </div>
-
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-950">
-          <div className="flex flex-wrap gap-2">
-            {STATUS_FILTERS.map((status) => (
-              <button
-                key={status}
-                type="button"
-                onClick={() => setStatusFilter(status)}
-                className={`rounded-full px-4 py-2 text-xs font-semibold tracking-wide transition ${
-                  statusFilter === status
-                    ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800'
-                }`}
-              >
-                {status === 'all' && t('store.filterAll', { defaultValue: 'すべて' })}
-                {status === 'available' && t('store.filterAvailable', { defaultValue: '販売中' })}
-                {status === 'coming_soon' && t('store.filterComingSoon', { defaultValue: '販売準備中' })}
-                {status === 'soldout' && t('store.filterSoldOut', { defaultValue: '完売' })}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {featuredProducts.length > 0 && (
-          <div className="rounded-2xl border border-gray-200 bg-white px-4 py-4 dark:border-gray-800 dark:bg-gray-950">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-violet-500">{t('store.featuredTitle', { defaultValue: '特集ピックアップ' })}</p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {featuredProducts.map((product) => (
-                <ProductCard key={`featured-${product.id}`} product={product} displayCurrency={currency} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {viewedProducts.length > 0 && (
-          <div className="rounded-2xl border border-gray-200 bg-white px-4 py-4 dark:border-gray-800 dark:bg-gray-950">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-500">{t('store.recentlyViewed', { defaultValue: '最近見た商品' })}</p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {viewedProducts.map((product) => (
-                <ProductCard key={`viewed-${product.id}`} product={product} displayCurrency={currency} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {rankingProducts.length > 0 && (
-          <div className="rounded-2xl border border-gray-200 bg-white px-4 py-4 dark:border-gray-800 dark:bg-gray-950">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="font-mono text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-500">
-                {rankingVariant === 'A' ? t('store.rankingTitle', { defaultValue: '売上ランキング' }) : t('store.rankingTitleB', { defaultValue: '人気トレンド' })}
+              <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-indigo-300/80">
+                mizzz official store
               </p>
-              <div className="inline-flex rounded-full border border-gray-200 p-1 dark:border-gray-800">
-                {(['7d', '30d'] as const).map((range) => (
-                  <button key={range} type="button" onClick={() => setRankingRange(range)} className={`rounded-full px-3 py-1 text-[11px] ${rankingRange === range ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : 'text-gray-500 dark:text-gray-400'}`}>
-                    {range === '7d' ? t('store.ranking7d', { defaultValue: '直近7日' }) : t('store.ranking30d', { defaultValue: '直近30日' })}
-                  </button>
+              <h1 className="mt-3 font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-[56px]">
+                {t('store.title')}
+              </h1>
+              <p className="mt-4 max-w-lg text-sm leading-relaxed text-indigo-100/80">
+                {heroVariant === 'A'
+                  ? t('store.ecHeroCopyA', { defaultValue: '新作ドロップ・限定販売・先行案内を1ページで完結。お気に入りから最短導線で購入できます。' })
+                  : t('store.ecHeroCopyB', { defaultValue: 'キャンペーン、ランキング、再販通知を統合したEC体験で、欲しいアイテムに最短でアクセスできます。' })}
+              </p>
+
+              <div className="mt-7 flex flex-wrap items-center gap-3">
+                <a
+                  href="#store-products"
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-gray-900 shadow-lg shadow-black/20 transition-all hover:-translate-y-0.5 hover:bg-gray-50 hover:shadow-xl"
+                >
+                  {ctaVariant === 'A'
+                    ? t('store.heroCtaPrimary', { defaultValue: '今すぐ購入する' })
+                    : t('store.heroCtaPrimaryAlt', { defaultValue: '人気商品を見る' })}
+                  <span>→</span>
+                </a>
+                <Link
+                  to={ROUTES.CART}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-medium text-white backdrop-blur-sm transition-all hover:bg-white/15 hover:border-white/30"
+                >
+                  {t('cart.goToCart', { defaultValue: 'カートを見る' })}
+                </Link>
+              </div>
+
+              {/* キャンペーン補足 */}
+              <div className="mt-6 inline-flex items-center gap-2 rounded-lg border border-white/15 bg-white/10 px-4 py-2.5 backdrop-blur-sm">
+                <span className="relative flex h-1.5 w-1.5 shrink-0">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-400" />
+                </span>
+                <span className="text-xs text-white/80">
+                  {t('store.campaignTitle', { defaultValue: '春の限定ドロップ' })}
+                  <span className="ml-2 font-mono text-[10px] text-indigo-200/60">
+                    — {t('store.campaignBody', { defaultValue: '会員先行販売・限定バンドルあり' })}
+                  </span>
+                </span>
+                <Link
+                  to={ROUTES.FANCLUB}
+                  className="ml-2 shrink-0 font-mono text-[10px] text-violet-300 underline underline-offset-2 transition-colors hover:text-violet-200"
+                >
+                  {t('store.campaignCta', { defaultValue: '詳細を見る' })}
+                </Link>
+              </div>
+            </motion.div>
+
+            {/* 右: 統計カード */}
+            <motion.div
+              initial={{ opacity: 0, x: 20, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+              transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className="hidden lg:block"
+            >
+              <div className="w-[200px] space-y-2 rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-md">
+                <p className="font-mono text-[8px] uppercase tracking-[0.2em] text-indigo-300/50">
+                  // store.status
+                </p>
+                {[
+                  { label: 'PRODUCTS', value: `${visibleProducts.length}+`, color: 'text-cyan-300' },
+                  { label: 'AVAILABLE', value: `${visibleProducts.filter(p => p.purchaseStatus === 'available').length}`, color: 'text-emerald-300' },
+                  { label: 'REGION', value: region, color: 'text-amber-300' },
+                ].map(({ label, value, color }) => (
+                  <div key={label} className="flex items-center justify-between border-t border-white/5 pt-2">
+                    <span className="font-mono text-[9px] text-indigo-300/40 tracking-widest">{label}</span>
+                    <span className={`font-mono text-[10px] font-medium ${color}`}>{value}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:py-14 space-y-8">
+
+        {/* ── フィルター + 検索エリア ────────────────────── */}
+        <SectionReveal>
+          <div className="rounded-2xl border border-[var(--ds-color-border-default)] bg-[var(--ds-color-bg-surface)] p-5 shadow-sm">
+            {/* ステータスフィルター */}
+            <div className="flex flex-wrap gap-2 pb-4 border-b border-[var(--ds-color-border-subtle)]">
+              {STATUS_FILTERS.map((status) => (
+                <StatusChip
+                  key={status}
+                  active={statusFilter === status}
+                  onClick={() => setStatusFilter(status)}
+                  label={
+                    status === 'all' ? t('store.filterAll', { defaultValue: 'すべて' })
+                    : status === 'available' ? t('store.filterAvailable', { defaultValue: '販売中' })
+                    : status === 'coming_soon' ? t('store.filterComingSoon', { defaultValue: '販売準備中' })
+                    : t('store.filterSoldOut', { defaultValue: '完売' })
+                  }
+                />
+              ))}
+              <label className="ml-auto inline-flex cursor-pointer items-center gap-2 text-xs text-[var(--ds-color-fg-muted)]">
+                <input
+                  type="checkbox"
+                  checked={hideSoldOut}
+                  onChange={(e) => setHideSoldOut(e.target.checked)}
+                  className="h-3.5 w-3.5 rounded accent-violet-600"
+                />
+                {t('store.hideSoldOut', { defaultValue: '完売を非表示' })}
+              </label>
+            </div>
+
+            {/* 検索・ソート・カテゴリ */}
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {/* 検索 */}
+              <div className="relative sm:col-span-2 lg:col-span-1">
+                <svg className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--ds-color-fg-subtle)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={t('store.searchPlaceholder', { defaultValue: '商品名・カテゴリ・タグで検索' })}
+                  className="input-surface w-full py-2 pl-9 pr-3 text-sm"
+                />
+              </div>
+
+              {/* ソート */}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="input-surface w-full px-3 py-2 text-sm"
+              >
+                <option value="recommended">{t('store.sortRecommended', { defaultValue: 'おすすめ順' })}</option>
+                <option value="newest">{t('store.sortNewest', { defaultValue: '新着順' })}</option>
+                <option value="priceAsc">{t('store.sortPriceAsc', { defaultValue: '価格が安い順' })}</option>
+                <option value="priceDesc">{t('store.sortPriceDesc', { defaultValue: '価格が高い順' })}</option>
+              </select>
+
+              {/* カテゴリ */}
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="input-surface w-full px-3 py-2 text-sm"
+              >
+                {categories.map((c) => (
+                  <option key={c} value={c}>{c === 'all' ? t('store.filterAll', { defaultValue: 'すべて' }) : c}</option>
+                ))}
+              </select>
+
+              {/* 通貨 / 地域 */}
+              <div className="flex gap-2">
+                <select
+                  value={currency}
+                  onChange={(e) => updateCurrency(e.target.value as typeof currency)}
+                  className="input-surface flex-1 px-3 py-2 text-sm"
+                >
+                  {DISPLAY_CURRENCIES.map((code) => (
+                    <option key={code} value={code}>{code}</option>
+                  ))}
+                </select>
+                <select
+                  value={region}
+                  onChange={(e) => setRegion(e.target.value as typeof region)}
+                  className="input-surface w-20 px-2 py-2 text-sm"
+                >
+                  <option value="JP">JP</option>
+                  <option value="US">US</option>
+                  <option value="EU">EU</option>
+                  <option value="ROW">ROW</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 地域ポリシー表示 */}
+            <p className="mt-3 font-mono text-[10px] text-[var(--ds-color-fg-subtle)]">
+              {t('store.regionNotice', {
+                defaultValue: `通貨:${regionPolicy.currency} / 送料:${regionPolicy.shippingFee} / 税率:${Math.round(regionPolicy.taxRate * 100)}% / 配送:${regionPolicy.canShip ? '可' : '不可'}`,
+              })}
+            </p>
+          </div>
+        </SectionReveal>
+
+        {/* ── 特集ピックアップ ──────────────────────────── */}
+        {featuredProducts.length > 0 && (
+          <SectionReveal>
+            <div className="rounded-2xl border border-[var(--ds-color-border-default)] bg-[var(--ds-color-bg-surface)] overflow-hidden">
+              <div className="flex items-center justify-between border-b border-[var(--ds-color-border-subtle)] px-5 py-3.5">
+                <div className="flex items-center gap-2.5">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-violet-500" />
+                  <span className="store-featured-badge">
+                    {t('store.featuredTitle', { defaultValue: '特集ピックアップ' })}
+                  </span>
+                </div>
+                <span className="font-mono text-[9px] text-[var(--ds-color-fg-subtle)] uppercase tracking-widest">
+                  {featuredProducts.length} items
+                </span>
+              </div>
+              <div className="p-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {featuredProducts.map((p, i) => (
+                  <motion.div
+                    key={`featured-${p.id}`}
+                    initial={{ opacity: 0, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.45, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <ProductCard product={p} displayCurrency={currency} />
+                  </motion.div>
                 ))}
               </div>
             </div>
-          </div>
+          </SectionReveal>
         )}
 
-        {stockoutForecast.length > 0 && (
-          <div className="rounded-2xl border border-amber-200/70 bg-amber-50/50 px-4 py-3 dark:border-amber-900/40 dark:bg-amber-950/20">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-amber-700 dark:text-amber-300">
-              {t('store.stockoutTitle', { defaultValue: '在庫予測 / 欠品予防' })}
-            </p>
-            <ul className="mt-2 space-y-1 text-xs text-amber-800 dark:text-amber-200">
-              {stockoutForecast.map((row) => (
-                <li key={row.productId}>{row.productTitle}: {t('store.stockoutSummary', { defaultValue: `${row.daysUntilStockout}日で欠品予測 (${row.estimatedStockoutDate})` })}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        <div className="rounded-2xl border border-gray-200 bg-white px-4 py-4 dark:border-gray-800 dark:bg-gray-950">
-          <p className="font-mono text-[10px] uppercase tracking-wider text-gray-400 dark:text-gray-600">status guide</p>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
-            <span className="inline-flex items-center rounded-sm border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-mono text-[11px] uppercase tracking-wider text-emerald-600">AVAILABLE</span>
-            <span className="text-gray-500 dark:text-gray-500">購入可能。すぐに購入またはカート追加できます。</span>
-          </div>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]"><Badge variant="coming_soon" size="sm" /><span className="text-gray-500 dark:text-gray-500">{t('store.statusComingSoon', { defaultValue: '販売準備中。公開通知を待機できます。' })}</span></div>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]"><Badge variant="soldout" size="sm" /><span className="text-gray-500 dark:text-gray-500">{t('store.statusSoldout', { defaultValue: '完売。再販情報は News / Fanclub で案内します。' })}</span></div>
-        </div>
-      </motion.div>
-
-      {loading && <div className="mt-10 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">{Array.from({ length: 8 }).map((_, i) => <SkeletonProductCard key={i} />)}</div>}
-      {error && <p className="mt-8 font-mono text-sm text-red-400">! {t('common.error')}</p>}
-
-      {!loading && !error && filteredProducts.length === 0 && (
-        <div className="mt-16 rounded border border-dashed border-gray-200 p-8 text-center dark:border-gray-800">
-          <p className="font-mono text-sm text-gray-500 dark:text-gray-500">{t('home.store.comingSoon')}</p>
-          <p className="mt-2 text-xs text-gray-400 dark:text-gray-600">{t('store.empty')}</p>
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
-            <Link to={ROUTES.CONTACT} className="inline-flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100">{t('store.requestCta')} →</Link>
-            <Link to={ROUTES.FANCLUB} className="inline-flex items-center text-xs font-mono text-violet-500 hover:text-violet-400">{t('store.emptySubCta')} →</Link>
-          </div>
-        </div>
-      )}
-
-      {filteredProducts.length > 0 && (
-        <div id="store-products" className="mt-10 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
-          {filteredProducts.map((product) => (
-            <div key={product.id} onClick={() => trackEvent('store_product_card_click', { slug: product.slug })}>
-              <ProductCard product={product} displayCurrency={currency} />
+        {/* ── 最近見た商品 ──────────────────────────────── */}
+        {viewedProducts.length > 0 && (
+          <SectionReveal delay={0.05}>
+            <div className="rounded-2xl border border-[var(--ds-color-border-default)] bg-[var(--ds-color-bg-surface)] overflow-hidden">
+              <div className="flex items-center border-b border-[var(--ds-color-border-subtle)] px-5 py-3.5">
+                <span className="store-featured-badge text-[var(--ds-color-fg-subtle)]">
+                  {t('store.recentlyViewed', { defaultValue: '最近見た商品' })}
+                </span>
+              </div>
+              <div className="p-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {viewedProducts.map((p) => (
+                  <ProductCard key={`viewed-${p.id}`} product={p} displayCurrency={currency} />
+                ))}
+              </div>
             </div>
-          ))}
-        </div>
-      )}
+          </SectionReveal>
+        )}
 
-      {!loading && (
-        <div className="mt-16 flex flex-col gap-4 border-t border-gray-100 pt-10 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm text-gray-400 dark:text-gray-600">{t('store.fcNote')}</p>
-            <p className="mt-1 font-mono text-[11px] text-gray-300 dark:text-gray-700">{t('store.stripeNote')}</p>
+        {/* ── ランキング ──────────────────────────────────── */}
+        {rankingProducts.length > 0 && (
+          <SectionReveal delay={0.05}>
+            <div className="rounded-2xl border border-[var(--ds-color-border-default)] bg-[var(--ds-color-bg-surface)] overflow-hidden">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--ds-color-border-subtle)] px-5 py-3.5">
+                <span className="store-featured-badge">
+                  {rankingVariant === 'A'
+                    ? t('store.rankingTitle', { defaultValue: '売上ランキング' })
+                    : t('store.rankingTitleB', { defaultValue: '人気トレンド' })}
+                </span>
+                <div className="inline-flex items-center rounded-full border border-[var(--ds-color-border-default)] bg-[var(--ds-color-bg-muted)] p-0.5">
+                  {(['7d', '30d'] as const).map((range) => (
+                    <button
+                      key={range}
+                      type="button"
+                      onClick={() => setRankingRange(range)}
+                      className={`rounded-full px-3 py-1 text-[11px] font-mono transition-all ${
+                        rankingRange === range
+                          ? 'bg-[var(--ds-color-fg-default)] text-[var(--ds-color-bg-surface)]'
+                          : 'text-[var(--ds-color-fg-muted)] hover:text-[var(--ds-color-fg-default)]'
+                      }`}
+                    >
+                      {range === '7d' ? t('store.ranking7d', { defaultValue: '7日' }) : t('store.ranking30d', { defaultValue: '30日' })}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="divide-y divide-[var(--ds-color-border-subtle)]">
+                {rankingProducts.map((p, i) => (
+                  <div key={`rank-${p.id}`} className="flex items-center gap-4 px-5 py-3.5 hover:bg-[var(--ds-color-bg-muted)] transition-colors">
+                    <span className="font-display text-2xl font-bold text-[var(--ds-color-fg-subtle)] w-7 shrink-0">
+                      {i + 1}
+                    </span>
+                    <Link
+                      to={`/store/${p.slug}`}
+                      className="flex-1 text-sm font-medium text-[var(--ds-color-fg-default)] hover:text-violet-600 dark:hover:text-violet-300 transition-colors"
+                    >
+                      {p.title}
+                    </Link>
+                    <Badge
+                      variant={p.purchaseStatus === 'soldout' ? 'soldout' : p.purchaseStatus === 'coming_soon' ? 'coming_soon' : 'new'}
+                      size="sm"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </SectionReveal>
+        )}
+
+        {/* ── 在庫予測 ──────────────────────────────────── */}
+        {stockoutForecast.length > 0 && (
+          <SectionReveal delay={0.05}>
+            <div className="rounded-2xl border border-amber-200/70 bg-amber-50/60 px-5 py-4 dark:border-amber-900/40 dark:bg-amber-950/20">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-500" />
+                <p className="font-mono text-[10px] uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                  {t('store.stockoutTitle', { defaultValue: '在庫予測 / 欠品予防' })}
+                </p>
+              </div>
+              <ul className="space-y-1 text-xs text-amber-800 dark:text-amber-200">
+                {stockoutForecast.map((row) => (
+                  <li key={row.productId}>
+                    {row.productTitle}: {t('store.stockoutSummary', { defaultValue: `${row.daysUntilStockout}日で欠品予測 (${row.estimatedStockoutDate})` })}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </SectionReveal>
+        )}
+
+        {/* ── ステータスガイド ───────────────────────────── */}
+        <SectionReveal delay={0.05}>
+          <div className="rounded-2xl border border-[var(--ds-color-border-subtle)] bg-[var(--ds-color-bg-muted)] px-5 py-4">
+            <p className="font-mono text-[9px] uppercase tracking-widest text-[var(--ds-color-fg-subtle)] mb-3">
+              status guide
+            </p>
+            <div className="flex flex-wrap gap-x-6 gap-y-2 text-[11px]">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center rounded border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-emerald-600 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">AVAILABLE</span>
+                <span className="text-[var(--ds-color-fg-muted)]">購入可能</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="coming_soon" size="sm" />
+                <span className="text-[var(--ds-color-fg-muted)]">{t('store.statusComingSoon', { defaultValue: '販売準備中' })}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="soldout" size="sm" />
+                <span className="text-[var(--ds-color-fg-muted)]">{t('store.statusSoldout', { defaultValue: '完売。再販情報はNews/FCで案内' })}</span>
+              </div>
+            </div>
           </div>
-          <Link to={ROUTES.FANCLUB} className="inline-flex shrink-0 items-center gap-2 border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-700 transition-all hover:border-gray-400 dark:border-gray-800 dark:text-gray-300 dark:hover:border-gray-600">
-            {t('home.fanclub.joinButton')}<span>→</span>
-          </Link>
-        </div>
-      )}
-    </section>
+        </SectionReveal>
+
+        {/* ── 商品グリッド ──────────────────────────────── */}
+        {loading && (
+          <div id="store-products" className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => <SkeletonProductCard key={i} />)}
+          </div>
+        )}
+
+        {error && (
+          <p className="mt-8 rounded-xl border border-red-200 bg-red-50 px-4 py-3 font-mono text-sm text-red-500 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300">
+            ! {t('common.error')}
+          </p>
+        )}
+
+        {!loading && !error && filteredProducts.length === 0 && (
+          <SectionReveal>
+            <div className="rounded-2xl border border-dashed border-[var(--ds-color-border-default)] bg-[var(--ds-color-bg-muted)] px-8 py-16 text-center">
+              <p className="font-mono text-sm text-[var(--ds-color-fg-subtle)]">
+                {t('home.store.comingSoon')}
+              </p>
+              <p className="mt-2 text-xs text-[var(--ds-color-fg-subtle)]">
+                {t('store.empty')}
+              </p>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
+                <Link
+                  to={ROUTES.CONTACT}
+                  className="inline-flex items-center gap-1 rounded-lg border border-[var(--ds-color-border-default)] bg-[var(--ds-color-bg-surface)] px-4 py-2 text-sm font-medium text-[var(--ds-color-fg-default)] transition-all hover:border-[var(--ds-color-border-strong)] hover:shadow-sm"
+                >
+                  {t('store.requestCta')} →
+                </Link>
+                <Link
+                  to={ROUTES.FANCLUB}
+                  className="inline-flex items-center gap-1 font-mono text-xs text-violet-600 hover:text-violet-500 dark:text-violet-400 dark:hover:text-violet-300"
+                >
+                  {t('store.emptySubCta')} →
+                </Link>
+              </div>
+            </div>
+          </SectionReveal>
+        )}
+
+        {filteredProducts.length > 0 && (
+          <div id="store-products" className="grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
+            {filteredProducts.map((p) => (
+              <div key={p.id} onClick={() => trackEvent('store_product_card_click', { slug: p.slug })}>
+                <ProductCard product={p} displayCurrency={currency} />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ── フッター導線 ──────────────────────────────── */}
+        {!loading && (
+          <SectionReveal delay={0.05}>
+            <div className="flex flex-col gap-4 rounded-2xl border border-[var(--ds-color-border-default)] bg-[var(--ds-color-bg-surface)] px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-medium text-[var(--ds-color-fg-default)]">{t('store.fcNote')}</p>
+                <p className="mt-0.5 font-mono text-[10px] text-[var(--ds-color-fg-subtle)]">{t('store.stripeNote')}</p>
+              </div>
+              <Link
+                to={ROUTES.FANCLUB}
+                className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-violet-700 hover:shadow-md dark:bg-violet-700 dark:hover:bg-violet-600"
+              >
+                {t('home.fanclub.joinButton')} <span>→</span>
+              </Link>
+            </div>
+          </SectionReveal>
+        )}
+      </div>
+    </div>
   )
 }
