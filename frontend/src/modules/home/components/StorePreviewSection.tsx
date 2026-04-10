@@ -21,11 +21,11 @@ function ProductCard({ product, index }: { product: ReturnType<typeof useProduct
       to={detailPath.product(product.slug)}
       onMouseMove={onMouseMove}
       onMouseLeave={onMouseLeave}
-      className="group relative block shrink-0 w-[260px] md:w-[300px] overflow-hidden focus-ring"
+      className="group relative block shrink-0 w-[240px] md:w-[280px] overflow-hidden focus-ring"
       style={{ transformStyle: 'preserve-3d' }}
     >
       {/* Image */}
-      <div className="relative aspect-[3/4] overflow-hidden bg-cyber-800 dark:bg-cyber-950">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-gray-100 dark:bg-cyber-950">
         {product.previewImage ? (
           <>
             <img
@@ -38,13 +38,13 @@ function ProductCard({ product, index }: { product: ReturnType<typeof useProduct
             <div
               className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
               style={{
-                background: 'linear-gradient(135deg, rgba(6,182,212,0.08) 0%, transparent 50%, rgba(245,158,11,0.04) 100%)',
+                background: 'linear-gradient(135deg, rgba(124,58,237,0.08) 0%, transparent 50%, rgba(6,182,212,0.05) 100%)',
               }}
             />
           </>
         ) : (
-          <div className="cyber-grid-fine flex h-full w-full items-center justify-center">
-            <span className="font-mono text-[10px] text-cyan-500/20 group-hover:text-cyan-500/40 transition-colors">
+          <div className="cyber-grid-fine flex h-full w-full items-center justify-center bg-[var(--ds-color-bg-muted)]">
+            <span className="font-mono text-[10px] text-[var(--ds-color-fg-subtle)] uppercase tracking-widest">
               item_{String(index + 1).padStart(2, '0')}
             </span>
           </div>
@@ -52,51 +52,43 @@ function ProductCard({ product, index }: { product: ReturnType<typeof useProduct
 
         {/* Soldout overlay */}
         {product.purchaseStatus === 'soldout' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[rgba(6,6,15,0.7)] backdrop-blur-sm">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
             <Badge variant="soldout" size="sm" />
           </div>
         )}
 
         {/* Status badges */}
         <div className="absolute right-2.5 top-2.5 flex flex-col gap-1">
-          {product.accessStatus === 'fc_only'  && <Badge variant="fc"          />}
-          {product.accessStatus === 'limited'   && <Badge variant="limited"     />}
+          {product.accessStatus === 'fc_only'      && <Badge variant="fc"          />}
+          {product.accessStatus === 'limited'       && <Badge variant="limited"     />}
           {product.purchaseStatus === 'coming_soon' && <Badge variant="coming_soon" />}
         </div>
 
-        {/* Cyber corner marks */}
-        <div className="absolute bottom-0 left-0 w-5 h-5 border-b border-l border-cyan-500/0 group-hover:border-cyan-500/40 transition-all duration-400" />
-        <div className="absolute top-0 right-0 w-5 h-5 border-t border-r border-cyan-500/0 group-hover:border-cyan-500/40 transition-all duration-400" />
-
-        {/* Scan line */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-          <div
-            className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-400/35 to-transparent"
-            style={{ animation: 'scanline 2.5s linear infinite', top: '-100%' }}
-          />
-        </div>
+        {/* Corner marks */}
+        <div className="absolute bottom-0 left-0 h-5 w-5 border-b border-l border-transparent group-hover:border-violet-400/50 transition-all duration-300 rounded-bl-2xl" />
+        <div className="absolute top-0 right-0 h-5 w-5 border-t border-r border-transparent group-hover:border-violet-400/50 transition-all duration-300 rounded-tr-2xl" />
 
         {/* Index label */}
-        <span className="absolute left-2.5 top-2.5 font-mono text-[8px] tracking-widest text-white/0 group-hover:text-cyan-400/60 transition-colors duration-300">
+        <span className="absolute left-2.5 top-2.5 font-mono text-[8px] tracking-widest text-transparent group-hover:text-white/60 transition-colors duration-300">
           {String(index + 1).padStart(2, '0')}
         </span>
       </div>
 
       {/* Meta */}
       <div className="pt-3 px-0.5">
-        <p className="line-clamp-1 text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-cyan-400 dark:group-hover:text-cyan-300 transition-colors duration-200">
+        <p className="line-clamp-1 text-sm font-medium text-[var(--ds-color-fg-default)] group-hover:text-violet-600 dark:group-hover:text-violet-300 transition-colors duration-200">
           {product.title}
         </p>
         <div className="mt-1.5 flex items-center justify-between">
-          <p className="font-mono text-xs text-[rgba(6,182,212,0.6)]">
+          <p className="font-mono text-xs text-[var(--ds-color-fg-muted)]">
             {product.purchaseStatus === 'soldout'
-              ? <span className="text-red-400/60">sold out</span>
+              ? <span className="text-gray-400 dark:text-gray-500">sold out</span>
               : product.purchaseStatus === 'coming_soon'
-                ? <span className="text-amber-400/60">coming soon</span>
-                : formatPriceNum(product.price, product.currency)}
+                ? <span className="text-amber-600 dark:text-amber-400">coming soon</span>
+                : <span className="text-[var(--ds-color-neon-cyan)]">{formatPriceNum(product.price, product.currency)}</span>}
           </p>
           <motion.span
-            className="font-mono text-[10px] text-[rgba(6,182,212,0.3)] group-hover:text-cyan-400 transition-colors"
+            className="font-mono text-[10px] text-[var(--ds-color-fg-subtle)] group-hover:text-violet-500 dark:group-hover:text-violet-300 transition-colors"
             animate={{ x: [0, 3, 0] }}
             transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
           >
@@ -104,7 +96,7 @@ function ProductCard({ product, index }: { product: ReturnType<typeof useProduct
           </motion.span>
         </div>
         {/* Animated underline */}
-        <div className="mt-1.5 h-px w-0 bg-gradient-to-r from-cyan-500/60 to-transparent group-hover:w-full transition-all duration-400 ease-out" />
+        <div className="mt-1.5 h-px w-0 bg-gradient-to-r from-violet-500/60 to-transparent group-hover:w-full transition-all duration-300 ease-out" />
       </div>
     </Link>
   )
@@ -140,7 +132,7 @@ export default function StorePreviewSection() {
   return (
     <section
       ref={trackRef}
-      className="relative overflow-hidden border-t border-[rgba(6,182,212,0.08)] bg-[rgba(6,6,15,0.02)] dark:bg-[rgba(6,6,15,0.6)] py-20"
+      className="relative overflow-hidden border-t border-[var(--ds-color-border-subtle)] bg-[var(--ds-color-bg-muted)] dark:bg-[rgba(6,6,15,0.5)] py-20"
     >
       {/* Subtle bg grid */}
       <div className="cyber-grid pointer-events-none absolute inset-0 opacity-20" />
@@ -158,7 +150,7 @@ export default function StorePreviewSection() {
             viewAllTo={storeLink(ROUTES.STORE)}
             viewAllLabel={t('home.store.viewAll')}
           />
-          <p className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.2em] text-[rgba(6,182,212,0.3)]">
+          <p className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--ds-color-fg-subtle)]">
             {t('store.stripeLead')}
           </p>
         </div>
@@ -192,12 +184,12 @@ export default function StorePreviewSection() {
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
-                  className="shrink-0 w-[260px] md:w-[300px] aspect-[3/4] cyber-grid-fine flex flex-col items-center justify-center border border-dashed border-[rgba(6,182,212,0.1)]"
+                  className="shrink-0 w-[240px] md:w-[280px] aspect-[3/4] rounded-2xl cyber-grid-fine flex flex-col items-center justify-center border border-dashed border-[var(--ds-color-border-default)]"
                 >
-                  <span className="font-mono text-[10px] text-cyan-500/20 uppercase tracking-widest">
+                  <span className="font-mono text-[10px] text-[var(--ds-color-fg-subtle)] uppercase tracking-widest">
                     {t('home.store.comingSoon')}
                   </span>
-                  <span className="mt-1 font-mono text-[9px] text-cyan-500/10">
+                  <span className="mt-1 font-mono text-[9px] text-[var(--ds-color-fg-subtle)]">
                     item_{String(i + 1).padStart(2, '0')}
                   </span>
                 </div>
@@ -218,7 +210,7 @@ export default function StorePreviewSection() {
           <Link
             to={fanclubLink(ROUTES.FANCLUB)}
             onClick={() => trackHomeCta('fanclub')}
-            className="font-mono text-[10px] uppercase tracking-widest text-violet-400/60 hover:text-violet-400 transition-colors"
+            className="font-mono text-[10px] uppercase tracking-widest text-violet-500/70 hover:text-violet-600 dark:text-violet-400/60 dark:hover:text-violet-400 transition-colors"
           >
             {t('store.fanclubLead')} →
           </Link>

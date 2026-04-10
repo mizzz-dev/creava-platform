@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
+
 import { useProductDetail } from '@/modules/store/hooks/useProductDetail'
 import { useProductList } from '@/modules/store/hooks/useProductList'
 import PurchaseActions from '@/modules/store/components/PurchaseActions'
@@ -263,23 +264,45 @@ export default function StoreDetailPage() {
               )}
 
               {/* 購入導線 */}
-              <div className="sticky bottom-4 mt-8 rounded-2xl border border-gray-200 bg-white/95 p-3 shadow-lg shadow-gray-200/70 backdrop-blur dark:border-gray-700 dark:bg-gray-900/95 dark:shadow-black/30">
+              <div className="sticky bottom-4 mt-8 space-y-2 rounded-2xl border border-[var(--ds-color-border-default)] bg-[var(--ds-color-bg-surface)]/95 p-4 shadow-lg shadow-gray-200/60 backdrop-blur-xl dark:shadow-black/40">
                 {product.purchaseStatus === 'available' && product.isPurchasable !== false && (
-                  <button
+                  <motion.button
                     type="button"
                     onClick={() => void handleCheckout()}
                     disabled={checkoutLoading}
-                    className="mb-3 inline-flex w-full items-center justify-center rounded bg-gray-900 px-6 py-3 text-sm font-medium tracking-wide text-white transition-colors hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    whileHover={{ scale: 1.01, translateY: -1 }}
+                    whileTap={{ scale: 0.99 }}
+                    transition={{ duration: 0.15 }}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 px-6 py-3.5 text-sm font-semibold tracking-wide text-white shadow-sm transition-colors hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
                   >
-                    {checkoutLoading ? t('store.checkoutLoading', { defaultValue: '決済ページを準備中...' }) : t('store.checkout', { defaultValue: 'Stripeで購入する' })}
-                  </button>
+                    {checkoutLoading ? (
+                      <>
+                        <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                        {t('store.checkoutLoading', { defaultValue: '決済ページを準備中...' })}
+                      </>
+                    ) : (
+                      <>
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        {t('store.checkout', { defaultValue: 'Stripeで購入する' })}
+                      </>
+                    )}
+                  </motion.button>
                 )}
                 <PurchaseActions
                   product={product}
                   className="mt-0"
                   onAddToCart={canAddCart ? () => addItem(product, 1) : undefined}
                 />
-                {checkoutError && <p className="mt-2 text-xs text-rose-600 dark:text-rose-300">{checkoutError}</p>}
+                {checkoutError && (
+                  <p className="mt-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-600 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-300">
+                    {checkoutError}
+                  </p>
+                )}
               </div>
               {product.purchaseStatus === 'soldout' && (
                 <RestockNotifyForm

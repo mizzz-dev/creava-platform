@@ -46,10 +46,10 @@ export default function ProductCard({ product, displayCurrency = 'JPY', tracking
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        <article className={`overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl dark:bg-gray-900/85 ${
+        <article className={`overflow-hidden rounded-2xl border bg-white shadow-[var(--ds-shadow-card)] transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-[var(--ds-shadow-floating)] dark:bg-gray-900/85 ${
           isUnavailable
             ? 'border-gray-200/70 dark:border-gray-800/80'
-            : 'border-gray-200/90 group-hover:border-gray-300/90 dark:border-gray-800 dark:group-hover:border-gray-700'
+            : 'border-gray-200/90 group-hover:border-gray-300 dark:border-gray-800 dark:group-hover:border-cyan-900/60'
         }`}>
           {/* ── 画像エリア ──────────────────────────────── */}
           <div className="relative aspect-square overflow-hidden bg-gray-50 dark:bg-gray-800">

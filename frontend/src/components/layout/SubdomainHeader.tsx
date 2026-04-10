@@ -43,9 +43,7 @@ export default function SubdomainHeader({ site, navItems, showAuth = false }: Su
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  /* アクセントカラー: ライト / ダーク両方で使えるCSS変数ベースの色 */
   const isStore = site === 'store'
-  const accentLight = isStore ? 'rgba(8,145,178,' : 'rgba(109,40,217,'
 
   return (
     <header
@@ -67,14 +65,11 @@ export default function SubdomainHeader({ site, navItems, showAuth = false }: Su
           <SiteLogo />
           <div className="hidden sm:block">
             <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-400 dark:text-cyan-500/40">mizzz</p>
-            <p
-              className="font-mono text-[10px] uppercase tracking-[0.14em]"
-              style={{
-                color: `${accentLight}0.75)`,
-              }}
-              /* ダークモード時はインラインスタイルで上書き — Tailwindダークモードと
-                 インラインスタイルは混在できないため、CSS変数で分岐 */
-            >
+            <p className={`font-mono text-[10px] uppercase tracking-[0.14em] ${
+              isStore
+                ? 'text-cyan-600 dark:text-cyan-400'
+                : 'text-violet-600 dark:text-violet-400'
+            }`}>
               {isStore ? t('subdomain.storeLabel') : t('subdomain.fanclubLabel')}
             </p>
           </div>
@@ -199,11 +194,13 @@ export default function SubdomainHeader({ site, navItems, showAuth = false }: Su
       </div>
 
       {/* スクロールプログレスバー */}
-      <motion.div
-        className="absolute bottom-0 left-0 h-px origin-left"
+      <div
+        className="absolute bottom-0 left-0 h-px origin-left transition-none"
         style={{
           width: `${scrollProgress * 100}%`,
-          background: `linear-gradient(to right, ${accentLight}0.5), rgba(139,92,246,0.3))`,
+          background: isStore
+            ? 'linear-gradient(to right, rgba(8,145,178,0.6), rgba(139,92,246,0.4))'
+            : 'linear-gradient(to right, rgba(124,58,237,0.6), rgba(6,182,212,0.4))',
         }}
       />
 
