@@ -221,6 +221,67 @@ export const motionPresets: Record<string, Variants> = {
       transition: { duration: 2, repeat: Infinity, ease: 'linear' },
     },
   },
+
+
+  /* ── EC / Store specific ─────────────────────── */
+
+  /** Product card entrance — staggered lift */
+  productCardReveal: {
+    hidden:  { opacity: 0, y: 24, scale: 0.97 },
+    visible: { opacity: 1, y: 0,  scale: 1,   transition: { duration: 0.52, ease: EASE_OUT } },
+  },
+
+  /** Badge pop — for NEW / LIMITED badges */
+  badgePop: {
+    hidden:  { opacity: 0, scale: 0.7 },
+    visible: { opacity: 1, scale: 1,   transition: { duration: 0.3, ease: EASE_SPRING } },
+  },
+
+  /** Price reveal — upward slide */
+  priceReveal: {
+    hidden:  { opacity: 0, y: 8 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: EASE_OUT } },
+  },
+
+  /** Hero text stagger — large display text reveal */
+  heroTextReveal: {
+    hidden:  { opacity: 0, y: 36, clipPath: 'inset(100% 0% 0% 0%)' },
+    visible: {
+      opacity: 1,
+      y: 0,
+      clipPath: 'inset(0% 0% 0% 0%)',
+      transition: { duration: 0.75, ease: EASE_OUT },
+    },
+  },
+
+  /** Section entrance with blur — editorial reveal */
+  sectionBlurReveal: {
+    hidden:  { opacity: 0, y: 18, filter: 'blur(6px)' },
+    visible: {
+      opacity: 1,
+      y: 0,
+      filter: 'blur(0px)',
+      transition: { duration: 0.6, ease: EASE_SMOOTH },
+    },
+  },
+
+  /** Horizontal card slide — for featured / spotlight lists */
+  cardSlideIn: {
+    hidden:  { opacity: 0, x: -20 },
+    visible: { opacity: 1, x: 0,   transition: { duration: 0.48, ease: EASE_OUT } },
+  },
+
+  /** Subtle zoom in — for image reveals */
+  imageReveal: {
+    hidden:  { opacity: 0, scale: 1.04 },
+    visible: { opacity: 1, scale: 1,    transition: { duration: 0.65, ease: EASE_SMOOTH } },
+  },
+
+  /** CTA button entrance */
+  ctaReveal: {
+    hidden:  { opacity: 0, y: 12, scale: 0.96 },
+    visible: { opacity: 1, y: 0,  scale: 1,    transition: { duration: 0.4, ease: EASE_SPRING } },
+  },
 }
 
 export type MotionPresetName = keyof typeof motionPresets

@@ -8,6 +8,7 @@ import { convertPrice, type DisplayCurrency } from '../lib/currency'
 import Badge from '@/components/common/Badge'
 import type { StoreProductSummary } from '../types'
 import { trackCtaClick, trackProductCardClick } from '@/modules/analytics/tracking'
+import { motionPresets } from '@/components/common/motionPresets'
 
 interface Props {
   product: StoreProductSummary
@@ -28,95 +29,125 @@ export default function ProductCard({ product, displayCurrency = 'JPY', tracking
         : formatPriceNum(convertPrice(product.price, product.currency, displayCurrency), displayCurrency)
 
   return (
-    <Link
-      to={detailPath.product(product.slug)}
-      onClick={() => {
-        trackCtaClick(trackingLocation, 'product_click', { slug: product.slug, status: product.purchaseStatus })
-        trackProductCardClick(trackingLocation, product.slug, product.purchaseStatus)
-      }}
-      className="group block"
-      aria-label={`${product.title} ${t('store.detailCta')}`}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+    <motion.div
+      variants={motionPresets.productCardReveal}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.1 }}
     >
-      <article className="overflow-hidden rounded-2xl border border-gray-200/80 bg-white/90 shadow-sm shadow-gray-200/40 transition-all duration-300 group-hover:-translate-y-1 group-hover:border-gray-300/90 group-hover:shadow-xl dark:border-gray-800 dark:bg-gray-900/80 dark:shadow-black/20 dark:group-hover:border-gray-700">
-        <div className="relative aspect-square overflow-hidden bg-gray-100 dark:bg-gray-800">
-          <motion.div
-            animate={{ opacity: hovered ? 1 : 0.7 }}
-            transition={{ duration: 0.2 }}
-            className="absolute left-3 top-3 z-10 rounded-full border border-white/70 bg-white/70 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.18em] text-gray-500 backdrop-blur dark:border-white/20 dark:bg-gray-900/70 dark:text-gray-300"
-          >
-            curated
-          </motion.div>
-          {product.previewImage ? (
-            <img
-              src={product.previewImage.url}
-              alt={product.previewImage.alt ?? product.title}
-              className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${isUnavailable ? 'opacity-60 grayscale' : ''}`}
-              loading="lazy"
+      <Link
+        to={detailPath.product(product.slug)}
+        onClick={() => {
+          trackCtaClick(trackingLocation, 'product_click', { slug: product.slug, status: product.purchaseStatus })
+          trackProductCardClick(trackingLocation, product.slug, product.purchaseStatus)
+        }}
+        className="group block"
+        aria-label={`${product.title} ${t('store.detailCta')}`}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        <article className={`overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl dark:bg-gray-900/85 ${
+          isUnavailable
+            ? 'border-gray-200/70 dark:border-gray-800/80'
+            : 'border-gray-200/90 group-hover:border-gray-300/90 dark:border-gray-800 dark:group-hover:border-gray-700'
+        }`}>
+          {/* ── 画像エリア ──────────────────────────────── */}
+          <div className="relative aspect-square overflow-hidden bg-gray-50 dark:bg-gray-800">
+            {/* 画像 */}
+            {product.previewImage ? (
+              <img
+                src={product.previewImage.url}
+                alt={product.previewImage.alt ?? product.title}
+                className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${isUnavailable ? 'opacity-50 grayscale' : ''}`}
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900">
+                <span className="font-mono text-[10px] uppercase tracking-widest text-gray-300 dark:text-gray-700">no image</span>
+              </div>
+            )}
+
+            {/* グラジエントオーバーレイ */}
+            <div className={`absolute inset-0 bg-gradient-to-t from-gray-900/40 via-transparent to-transparent transition-opacity duration-300 ${hovered ? 'opacity-100' : 'opacity-0'}`} />
+
+            {/* ホバー時のグロー */}
+            <motion.div
+              animate={{ opacity: hovered ? 1 : 0 }}
+              transition={{ duration: 0.3 }}
+              className="pointer-events-none absolute inset-x-4 bottom-3 h-10 rounded-xl bg-white/40 blur-xl dark:bg-violet-400/20"
             />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center">
-              <span className="font-mono text-[10px] text-gray-300 dark:text-gray-700">no image</span>
+
+            {/* 右上バッジ群 */}
+            <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
+              {product.campaignType === 'drop'    && <Badge variant="featured"    size="sm" label="DROP" />}
+              {product.campaignType === 'restock' && <Badge variant="new"         size="sm" label="RESTOCK" />}
+              {product.pickup                     && <Badge variant="pickup"      size="sm" />}
+              {product.isTrending                 && <Badge variant="featured"    size="sm" label="TRENDING" />}
+              {product.purchaseStatus === 'soldout'      && <Badge variant="soldout"    size="sm" />}
+              {product.purchaseStatus === 'coming_soon'  && <Badge variant="coming_soon" size="sm" />}
+              {product.isNewArrival                && <Badge variant="new"         size="sm" />}
+              {product.isLimited                  && <Badge variant="limited"     size="sm" label="LIMITED" />}
             </div>
-          )}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-950/45 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-          <div className="pointer-events-none absolute inset-x-3 bottom-3 h-14 rounded-2xl bg-white/60 opacity-0 blur-xl transition duration-300 group-hover:opacity-100 dark:bg-violet-400/20" />
-
-          <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
-            {product.campaignType === 'drop' && <Badge variant="featured" size="sm" label="DROP" />}
-            {product.campaignType === 'restock' && <Badge variant="new" size="sm" label="RESTOCK" />}
-            {product.pickup && <Badge variant="pickup" size="sm" />}
-            {product.isTrending && <Badge variant="featured" size="sm" label="TRENDING" />}
-            {product.purchaseStatus === 'soldout' && <Badge variant="soldout" size="sm" />}
-            {product.purchaseStatus === 'coming_soon' && <Badge variant="coming_soon" size="sm" />}
-            {product.isNewArrival && <Badge variant="new" size="sm" />}
-            {product.isLimited && <Badge variant="limited" size="sm" label="LIMITED" />}
+            {/* 左下バッジ群 */}
+            <div className="absolute bottom-2 left-2 flex items-center gap-1">
+              {product.accessStatus === 'fc_only' && <Badge variant="fc"      size="sm" label="MEMBERS" />}
+              {product.accessStatus === 'limited' && <Badge variant="limited" size="sm" />}
+              {product.earlyAccess                && <Badge variant="early"   size="sm" label={t('store.badgeEarly', { defaultValue: '先行' })} />}
+              {product.memberBenefit              && <Badge variant="benefit" size="sm" label={t('store.badgeBenefit', { defaultValue: '特典' })} />}
+            </div>
           </div>
 
-          <div className="absolute bottom-2 left-2 flex items-center gap-1">
-            {product.accessStatus === 'fc_only' && <Badge variant="fc" size="sm" label="MEMBERS" />}
-            {product.accessStatus === 'limited' && <Badge variant="limited" size="sm" />}
-            {product.earlyAccess && <Badge variant="early" size="sm" label={t('store.badgeEarly', { defaultValue: '先行' })} />}
-            {product.memberBenefit && <Badge variant="benefit" size="sm" label={t('store.badgeBenefit', { defaultValue: '特典' })} />}
-          </div>
-        </div>
+          {/* ── テキストエリア ─────────────────────────── */}
+          <div className="space-y-1.5 px-4 py-3.5">
+            {/* タイトル + 矢印 */}
+            <h3 className="flex items-start justify-between gap-2 text-sm font-medium leading-relaxed text-gray-900 transition-colors group-hover:text-gray-600 dark:text-gray-100 dark:group-hover:text-gray-300">
+              <span className="line-clamp-2">{product.title}</span>
+              <motion.span
+                aria-hidden
+                animate={{ x: hovered ? 4 : 0, opacity: hovered ? 1 : 0 }}
+                transition={{ duration: 0.18 }}
+                className="mt-0.5 shrink-0 text-gray-400"
+              >
+                →
+              </motion.span>
+            </h3>
 
-        <div className="space-y-1.5 px-3.5 py-3.5">
-          <h3 className="flex items-start justify-between gap-2 line-clamp-2 text-sm font-medium leading-relaxed text-gray-900 transition-colors group-hover:text-gray-600 dark:text-gray-100 dark:group-hover:text-gray-300">
-            <span className="line-clamp-2">{product.title}</span>
-            <motion.span
-              aria-hidden
-              animate={{ x: hovered ? 3 : 0, opacity: hovered ? 1 : 0 }}
-              transition={{ duration: 0.18 }}
-              className="shrink-0 mt-0.5 text-gray-400"
-            >
-              →
-            </motion.span>
-          </h3>
-          <p className="font-mono text-xs text-gray-500 dark:text-gray-400">{statusLabel}</p>
-          {/* sold-out 時の上品な代替メッセージ */}
-          {product.purchaseStatus === 'soldout' && (
-            <p className="text-[10px] text-gray-400 dark:text-gray-500">
-              {t('store.statusSoldout', { defaultValue: '再販情報は News / Fanclub で案内します。' })}
-            </p>
-          )}
-          {product.shortHighlight && product.purchaseStatus !== 'soldout' && (
-            <p className="line-clamp-2 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">{product.shortHighlight}</p>
-          )}
-          <div className="flex items-center justify-between gap-3">
-            <span className="line-clamp-1 text-[11px] text-gray-500 dark:text-gray-500">
-              {product.accessStatus === 'fc_only'
-                ? t('store.fcOnlyNote')
-                : t('store.detailHint', { defaultValue: '購入条件を確認' })}
-            </span>
-            <span className="shrink-0 rounded-full border border-gray-200 bg-gray-100/90 px-2 py-0.5 font-mono text-[10px] text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
-              {product.stock > 0 ? `在庫 ${product.stock}` : '在庫なし'}
-            </span>
+            {/* ハイライト */}
+            {product.shortHighlight && product.purchaseStatus !== 'soldout' && (
+              <p className="line-clamp-1 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">{product.shortHighlight}</p>
+            )}
+
+            {/* 価格 / ステータス */}
+            <div className="flex items-center justify-between gap-2">
+              <p className={`font-mono text-sm font-medium price-badge ${
+                isUnavailable ? 'text-gray-400 dark:text-gray-500' : 'text-gray-800 dark:text-gray-100'
+              }`}>
+                {statusLabel}
+              </p>
+              <span className={`shrink-0 rounded-full px-2.5 py-0.5 font-mono text-[9px] uppercase tracking-wider ${
+                product.stock > 0
+                  ? 'badge-in-stock'
+                  : 'badge-soldout'
+              }`}>
+                {product.stock > 0 ? `在庫 ${product.stock}` : '在庫なし'}
+              </span>
+            </div>
+
+            {/* 売り切れ補足 */}
+            {product.purchaseStatus === 'soldout' && (
+              <p className="text-[10px] text-gray-400 dark:text-gray-500">
+                {t('store.statusSoldout', { defaultValue: '再販情報は News / Fanclub で案内します。' })}
+              </p>
+            )}
+
+            {/* FC限定補足 */}
+            {product.accessStatus === 'fc_only' && product.purchaseStatus !== 'soldout' && (
+              <p className="text-[10px] text-violet-600 dark:text-violet-400">{t('store.fcOnlyNote')}</p>
+            )}
           </div>
-        </div>
-      </article>
-    </Link>
+        </article>
+      </Link>
+    </motion.div>
   )
 }

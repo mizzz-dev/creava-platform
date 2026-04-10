@@ -46,14 +46,14 @@ const TICKER_ITEMS = ['film', 'photography', 'music', 'direction', 'design', 'mo
 function Ticker() {
   const doubled = [...TICKER_ITEMS, ...TICKER_ITEMS]
   return (
-    <div className="marquee-container border-y border-[rgba(6,182,212,0.1)] py-2 overflow-hidden">
+    <div className="marquee-container border-y border-gray-200/80 py-2 overflow-hidden dark:border-[rgba(6,182,212,0.1)]">
       <div className="marquee-track flex items-center gap-8">
         {doubled.map((item, i) => (
           <span key={i} className="flex items-center gap-8 shrink-0">
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-500/60 dark:text-cyan-400/50">
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-gray-400 dark:text-cyan-400/50">
               {item}
             </span>
-            <span className="text-[rgba(6,182,212,0.2)] text-xs">◆</span>
+            <span className="text-gray-300 text-xs dark:text-[rgba(6,182,212,0.2)]">◆</span>
           </span>
         ))}
       </div>
@@ -70,36 +70,36 @@ function SystemPanel() {
   }, [])
 
   const rows = [
-    { label: 'STATUS',   value: 'ONLINE',    color: 'text-green-400' },
-    { label: 'TYPE',     value: 'CREATOR',   color: 'text-cyan-400'  },
-    { label: 'MODE',     value: 'PUBLIC',    color: 'text-violet-400' },
-    { label: 'BUILD',    value: `v2.${tick % 9}.${tick % 3}`, color: 'text-amber-400' },
+    { label: 'STATUS',   value: 'ONLINE',    color: 'text-emerald-600 dark:text-green-400' },
+    { label: 'TYPE',     value: 'CREATOR',   color: 'text-cyan-600 dark:text-cyan-400'  },
+    { label: 'MODE',     value: 'PUBLIC',    color: 'text-violet-600 dark:text-violet-400' },
+    { label: 'BUILD',    value: `v2.${tick % 9}.${tick % 3}`, color: 'text-amber-600 dark:text-amber-400' },
   ]
 
   return (
-    <div className="glass-cyber rounded-sm p-5 w-[220px] relative overflow-hidden">
-      {/* Scanline sweep */}
-      <div className="scanline absolute inset-0 pointer-events-none" />
+    <div className="glass-cyber rounded-xl p-5 w-[220px] relative overflow-hidden">
+      {/* Scanline sweep — dark mode only */}
+      <div className="scanline absolute inset-0 pointer-events-none dark:block hidden" />
 
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-cyan-400/60">
+        <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-400 dark:text-cyan-400/60">
           // SYS.STATUS
         </span>
         <div className="flex items-center gap-1.5">
           <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-60" />
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-400" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
           </span>
-          <span className="font-mono text-[8px] text-green-400/70 tracking-widest">LIVE</span>
+          <span className="font-mono text-[8px] text-emerald-600 dark:text-green-400/70 tracking-widest">LIVE</span>
         </div>
       </div>
 
       {/* Data rows */}
       <div className="space-y-2.5">
         {rows.map(({ label, value, color }) => (
-          <div key={label} className="flex items-center justify-between group">
-            <span className="font-mono text-[9px] text-[rgba(120,140,180,0.5)] tracking-widest">
+          <div key={label} className="flex items-center justify-between">
+            <span className="font-mono text-[9px] text-gray-400 dark:text-[rgba(120,140,180,0.5)] tracking-widest">
               {label}
             </span>
             <span className={`font-mono text-[9px] tracking-wider ${color}`}>
@@ -110,18 +110,18 @@ function SystemPanel() {
       </div>
 
       {/* Footer */}
-      <div className="mt-4 pt-3 border-t border-[rgba(6,182,212,0.12)]">
+      <div className="mt-4 pt-3 border-t border-gray-200/80 dark:border-[rgba(6,182,212,0.12)]">
         <div className="flex items-center gap-1.5">
-          <span className="typed-cursor text-cyan-400/70 h-3" />
-          <span className="font-mono text-[9px] text-[rgba(6,182,212,0.5)]">
+          <span className="typed-cursor text-gray-400 dark:text-cyan-400/70 h-3" />
+          <span className="font-mono text-[9px] text-gray-400 dark:text-[rgba(6,182,212,0.5)]">
             film · photo · music
           </span>
         </div>
       </div>
 
       {/* Corner deco */}
-      <div className="absolute bottom-0 right-0 w-8 h-8 border-b border-r border-cyan-500/20" />
-      <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-cyan-500/20" />
+      <div className="absolute bottom-0 right-0 w-8 h-8 border-b border-r border-gray-200/80 dark:border-cyan-500/20" />
+      <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-gray-200/80 dark:border-cyan-500/20" />
     </div>
   )
 }
@@ -129,18 +129,18 @@ function SystemPanel() {
 /* ── Stat card ──────────────────────────────────────── */
 function StatCard({ value, label, accent = 'cyan' }: { value: number; label: string; accent?: 'cyan' | 'amber' | 'violet' }) {
   const colors = {
-    cyan:   { border: 'border-cyan-500/20',   text: 'text-cyan-400',   bg: 'bg-cyan-500/5'   },
-    amber:  { border: 'border-amber-500/20',  text: 'text-amber-400',  bg: 'bg-amber-500/5'  },
-    violet: { border: 'border-violet-500/20', text: 'text-violet-400', bg: 'bg-violet-500/5' },
+    cyan:   { border: 'border-cyan-200/80 dark:border-cyan-500/20',   text: 'text-cyan-600 dark:text-cyan-400',   bg: 'bg-cyan-50/80 dark:bg-cyan-500/5'   },
+    amber:  { border: 'border-amber-200/80 dark:border-amber-500/20',  text: 'text-amber-600 dark:text-amber-400',  bg: 'bg-amber-50/80 dark:bg-amber-500/5'  },
+    violet: { border: 'border-violet-200/80 dark:border-violet-500/20', text: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-50/80 dark:bg-violet-500/5' },
   }
   const c = colors[accent]
 
   return (
-    <div className={`${c.bg} border ${c.border} px-4 py-3 rounded-sm`}>
+    <div className={`${c.bg} border ${c.border} px-4 py-3 rounded-xl`}>
       <div className={`font-display text-2xl font-bold ${c.text}`}>
         <Counter to={value} suffix="+" />
       </div>
-      <div className="font-mono text-[9px] uppercase tracking-widest text-[rgba(120,140,180,0.6)] mt-0.5">
+      <div className="font-mono text-[9px] uppercase tracking-widest text-gray-400 dark:text-[rgba(120,140,180,0.6)] mt-0.5">
         {label}
       </div>
     </div>
@@ -241,7 +241,7 @@ export default function HeroSection() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                 </span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[rgba(120,140,180,0.7)]">
+                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-gray-400 dark:text-[rgba(120,140,180,0.7)]">
                   portfolio / v2.0
                 </span>
               </div>
@@ -282,15 +282,15 @@ export default function HeroSection() {
             {/* Sub copy */}
             <motion.p
               variants={stagger.item}
-              className="mt-5 max-w-lg text-lg leading-relaxed text-[rgba(120,140,180,0.85)] dark:text-[rgba(180,190,220,0.75)]"
+              className="mt-5 max-w-lg text-lg leading-relaxed text-gray-500 dark:text-[rgba(180,190,220,0.75)]"
             >
-              <span className="font-mono text-sm text-cyan-500/50 select-none mr-2">&gt;</span>
+              <span className="font-mono text-sm text-gray-300 dark:text-cyan-500/50 select-none mr-2">&gt;</span>
               {t('home.hero.subCopy')}
             </motion.p>
 
             <motion.p
               variants={stagger.item}
-              className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[rgba(6,182,212,0.3)]"
+              className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-gray-300 dark:text-[rgba(6,182,212,0.3)]"
             >
               {t('home.hero.hubLine')}
             </motion.p>
@@ -390,9 +390,9 @@ export default function HeroSection() {
           <motion.div
             animate={{ scaleY: [1, 0.4, 1] }}
             transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-            className="h-5 w-px origin-top bg-gradient-to-b from-cyan-500/70 to-transparent"
+            className="h-5 w-px origin-top bg-gradient-to-b from-gray-400/60 dark:from-cyan-500/70 to-transparent"
           />
-          <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-[rgba(6,182,212,0.4)]">
+          <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-gray-300 dark:text-[rgba(6,182,212,0.4)]">
             scroll
           </span>
         </motion.div>
