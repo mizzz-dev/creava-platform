@@ -216,18 +216,37 @@ export default function StorefrontHomePage() {
       {primaryCampaign && <CampaignHero campaign={primaryCampaign} location="store_home_campaign_hero" />}
 
       {sectionResolver('store-home-pickup', true) && !loading && !error && pickup.length > 0 && (
-        <section className="mt-10 grid gap-4 lg:grid-cols-3">
-          {pickup.map((item, index) => (
-            <Link key={item.id} to={`/products/${item.slug}`} onClick={() => trackCtaClick('store_home_pickup', 'pickup_click', { slug: item.slug })} className={`group overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 transition hover:-translate-y-1 hover:shadow-lg dark:border-gray-800 dark:bg-gray-900 ${index === 0 ? 'lg:col-span-2' : ''}`}>
-              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-gray-500">Editor's pick</p>
-              <h2 className="mt-2 text-lg font-semibold text-gray-900 group-hover:text-gray-600 dark:text-gray-100 dark:group-hover:text-gray-300">{item.title}</h2>
-              <p className="mt-2 line-clamp-2 text-sm text-gray-600 dark:text-gray-300">詳細ページで商品の仕様や購入条件を確認できます。</p>
+        <SectionReveal className="mt-10">
+          <div className="flex items-center gap-3 mb-5">
+            <p className="section-eyebrow">Editor's Pick</p>
+            <div className="h-px flex-1 bg-gradient-to-r from-gray-200 to-transparent dark:from-gray-700" />
+          </div>
+          <div className="grid gap-4 lg:grid-cols-3">
+            {pickup.map((item, index) => (
+              <Link
+                key={item.id}
+                to={`/products/${item.slug}`}
+                onClick={() => trackCtaClick('store_home_pickup', 'pickup_click', { slug: item.slug })}
+                className={`group relative overflow-hidden rounded-2xl border border-gray-200/90 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-gray-300/80 hover:shadow-lg dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700 ${index === 0 ? 'lg:col-span-2' : ''}`}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-violet-50/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:from-violet-950/20" />
+                <p className="relative font-mono text-[10px] uppercase tracking-[0.18em] text-gray-400 dark:text-gray-500">Editor's pick</p>
+                <h2 className="relative mt-2 text-lg font-semibold text-gray-900 group-hover:text-gray-700 dark:text-gray-100 dark:group-hover:text-gray-300">{item.title}</h2>
+                <p className="relative mt-2 line-clamp-2 text-sm text-gray-500 dark:text-gray-400">詳細ページで商品の仕様や購入条件を確認できます。</p>
+                <p className="relative mt-4 font-mono text-[11px] text-gray-400 transition-colors group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300">詳細を見る →</p>
+              </Link>
+            ))}
+            <Link
+              to="/news"
+              onClick={() => trackCtaClick('store_home_pickup', 'news')}
+              className="flex flex-col justify-between rounded-2xl border border-dashed border-gray-200/80 p-5 text-sm text-gray-500 transition-all duration-300 hover:border-gray-300 hover:bg-gray-50/60 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-900/50"
+            >
+              <p className="font-mono text-[10px] uppercase tracking-widest text-gray-400 dark:text-gray-600">週次更新</p>
+              <p className="mt-2 font-medium text-gray-700 dark:text-gray-300">今週のおすすめ・お知らせを見る</p>
+              <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">News一覧へ →</p>
             </Link>
-          ))}
-          <Link to="/news" onClick={() => trackCtaClick('store_home_pickup', 'news')} className="rounded-2xl border border-dashed border-gray-300 p-5 text-sm text-gray-600 transition hover:border-gray-500 dark:border-gray-700 dark:text-gray-300">
-            今週のおすすめ・お知らせを見る →
-          </Link>
-        </section>
+          </div>
+        </SectionReveal>
       )}
 
       {sectionResolver('store-home-bento', true) && <CuratedBentoSection
@@ -243,25 +262,58 @@ export default function StorefrontHomePage() {
         items={spotlightItems}
       />}
 
-      {sectionResolver('store-home-new-arrivals', true) && <SectionReveal className="mt-12">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">New Arrival</h2>
-          <Link to="/products" onClick={() => trackCtaClick('store_home_new_arrival', 'more')} className="text-sm text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100">もっと見る →</Link>
-        </div>
-        {loading && <div className="grid grid-cols-2 gap-4 md:grid-cols-4">{Array.from({ length: 4 }).map((_, idx) => <SkeletonProductCard key={idx} />)}</div>}
-        {error && <ErrorState message={error} onRetry={refetch} location="store_home_new_arrival" />}
-        {!loading && !error && newArrivals.length === 0 && <p className="rounded-xl border border-dashed border-gray-300 p-6 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">公開中の商品はまだありません。</p>}
-        {!loading && !error && newArrivals.length > 0 && <div className="grid grid-cols-2 gap-4 md:grid-cols-4">{newArrivals.map((product) => <ProductCard key={product.id} product={product} trackingLocation="store_home_new_arrival" />)}</div>}
-      </SectionReveal>}
+      {sectionResolver('store-home-new-arrivals', true) && (
+        <SectionReveal className="mt-14">
+          <div className="mb-5 flex items-center justify-between">
+            <div>
+              <p className="section-eyebrow mb-1">New Arrivals</p>
+              <h2 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">最新商品</h2>
+            </div>
+            <Link
+              to="/products"
+              onClick={() => trackCtaClick('store_home_new_arrival', 'more')}
+              className="group inline-flex items-center gap-1 text-sm text-gray-500 transition-colors hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100"
+            >
+              もっと見る
+              <span className="inline-block transition-transform duration-200 group-hover:translate-x-1">→</span>
+            </Link>
+          </div>
+          {loading && <div className="grid grid-cols-2 gap-4 md:grid-cols-4">{Array.from({ length: 4 }).map((_, idx) => <SkeletonProductCard key={idx} />)}</div>}
+          {error && <ErrorState message={error} onRetry={refetch} location="store_home_new_arrival" />}
+          {!loading && !error && newArrivals.length === 0 && (
+            <p className="rounded-2xl border border-dashed border-gray-200 bg-white/60 p-8 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-transparent dark:text-gray-400">
+              公開中の商品はまだありません。
+            </p>
+          )}
+          {!loading && !error && newArrivals.length > 0 && (
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              {newArrivals.map((product) => <ProductCard key={product.id} product={product} trackingLocation="store_home_new_arrival" />)}
+            </div>
+          )}
+        </SectionReveal>
+      )}
 
-      {sectionResolver('store-home-collections', true) && <SectionReveal className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {DEFAULT_COLLECTIONS.map((collection) => (
-          <Link key={collection.slug} to={`/collections/${collection.slug}`} onClick={() => trackCtaClick('store_home_collection', 'collection_click', { collection: collection.slug })} className="rounded-2xl border border-gray-200 bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-900/70">
-            <p className="font-mono text-[11px] uppercase tracking-wider text-gray-500">{collection.name}</p>
-            <p className="mt-2 text-xs leading-relaxed text-gray-500 dark:text-gray-400">{collection.description}</p>
-          </Link>
-        ))}
-      </SectionReveal>}
+      {sectionResolver('store-home-collections', true) && (
+        <SectionReveal className="mt-12">
+          <div className="flex items-center gap-3 mb-5">
+            <p className="section-eyebrow">Collections</p>
+            <div className="h-px flex-1 bg-gradient-to-r from-gray-200 to-transparent dark:from-gray-700" />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            {DEFAULT_COLLECTIONS.map((collection) => (
+              <Link
+                key={collection.slug}
+                to={`/collections/${collection.slug}`}
+                onClick={() => trackCtaClick('store_home_collection', 'collection_click', { collection: collection.slug })}
+                className="group rounded-2xl border border-gray-200/90 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-300/80 hover:shadow-md dark:border-gray-800 dark:bg-gray-900/70 dark:hover:border-gray-700"
+              >
+                <p className="font-mono text-[11px] uppercase tracking-wider text-gray-500 transition-colors group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-200">{collection.name}</p>
+                <p className="mt-2 text-xs leading-relaxed text-gray-400 dark:text-gray-500">{collection.description}</p>
+              </Link>
+            ))}
+          </div>
+        </SectionReveal>
+      )}
 
 
       {sectionResolver('store-home-weekly-update', true) && <div id="store-weekly-update">
@@ -319,64 +371,81 @@ export default function StorefrontHomePage() {
         </section>
       )}
 
-      {sectionResolver('store-home-featured', true) && <SectionReveal className="mt-12 grid gap-10 lg:grid-cols-2">
-        {!loading && !error && featured.length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Featured</h2>
-            <div className="mt-4 grid grid-cols-2 gap-4">{featured.map((product) => <ProductCard key={product.id} product={product} trackingLocation="store_home_featured" />)}</div>
-          </div>
-        )}
-
-        {!loading && !error && digitalGoods.length > 0 && (
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Digital Goods</h2>
-            <div className="mt-4 grid grid-cols-2 gap-4">{digitalGoods.map((product) => <ProductCard key={product.id} product={product} trackingLocation="store_home_digital" />)}</div>
-          </div>
-        )}
-      </SectionReveal>}
-
-      {sectionResolver('store-home-news-support', true) && <SectionReveal className="mt-12 grid gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900/70">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">お知らせ</h2>
-            <Link to="/news" onClick={() => trackCtaClick('store_home_news', 'list')} className="text-xs text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">一覧へ →</Link>
-          </div>
-          {newsLoading && <p className="text-sm text-gray-500">読み込み中...</p>}
-          {newsError && <ErrorState message={newsError} onRetry={refetchNews} location="store_home_news" />}
-          {!newsLoading && !newsError && (!news || news.length === 0) && <p className="text-sm text-gray-500">お知らせはまだありません。</p>}
-          {!newsLoading && !newsError && news && news.length > 0 && (
-            <ul className="space-y-2">
-              {news.map((item) => (
-                <li key={item.id}>
-                  <Link to={`/news/${item.slug}`} onClick={() => trackCtaClick('store_home_news', 'news_click', { slug: item.slug })} className="text-sm text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
-                    {item.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <div className="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900/70">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">FAQ / Guide</h2>
-            <div className="flex items-center gap-2 text-xs">
-              <Link to="/faq" onClick={() => trackCtaClick('store_home_support', 'faq')} className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">FAQ</Link>
-              <Link to="/guide" onClick={() => trackCtaClick('store_home_support', 'guide')} className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">Guide</Link>
+      {sectionResolver('store-home-featured', true) && !loading && !error && (featured.length > 0 || digitalGoods.length > 0) && (
+        <SectionReveal className="mt-14 grid gap-10 lg:grid-cols-2">
+          {featured.length > 0 && (
+            <div>
+              <p className="section-eyebrow mb-2">Featured</p>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">特集商品</h2>
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                {featured.map((product) => <ProductCard key={product.id} product={product} trackingLocation="store_home_featured" />)}
+              </div>
             </div>
-          </div>
-          {faqLoading && <p className="text-sm text-gray-500">読み込み中...</p>}
-          {faqError && <ErrorState message={faqError} onRetry={refetchFaq} location="store_home_faq" />}
-          {!faqLoading && !faqError && (!faqs || faqs.length === 0) && <p className="text-sm text-gray-500">FAQ は準備中です。</p>}
-          {!faqLoading && !faqError && faqs && faqs.length > 0 && (
-            <ul className="space-y-2">
-              {faqs.map((item) => (
-                <li key={item.id} className="text-sm text-gray-700 dark:text-gray-300">Q. {item.question}</li>
-              ))}
-            </ul>
           )}
-        </div>
-      </SectionReveal>}
+          {digitalGoods.length > 0 && (
+            <div>
+              <p className="section-eyebrow mb-2">Digital Goods</p>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">デジタル商品</h2>
+              <div className="mt-4 grid grid-cols-2 gap-4">
+                {digitalGoods.map((product) => <ProductCard key={product.id} product={product} trackingLocation="store_home_digital" />)}
+              </div>
+            </div>
+          )}
+        </SectionReveal>
+      )}
+
+      {sectionResolver('store-home-news-support', true) && (
+        <SectionReveal className="mt-14 grid gap-4 md:grid-cols-2">
+          <div className="rounded-2xl border border-gray-200/90 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900/70">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <p className="section-eyebrow mb-1">News</p>
+                <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">お知らせ</h2>
+              </div>
+              <Link to="/news" onClick={() => trackCtaClick('store_home_news', 'list')} className="group inline-flex items-center gap-1 text-xs text-gray-400 transition-colors hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-200">
+                一覧へ <span className="transition-transform group-hover:translate-x-0.5">→</span>
+              </Link>
+            </div>
+            {newsLoading && <p className="text-sm text-gray-400">読み込み中...</p>}
+            {newsError && <ErrorState message={newsError} onRetry={refetchNews} location="store_home_news" />}
+            {!newsLoading && !newsError && (!news || news.length === 0) && <p className="text-sm text-gray-400">お知らせはまだありません。</p>}
+            {!newsLoading && !newsError && news && news.length > 0 && (
+              <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+                {news.map((item) => (
+                  <li key={item.id} className="py-2 first:pt-0 last:pb-0">
+                    <Link to={`/news/${item.slug}`} onClick={() => trackCtaClick('store_home_news', 'news_click', { slug: item.slug })} className="block text-sm text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-white">
+                      {item.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-gray-200/90 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900/70">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <p className="section-eyebrow mb-1">Support</p>
+                <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">FAQ / ガイド</h2>
+              </div>
+              <div className="flex items-center gap-3 text-xs">
+                <Link to="/faq" onClick={() => trackCtaClick('store_home_support', 'faq')} className="text-gray-400 transition-colors hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-200">FAQ</Link>
+                <Link to="/guide" onClick={() => trackCtaClick('store_home_support', 'guide')} className="text-gray-400 transition-colors hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-200">Guide</Link>
+              </div>
+            </div>
+            {faqLoading && <p className="text-sm text-gray-400">読み込み中...</p>}
+            {faqError && <ErrorState message={faqError} onRetry={refetchFaq} location="store_home_faq" />}
+            {!faqLoading && !faqError && (!faqs || faqs.length === 0) && <p className="text-sm text-gray-400">FAQ は準備中です。</p>}
+            {!faqLoading && !faqError && faqs && faqs.length > 0 && (
+              <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+                {faqs.map((item) => (
+                  <li key={item.id} className="py-2 first:pt-0 last:pb-0 text-sm text-gray-600 dark:text-gray-300">Q. {item.question}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </SectionReveal>
+      )}
 
       {/* ── playful: hidden quote ─────────────────────── */}
       <HiddenQuote

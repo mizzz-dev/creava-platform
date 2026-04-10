@@ -17,7 +17,7 @@ import CampaignHero from '@/modules/campaign/components/CampaignHero'
 import NotificationInterestButton from '@/modules/notifications/components/NotificationInterestButton'
 
 const SELECT_CLS =
-  'mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-2 font-mono text-xs text-gray-700 transition-colors focus:border-gray-400 focus:outline-none dark:border-[rgba(6,182,212,0.15)] dark:bg-[rgba(6,6,15,0.6)] dark:text-[rgba(180,190,220,0.7)] dark:focus:border-cyan-500/40'
+  'mt-1 w-full rounded-lg border border-gray-200/80 bg-white px-3 py-2 font-mono text-xs text-gray-700 shadow-sm transition-colors focus:border-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-300 dark:border-[rgba(6,182,212,0.15)] dark:bg-[rgba(6,6,15,0.6)] dark:text-[rgba(180,190,220,0.7)] dark:focus:border-cyan-500/40 dark:focus:ring-cyan-500/20'
 
 export default function StorefrontProductsPage() {
   const { products, loading, error, refetch } = useProductList(120)
@@ -228,29 +228,21 @@ export default function StorefrontProductsPage() {
       )}
       {!loading && !error && filtered.length === 0 && (
         <motion.div
-          className="mt-10 border border-dashed border-[rgba(6,182,212,0.15)] p-10 text-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          className="mt-10 rounded-2xl border border-dashed border-gray-200 bg-white/60 p-10 text-center dark:border-[rgba(6,182,212,0.12)] dark:bg-transparent"
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4 }}
         >
-          <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-cyan-500/30 mb-2">// no_results</p>
+          <p className="font-mono text-[9px] uppercase tracking-[0.25em] text-gray-400 dark:text-cyan-500/30 mb-2">// no results</p>
           <p className="text-sm text-gray-500 dark:text-[rgba(180,190,220,0.5)]">
             条件に合う商品がありません。絞り込み条件を変更してください。
           </p>
         </motion.div>
       )}
       {!loading && !error && filtered.length > 0 && (
-        <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-          {filtered.map((product, i) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 16, filter: 'blur(4px)' }}
-              whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              viewport={{ once: true, margin: '-20px' }}
-              transition={{ duration: 0.4, delay: (i % 8) * 0.04 }}
-            >
-              <ProductCard product={product} trackingLocation="store_products_grid" />
-            </motion.div>
+        <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          {filtered.map((product) => (
+            <ProductCard key={product.id} product={product} trackingLocation="store_products_grid" />
           ))}
         </div>
       )}

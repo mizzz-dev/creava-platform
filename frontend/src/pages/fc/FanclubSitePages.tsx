@@ -96,15 +96,15 @@ function FcSectionTemplate({
         {items.map((item) => {
           const isLocked = !canAccessByRole(role, item.visibility)
           return (
-            <article key={item.slug} className="rounded-2xl border border-gray-200/80 bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-900/70">
+            <article key={item.slug} className="group rounded-2xl border border-gray-200/90 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-300/80 hover:shadow-md dark:border-gray-800 dark:bg-gray-900/70 dark:hover:border-gray-700">
               <div className="flex items-center justify-between gap-3">
-                <p className="font-mono text-xs text-gray-500 dark:text-gray-400">{item.publishAt}</p>
+                <p className="font-mono text-xs text-gray-400 dark:text-gray-500">{item.publishAt}</p>
                 <SemanticBadge tone={isLocked ? 'neutral' : 'members'} className="text-[11px]">
                   {isLocked ? `🔒 ${accessLabel[item.visibility]}` : accessLabel[item.visibility]}
                 </SemanticBadge>
               </div>
-              <h2 className="mt-3 text-lg font-semibold text-gray-900 dark:text-gray-100">{item.title}</h2>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{item.description}</p>
+              <h2 className="mt-3 text-lg font-semibold text-gray-900 transition-colors group-hover:text-gray-700 dark:text-gray-100 dark:group-hover:text-gray-300">{item.title}</h2>
+              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{item.description}</p>
               <div className="mt-5">
                 {isLocked ? (
                   <Button to={ROUTES.FC_JOIN} variant="accent" size="sm" onClick={() => trackCtaClick('fc_section', 'join_from_locked', { title: item.title, section: title })}>{t('fanclub.joinToView')}</Button>
@@ -341,17 +341,31 @@ export function FanclubHomeHubPage() {
       />}
 
       {sectionResolver('fc-home-store-bridge', true) && storeBenefits.length > 0 && (
-        <SectionReveal className="mt-8 rounded-3xl border border-violet-200 bg-violet-50/70 p-6 dark:border-violet-900/60 dark:bg-violet-950/20">
+        <SectionReveal className="mt-10 rounded-3xl border border-violet-200/80 bg-gradient-to-br from-violet-50/80 via-white to-violet-50/40 p-6 shadow-sm dark:border-violet-900/60 dark:bg-violet-950/20 dark:from-transparent dark:via-transparent dark:to-transparent">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">会員向け販売・先行案内</h2>
-            <Link to={storeLink('/products')} onClick={() => trackCtaClick('fc_home_store_bridge', 'to_store_products')} className="text-xs text-violet-700 underline dark:text-violet-300">ストア一覧へ</Link>
+            <div>
+              <p className="section-eyebrow mb-1">Member Store</p>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">会員向け販売・先行案内</h2>
+            </div>
+            <Link
+              to={storeLink('/products')}
+              onClick={() => trackCtaClick('fc_home_store_bridge', 'to_store_products')}
+              className="group inline-flex items-center gap-1 text-xs text-violet-600 transition-colors hover:text-violet-800 dark:text-violet-400 dark:hover:text-violet-200"
+            >
+              ストア一覧へ <span className="transition-transform group-hover:translate-x-0.5">→</span>
+            </Link>
           </div>
-          <div className="mt-4 grid gap-3 md:grid-cols-3">
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
             {storeBenefits.map((item) => (
-              <Link key={item.id} to={storeLink(`/products/${item.slug}`)} onClick={() => trackCtaClick('fc_home_store_bridge', 'store_product_click', { slug: item.slug })} className="rounded-2xl border border-violet-200 bg-white p-4 dark:border-violet-900/70 dark:bg-gray-900/70">
-                <p className="font-mono text-[10px] uppercase tracking-wider text-violet-600">{item.earlyAccess ? 'EARLY ACCESS' : 'MEMBER BENEFIT'}</p>
-                <p className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">{item.title}</p>
-                <p className="mt-1 line-clamp-2 text-xs text-gray-600 dark:text-gray-300">{item.specialOffer ?? item.memberBenefit ?? '会員向け販売情報あり'}</p>
+              <Link
+                key={item.id}
+                to={storeLink(`/products/${item.slug}`)}
+                onClick={() => trackCtaClick('fc_home_store_bridge', 'store_product_click', { slug: item.slug })}
+                className="group rounded-2xl border border-violet-200/80 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-violet-300/80 hover:shadow-md dark:border-violet-900/60 dark:bg-gray-900/70 dark:hover:border-violet-800/60"
+              >
+                <p className="font-mono text-[10px] uppercase tracking-wider text-violet-600 dark:text-violet-400">{item.earlyAccess ? 'EARLY ACCESS' : 'MEMBER BENEFIT'}</p>
+                <p className="mt-2 text-sm font-medium text-gray-900 transition-colors group-hover:text-gray-700 dark:text-gray-100 dark:group-hover:text-gray-300">{item.title}</p>
+                <p className="mt-1 line-clamp-2 text-xs text-gray-500 dark:text-gray-400">{item.specialOffer ?? item.memberBenefit ?? '会員向け販売情報あり'}</p>
               </Link>
             ))}
           </div>
@@ -372,7 +386,7 @@ export function FanclubHomeHubPage() {
           message={t('playful.fcEasterEggMessage', { defaultValue: 'ありがとう、見つけてくれて。' })}
           location="fc_home"
         >
-          <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-200 dark:text-gray-700 cursor-default select-none">
+          <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-300 dark:text-gray-700 cursor-default select-none">
             official fanclub
           </span>
         </EasterEggTrigger>
@@ -445,16 +459,23 @@ export function FanclubJoinPage() {
           { id: 0, documentId: 'default-paid', name: '有料会員（standard）', description: '月額 880円 / 年額 8,800円。限定ニュース、ブログ、動画、ギャラリー、チケット先行案内。', price: 880, currency: 'JPY', billingCycle: 'monthly', isJoinable: true, membershipType: 'paid' },
           { id: 1, documentId: 'default-premium', name: 'プレミアム会員（将来拡張）', description: '上位プランを追加できるよう、権限制御を拡張可能な構造で設計。', price: 0, currency: 'JPY', billingCycle: 'monthly', isJoinable: false, membershipType: 'premium' },
         ]).map((plan) => (
-          <article key={plan.documentId} className="rounded-2xl border border-gray-200 p-5 dark:border-gray-800">
-            <h2 className="text-lg font-semibold">{plan.name}</h2>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">{plan.description ?? '詳細は順次公開します。'}</p>
-            <p className="mt-3 text-xs text-gray-500">{plan.price > 0 ? `${plan.price.toLocaleString()} ${plan.currency} / ${plan.billingCycle === 'yearly' ? '年額' : '月額'}` : '価格未定'}</p>
+          <article key={plan.documentId} className="rounded-2xl border border-gray-200/90 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900/70">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{plan.name}</h2>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{plan.description ?? '詳細は順次公開します。'}</p>
+            {plan.price > 0 && (
+              <p className="mt-3 font-mono text-sm font-semibold text-gray-800 dark:text-gray-200">
+                ¥{plan.price.toLocaleString()} <span className="text-xs font-normal text-gray-400">/ {plan.billingCycle === 'yearly' ? '年額' : '月額'}</span>
+              </p>
+            )}
+            {plan.price === 0 && (
+              <p className="mt-3 font-mono text-sm text-gray-400 dark:text-gray-500">価格未定</p>
+            )}
             {plan.isJoinable && user && (
               <button
                 type="button"
                 onClick={() => void handleJoin(plan.documentId)}
                 disabled={loadingPlanId === plan.documentId}
-                className="mt-4 inline-flex rounded-full bg-gray-900 px-4 py-2 text-xs text-white hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-gray-100 dark:text-gray-900"
+                className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gray-900 px-4 py-2 text-xs font-medium text-white transition-all hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
               >
                 {loadingPlanId === plan.documentId ? '決済ページを準備中...' : 'Stripe Checkoutで加入する'}
               </button>
