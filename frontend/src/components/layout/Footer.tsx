@@ -37,7 +37,7 @@ export default function Footer() {
   const { t } = useTranslation()
 
   const activeSns = SNS_LINKS.filter(({ envKey }) =>
-    Boolean((import.meta.env as Record<string, string>)[envKey]),
+    Boolean(((import.meta.env as unknown) as Record<string, string>)[envKey]),
   )
 
   return (
@@ -61,7 +61,7 @@ export default function Footer() {
                 {activeSns.map(({ label, envKey }) => (
                   <a
                     key={label}
-                    href={(import.meta.env as Record<string, string>)[envKey]}
+                    href={((import.meta.env as unknown) as Record<string, string>)[envKey]}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-mono text-[10px] uppercase tracking-widest text-[rgba(6,182,212,0.35)] transition-colors hover:text-cyan-400"
