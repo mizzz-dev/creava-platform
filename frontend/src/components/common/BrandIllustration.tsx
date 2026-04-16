@@ -276,14 +276,20 @@ export default function BrandIllustration({
           <motion.path
             key={i}
             d={p.d}
-            className={`fill-none stroke-[${p.strokeWidth}] ${tone.stroke}`}
+            className={`fill-none ${tone.stroke}`}
+            style={{ strokeWidth: p.strokeWidth }}
             opacity={p.opacity ?? 1}
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: Number(p.opacity ?? 1) }}
-            transition={{
-              pathLength: { duration: 1.4, ease: [0.22, 1, 0.36, 1], delay: i * 0.15 },
-              opacity: { duration: 0.4, delay: i * 0.15 },
-            }}
+            {...(reduceMotion
+              ? {}
+              : {
+                  initial: { pathLength: 0, opacity: 0 },
+                  animate: { pathLength: 1, opacity: Number(p.opacity ?? 1) },
+                  transition: {
+                    pathLength: { duration: 1.4, ease: [0.22, 1, 0.36, 1] as [number,number,number,number], delay: i * 0.15 },
+                    opacity: { duration: 0.4, delay: i * 0.15 },
+                  },
+                }
+            )}
           />
         ))}
 
@@ -294,13 +300,18 @@ export default function BrandIllustration({
             cy={c.cy}
             r={c.r}
             className={circleClass(c.className)}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{
-              duration: 0.4,
-              delay: 0.6 + i * 0.1,
-              ease: [0.34, 1.56, 0.64, 1],
-            }}
+            {...(reduceMotion
+              ? {}
+              : {
+                  initial: { scale: 0, opacity: 0 },
+                  animate: { scale: 1, opacity: 1 },
+                  transition: {
+                    duration: 0.4,
+                    delay: 0.6 + i * 0.1,
+                    ease: [0.34, 1.56, 0.64, 1] as [number,number,number,number],
+                  },
+                }
+            )}
           />
         ))}
       </svg>
