@@ -78,12 +78,21 @@ export default function AnimatedBackground({
 
   const showOrbs   = variant === 'orbs' || variant === 'orbs-grid'
   const showGrid   = variant === 'grid' || variant === 'orbs-grid'
+  const showNoise  = variant === 'noise'
 
   return (
     <div
       aria-hidden="true"
       className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}
     >
+      {/* ── ノイズオーバーレイ ────────────────────────── */}
+      {showNoise && (
+        <div
+          className="absolute inset-0 noise-overlay"
+          style={{ opacity: opacityMult * 0.5 }}
+        />
+      )}
+
       {/* ── 背景グリッド ──────────────────────────────── */}
       {showGrid && (
         <div

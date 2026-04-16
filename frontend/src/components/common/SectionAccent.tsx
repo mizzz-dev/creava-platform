@@ -77,6 +77,7 @@ export default function SectionAccent({
 
   /* ── top-radial ─────────────────────────────────── */
   if (variant === 'top-radial') {
+    const pal = PALETTE[palette]
     return (
       <div
         aria-hidden="true"
@@ -87,16 +88,14 @@ export default function SectionAccent({
         <div
           className="absolute inset-0 dark:hidden"
           style={{
-            background:
-              'radial-gradient(ellipse 70% 50% at 50% 0%, rgba(124,58,237,0.07) 0%, transparent 70%)',
+            background: `radial-gradient(ellipse 70% 50% at 50% 0%, ${pal.light.primary} 0%, transparent 70%)`,
           }}
         />
         {/* ダークモード用グロー（明度を上げる） */}
         <div
           className="absolute inset-0 hidden dark:block"
           style={{
-            background:
-              'radial-gradient(ellipse 70% 50% at 50% 0%, rgba(139,92,246,0.12) 0%, transparent 70%)',
+            background: `radial-gradient(ellipse 70% 50% at 50% 0%, ${pal.dark.primary} 0%, transparent 70%)`,
           }}
         />
       </div>
@@ -105,6 +104,7 @@ export default function SectionAccent({
 
   /* ── bottom-radial ───────────────────────────────── */
   if (variant === 'bottom-radial') {
+    const pal = PALETTE[palette]
     return (
       <div
         aria-hidden="true"
@@ -112,17 +112,15 @@ export default function SectionAccent({
         style={{ opacity }}
       >
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 dark:hidden"
           style={{
-            background: `radial-gradient(ellipse 70% 50% at 50% 100%,
-              rgba(124,58,237,0.06) 0%, transparent 70%)`,
+            background: `radial-gradient(ellipse 70% 50% at 50% 100%, ${pal.light.primary} 0%, transparent 70%)`,
           }}
         />
         <div
-          className="dark:block hidden absolute inset-0"
+          className="hidden dark:block absolute inset-0"
           style={{
-            background: `radial-gradient(ellipse 70% 50% at 50% 100%,
-              rgba(139,92,246,0.11) 0%, transparent 70%)`,
+            background: `radial-gradient(ellipse 70% 50% at 50% 100%, ${pal.dark.primary} 0%, transparent 70%)`,
           }}
         />
       </div>
