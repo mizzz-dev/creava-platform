@@ -1,6 +1,13 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
+  /* Vite built-ins (augmented here for environments without vite/client types) */
+  readonly DEV: boolean
+  readonly PROD: boolean
+  readonly MODE: string
+  readonly BASE_URL: string
+  readonly SSR: boolean
+  /* App env vars */
   readonly VITE_SITE_TYPE?: 'main' | 'store' | 'fanclub'
   readonly VITE_SITE_URL?: string
   readonly VITE_MAIN_SITE_URL?: string
@@ -8,6 +15,11 @@ interface ImportMetaEnv {
   readonly VITE_FANCLUB_SITE_URL?: string
   readonly VITE_STRAPI_API_URL: string
   readonly VITE_STRAPI_API_TOKEN: string
+  readonly VITE_STRAPI_TIMEOUT_MS?: string
+  readonly VITE_STRAPI_RETRY_COUNT?: string
+  readonly VITE_STRAPI_RESPONSE_CACHE_TTL_MS?: string
+  readonly VITE_STRAPI_RESPONSE_CACHE_STALE_TTL_MS?: string
+  readonly VITE_STRAPI_USE_TOKEN_FOR_PUBLIC?: string
   readonly VITE_CLERK_PUBLISHABLE_KEY: string
   readonly VITE_CLERK_SOCIAL_GOOGLE_ENABLED: string
   readonly VITE_CLERK_SOCIAL_APPLE_ENABLED: string
@@ -15,6 +27,18 @@ interface ImportMetaEnv {
   readonly VITE_CLERK_SOCIAL_FACEBOOK_ENABLED: string
   readonly VITE_SHOPIFY_STORE_DOMAIN: string
   readonly VITE_SHOPIFY_STOREFRONT_TOKEN: string
+  readonly VITE_STRIPE_PUBLISHABLE_KEY?: string
+  readonly VITE_FORMSPREE_CONTACT_ID?: string
+  readonly VITE_FORMSPREE_REQUEST_ID?: string
+  readonly VITE_FORMSPREE_RESTOCK_ID?: string
+  readonly VITE_GA_MEASUREMENT_ID?: string
+  readonly VITE_PREVIEW_SECRET?: string
+  readonly VITE_AVAILABILITY_STATUS?: string
+  readonly VITE_GITHUB_USERNAME?: string
+  readonly VITE_SNS_X_URL?: string
+  readonly VITE_SNS_INSTAGRAM_URL?: string
+  readonly VITE_SNS_NOTE_URL?: string
+  readonly VITE_SNS_YOUTUBE_URL?: string
 }
 
 interface ImportMeta {
