@@ -282,6 +282,188 @@ export const motionPresets: Record<string, Variants> = {
     hidden:  { opacity: 0, y: 12, scale: 0.96 },
     visible: { opacity: 1, y: 0,  scale: 1,    transition: { duration: 0.4, ease: EASE_SPRING } },
   },
+
+
+  /* ── Page transitions ─────────────────────────── */
+
+  /** Page enter — fade + subtle lift */
+  pageEnter: {
+    hidden:  { opacity: 0, y: 12 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE_OUT } },
+  },
+
+  /** Page exit — fade + subtle rise */
+  pageExit: {
+    visible: { opacity: 1, y: 0 },
+    hidden:  { opacity: 0, y: -8, transition: { duration: 0.28, ease: EASE_SMOOTH } },
+  },
+
+
+  /* ── Drawer / modal transitions ───────────────── */
+
+  /** Drawer slide up from bottom */
+  drawerReveal: {
+    hidden:  { opacity: 0, y: '100%' },
+    visible: { opacity: 1, y: '0%', transition: { duration: 0.38, ease: EASE_OUT } },
+    exit:    { opacity: 0, y: '100%', transition: { duration: 0.28, ease: EASE_SMOOTH } },
+  },
+
+  /** Side panel slide from right */
+  panelReveal: {
+    hidden:  { opacity: 0, x: '100%' },
+    visible: { opacity: 1, x: '0%', transition: { duration: 0.38, ease: EASE_OUT } },
+    exit:    { opacity: 0, x: '100%', transition: { duration: 0.28, ease: EASE_SMOOTH } },
+  },
+
+  /** Modal scale up from center */
+  modalReveal: {
+    hidden:  { opacity: 0, scale: 0.92, y: 8 },
+    visible: { opacity: 1, scale: 1,    y: 0, transition: { duration: 0.35, ease: EASE_SPRING } },
+    exit:    { opacity: 0, scale: 0.94, y: 4, transition: { duration: 0.22, ease: EASE_SMOOTH } },
+  },
+
+  /** Backdrop fade */
+  backdropReveal: {
+    hidden:  { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.25, ease: 'easeOut' } },
+    exit:    { opacity: 0, transition: { duration: 0.2,  ease: 'easeIn' } },
+  },
+
+
+  /* ── Clip-path / cinematic entrances ──────────── */
+
+  /** Clip reveal — dramatic curtain from bottom */
+  clipReveal: {
+    hidden:  { opacity: 0, y: 24, clipPath: 'inset(100% 0% 0% 0%)' },
+    visible: {
+      opacity: 1,
+      y: 0,
+      clipPath: 'inset(0% 0% 0% 0%)',
+      transition: { duration: 0.7, ease: EASE_OUT },
+    },
+  },
+
+  /** Rise through — deep lift + scale, for hero headings */
+  riseThrough: {
+    hidden:  { opacity: 0, y: 40, scale: 0.96 },
+    visible: { opacity: 1, y: 0,  scale: 1, transition: { duration: 0.7, ease: EASE_OUT } },
+  },
+
+
+  /* ── Loading animations ───────────────────────── */
+
+  /** Loading pulse — for skeleton / placeholder */
+  loadingPulse: {
+    animate: {
+      opacity: [0.5, 1, 0.5],
+      transition: { duration: 1.6, repeat: Infinity, ease: 'easeInOut' },
+    },
+  },
+
+  /** Loading bounce — for 3-dot indicator */
+  loadingBounce: {
+    animate: {
+      y: [0, -6, 0],
+      transition: { duration: 0.55, repeat: Infinity, ease: 'easeInOut' },
+    },
+  },
+
+
+  /* ── Decorative background motion ────────────── */
+
+  /** Orb float — for decorative background orbs */
+  orbFloat: {
+    animate: {
+      x: [0, 12, -8, 0],
+      y: [0, -16, 8, 0],
+      scale: [1, 1.06, 0.97, 1],
+      transition: { duration: 12, repeat: Infinity, ease: 'easeInOut' },
+    },
+  },
+
+  /** Orb float (slow variant) */
+  orbFloatSlow: {
+    animate: {
+      x: [0, -10, 6, 0],
+      y: [0, 12, -10, 0],
+      scale: [1, 1.04, 0.98, 1],
+      transition: { duration: 18, repeat: Infinity, ease: 'easeInOut' },
+    },
+  },
+
+  /** Subtle rotate — for decorative circles/rings */
+  rotateSubtle: {
+    animate: {
+      rotate: [0, 5, -3, 0],
+      transition: { duration: 8, repeat: Infinity, ease: 'easeInOut' },
+    },
+  },
+
+
+  /* ── CTA feedback ─────────────────────────────── */
+
+  /** CTA tap — press feedback */
+  ctaTap: {
+    rest:  { scale: 1 },
+    tap:   { scale: 0.97, transition: { duration: 0.1, ease: 'easeIn' } },
+    hover: { scale: 1.02, y: -2, transition: motionTransition.hover },
+  },
+
+  /** Icon nudge right — for arrow icons in CTA */
+  iconNudge: {
+    rest:  { x: 0 },
+    hover: { x: 5, transition: { ...motionTransition.hover, ease: EASE_SPRING } },
+  },
+
+
+  /* ── Illustration interactions ────────────────── */
+
+  /** Interactive illustration hover */
+  illustrationHover: {
+    rest:  { y: 0,  scale: 1,    rotate: 0 },
+    hover: { y: -8, scale: 1.02, rotate: 0.5, transition: { duration: 0.5, ease: EASE_SPRING } },
+  },
+
+  /** Illustration continuous bob */
+  illustrationBob: {
+    animate: {
+      y: [0, -10, 0],
+      rotate: [0, 1, -0.5, 0],
+      transition: { duration: 5, repeat: Infinity, ease: 'easeInOut' },
+    },
+  },
+
+
+  /* ── Tab / switch transitions ─────────────────── */
+
+  /** Tab content switch */
+  tabSwitch: {
+    hidden:  { opacity: 0, x: 10 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.25, ease: EASE_OUT } },
+    exit:    { opacity: 0, x: -6, transition: { duration: 0.18, ease: EASE_SMOOTH } },
+  },
+
+  /** Theme switch — smooth reveal on theme change */
+  themeSwitch: {
+    hidden:  { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.35, ease: 'easeOut' } },
+  },
+
+
+  /* ── List / feed animations ───────────────────── */
+
+  /** List item enter — for news/blog feeds */
+  listItemReveal: {
+    hidden:  { opacity: 0, x: -12 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.4, ease: EASE_OUT } },
+  },
+
+  /** Notification toast enter */
+  toastReveal: {
+    hidden:  { opacity: 0, y: -12, scale: 0.96 },
+    visible: { opacity: 1, y: 0,   scale: 1, transition: { duration: 0.35, ease: EASE_SPRING } },
+    exit:    { opacity: 0, y: -8,  scale: 0.97, transition: { duration: 0.25, ease: EASE_SMOOTH } },
+  },
 }
 
 export type MotionPresetName = keyof typeof motionPresets
