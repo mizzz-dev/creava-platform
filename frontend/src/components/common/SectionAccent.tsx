@@ -83,23 +83,22 @@ export default function SectionAccent({
         className={`pointer-events-none absolute inset-x-0 top-0 h-64 ${className}`}
         style={{ opacity }}
       >
+        {/* ライトモード用グロー */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 dark:hidden"
           style={{
-            background: `
-              radial-gradient(ellipse 70% 50% at 50% 0%,
-                var(--accent-p, rgba(124,58,237,0.07)) 0%,
-                transparent 70%)
-            `,
+            background:
+              'radial-gradient(ellipse 70% 50% at 50% 0%, rgba(124,58,237,0.07) 0%, transparent 70%)',
           }}
         />
-        {/* dark override via CSS variable */}
-        <style>{`
-          .dark [data-accent-top] {
-            --accent-p: rgba(139,92,246,0.12);
-          }
-        `}</style>
-        <span data-accent-top="" className="sr-only" />
+        {/* ダークモード用グロー（明度を上げる） */}
+        <div
+          className="absolute inset-0 hidden dark:block"
+          style={{
+            background:
+              'radial-gradient(ellipse 70% 50% at 50% 0%, rgba(139,92,246,0.12) 0%, transparent 70%)',
+          }}
+        />
       </div>
     )
   }

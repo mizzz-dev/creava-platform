@@ -233,11 +233,12 @@ export default function BrandIllustration({
   return (
     <motion.div
       className={[
-        'pointer-events-none relative aspect-[5/4] w-full overflow-hidden rounded-3xl border',
+        /* interactive 時は pointer-events を有効にして whileHover / cursor を機能させる */
+        interactive ? 'cursor-pointer' : 'pointer-events-none',
+        'relative aspect-[5/4] w-full overflow-hidden rounded-3xl border',
         'bg-gradient-to-br via-white/30 to-white/10 backdrop-blur-sm',
         tone.bg,
         tone.border,
-        interactive ? 'cursor-pointer' : '',
         className ?? '',
       ].join(' ')}
       {...hoverProps}
