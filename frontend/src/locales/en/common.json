@@ -165,7 +165,10 @@
       "emailFormat": "Please enter a valid email address",
       "minLength": "Please enter at least {{min}} characters",
       "fileTooLarge": "File size must be 10MB or less",
-      "fileType": "File type not supported"
+      "fileType": "File type not supported",
+      "policyRequired": "You must agree to the policy",
+      "fileCount": "You can attach up to {{max}} files",
+      "fileTotalTooLarge": "Total attachment size must be 20MB or less"
     },
     "requestTypes": {
       "video": "Video Production",
@@ -173,6 +176,32 @@
       "music": "Music Production",
       "web": "Web / System Development",
       "other": "Other"
+    },
+    "toConfirm": "Review before send",
+    "confirmTitle": "Review your message",
+    "backToEdit": "Back to edit",
+    "sendConfirmed": "Send now",
+    "resultFailedTitle": "Failed to send",
+    "backToContactTop": "Back to contact top",
+    "policyAgreePrefix": "Before sending, please agree to",
+    "policyAgreeAnd": "and",
+    "policyAgreeSuffix": ".",
+    "maxFiles": "Up to {{max}} files",
+    "retry": "Retry",
+    "phone": "Phone",
+    "inquiryCategory": "Inquiry Category",
+    "selectInquiryCategory": "Select a category",
+    "errorValidation": "Please review your input and retry.",
+    "errorTemporary": "Temporary failure. Please try again later.",
+    "categories": {
+      "general": "General",
+      "works": "Works",
+      "store": "Store",
+      "fanclub": "Fanclub",
+      "other": "Other",
+      "project": "Project",
+      "estimate": "Estimate",
+      "event": "Event"
     }
   },
   "seo": {

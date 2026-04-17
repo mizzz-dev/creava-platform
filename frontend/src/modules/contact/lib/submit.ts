@@ -1,39 +1,65 @@
 export interface ContactPayload {
+  inquiryCategory: string
   name: string
+  companyOrOrganization: string
   email: string
+  phone: string
   subject: string
   message: string
-  file?: File
+  policyAgree: boolean
+  honeypot?: string
+  files?: File[]
 }
 
 export interface RequestPayload {
+  inquiryCategory: string
   name: string
-  email: string
   company: string
+  email: string
+  phone: string
+  subject: string
   requestType: string
   budget: string
   deadline: string
   detail: string
-  file?: File
+  policyAgree: boolean
+  honeypot?: string
+  files?: File[]
 }
 
-const CONTACT_FORM_ID = import.meta.env.VITE_FORMSPREE_CONTACT_ID as string | undefined
-const REQUEST_FORM_ID = import.meta.env.VITE_FORMSPREE_REQUEST_ID as string | undefined
+export interface RestockPayload {
+  email: string
+  productId: number
+  productSlug: string
+  productTitle: string
+  locale: string
+}
 
-/** ファイル許可 MIME タイプ */
+export class FormSubmissionError extends Error {
+  constructor(
+    message: string,
+    public readonly kind: 'validation' | 'temporary' | 'network',
+  ) {
+    super(message)
+    this.name = 'FormSubmissionError'
+  }
+}
+
 const ALLOWED_TYPES = [
   'application/pdf',
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'application/zip',
-  'application/x-zip-compressed',
   'image/jpeg',
   'image/png',
-  'image/gif',
   'image/webp',
 ]
 
-const MAX_FILE_BYTES = 10 * 1024 * 1024 // 10 MB
+const MAX_FILE_BYTES = 10 * 1024 * 1024
+const MAX_FILES = 3
+const MAX_TOTAL_FILE_BYTES = 20 * 1024 * 1024
 
 export function validateFile(file: File): string | null {
   if (file.size > MAX_FILE_BYTES) return 'fileTooLarge'
@@ -41,96 +67,180 @@ export function validateFile(file: File): string | null {
   return null
 }
 
-/**
- * Formspree への送信（常に multipart/form-data）
- *
- * JSON 送信は Formspree の設定・プランによって 400 になる場合があるため、
- * Content-Type をブラウザに任せる FormData を常に使用します。
- * _subject  … メール件名として Formspree が利用
- * _replyto  … 返信先として Formspree が利用
- */
-async function postToFormspree(
-  formId: string,
-  data: Record<string, string>,
-  file?: File,
-): Promise<void> {
+export function validateFiles(files: File[]): string | null {
+  if (files.length > MAX_FILES) return 'fileCount'
+  const total = files.reduce((sum, file) => sum + file.size, 0)
+  if (total > MAX_TOTAL_FILE_BYTES) return 'fileTotalTooLarge'
+  return null
+}
+
+function getStrapiBaseUrl(): string {
+  const baseUrl = import.meta.env.VITE_STRAPI_API_URL as string | undefined
+  if (!baseUrl) throw new Error('VITE_STRAPI_API_URL is not set')
+  return baseUrl.replace(/\/$/, '')
+}
+
+function getSourceSite(): 'main' | 'store' | 'fc' | 'unknown' {
+  const siteType = String(import.meta.env.VITE_SITE_TYPE ?? '').toLowerCase()
+  if (siteType === 'main' || siteType === 'store' || siteType === 'fc') return siteType
+  return 'unknown'
+}
+
+type SubmitResult = { id: number; status: string; submittedAt: string }
+
+async function parseApiError(res: Response): Promise<FormSubmissionError> {
+  let message = `HTTP ${res.status}`
+  try {
+    const json = await res.json() as { error?: { message?: string }; message?: string }
+    message = json.error?.message ?? json.message ?? message
+  } catch {
+    // noop
+  }
+  if (res.status >= 400 && res.status < 500) return new FormSubmissionError(message, 'validation')
+  if (res.status >= 500) return new FormSubmissionError(message, 'temporary')
+  return new FormSubmissionError(message, 'network')
+}
+
+async function uploadFiles(files: File[]): Promise<number[]> {
+  if (files.length === 0) return []
   const fd = new FormData()
+  files.forEach((file) => fd.append('attachments', file, file.name))
 
-  // Formspree 特殊フィールド
-  if (data._subject) fd.append('_subject', data._subject)
-  if (data._replyto) fd.append('_replyto', data._replyto)
+  const res = await fetch(`${getStrapiBaseUrl()}/api/forms/upload`, { method: 'POST', body: fd })
+  if (!res.ok) throw await parseApiError(res)
 
-  // 通常フィールド
-  Object.entries(data).forEach(([k, v]) => {
-    if (!k.startsWith('_')) fd.append(k, v)
-  })
+  const json = await res.json() as { data: { id: number }[] }
+  return json.data.map((item) => item.id)
+}
 
-  // ファイル添付（Formspree Gold 以上で受信可能）
-  if (file) fd.append('attachment', file, file.name)
-
-  const res = await fetch(`https://formspree.io/f/${formId}`, {
+async function confirmSubmission(payload: Record<string, unknown>): Promise<void> {
+  const res = await fetch(`${getStrapiBaseUrl()}/api/forms/confirm`, {
     method: 'POST',
-    headers: { Accept: 'application/json' },
-    body: fd,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
   })
-
-  if (!res.ok) {
-    let message = `HTTP ${res.status}`
-    try {
-      const err = await res.json() as { error?: string; errors?: { message: string }[] }
-      message = err.errors?.[0]?.message ?? err.error ?? message
-    } catch { /* ignore parse error */ }
-    throw new Error(message)
-  }
+  if (!res.ok) throw await parseApiError(res)
 }
 
-/**
- * 問い合わせフォームの送信処理
- * VITE_FORMSPREE_CONTACT_ID が未設定の場合はスタブ動作（開発用）。
- */
-export async function submitContact(payload: ContactPayload): Promise<void> {
-  if (!CONTACT_FORM_ID) {
-    if (import.meta.env.DEV) {
-      console.warn('[contact] VITE_FORMSPREE_CONTACT_ID is not set. Using dev stub (no email sent).')
-    }
-    await new Promise<void>((r) => setTimeout(r, 800))
-    return
-  }
+async function submitSubmission(payload: Record<string, unknown>): Promise<SubmitResult> {
+  const res = await fetch(`${getStrapiBaseUrl()}/api/forms/submit`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (!res.ok) throw await parseApiError(res)
 
-  const { file, ...fields } = payload
-  await postToFormspree(CONTACT_FORM_ID, {
-    _subject: `[お問い合わせ] ${fields.subject}`,
-    _replyto: fields.email,
-    name: fields.name,
-    email: fields.email,
-    subject: fields.subject,
-    message: fields.message,
-  }, file)
+  const json = await res.json() as { data: SubmitResult }
+  return json.data
 }
 
-/**
- * 仕事依頼フォームの送信処理
- * VITE_FORMSPREE_REQUEST_ID が未設定の場合はスタブ動作（開発用）。
- */
-export async function submitRequest(payload: RequestPayload): Promise<void> {
-  if (!REQUEST_FORM_ID) {
-    if (import.meta.env.DEV) {
-      console.warn('[contact] VITE_FORMSPREE_REQUEST_ID is not set. Using dev stub (no email sent).')
-    }
-    await new Promise<void>((r) => setTimeout(r, 800))
-    return
-  }
-
-  const { file, ...fields } = payload
-  await postToFormspree(REQUEST_FORM_ID, {
-    _subject: `[仕事依頼] ${fields.requestType} — ${fields.name}`,
-    _replyto: fields.email,
-    name: fields.name,
-    email: fields.email,
-    company: fields.company,
-    requestType: fields.requestType,
-    budget: fields.budget,
-    deadline: fields.deadline,
-    detail: fields.detail,
-  }, file)
+export async function confirmContact(payload: ContactPayload & { locale: string; sourcePage: string }): Promise<void> {
+  await confirmSubmission({
+    formType: 'contact',
+    inquiryCategory: payload.inquiryCategory,
+    name: payload.name,
+    companyOrOrganization: payload.companyOrOrganization,
+    email: payload.email,
+    phone: payload.phone,
+    subject: payload.subject,
+    message: payload.message,
+    policyAgree: payload.policyAgree,
+    locale: payload.locale,
+    sourceSite: getSourceSite(),
+    sourcePage: payload.sourcePage,
+    website: payload.honeypot ?? '',
+  })
 }
+
+export async function submitContact(payload: ContactPayload & { locale: string; sourcePage: string }): Promise<SubmitResult> {
+  const files = payload.files ?? []
+  const fileErr = validateFiles(files)
+  if (fileErr) throw new FormSubmissionError(fileErr, 'validation')
+
+  const attachmentIds = await uploadFiles(files)
+  return submitSubmission({
+    formType: 'contact',
+    inquiryCategory: payload.inquiryCategory,
+    name: payload.name,
+    companyOrOrganization: payload.companyOrOrganization,
+    email: payload.email,
+    phone: payload.phone,
+    subject: payload.subject,
+    message: payload.message,
+    policyAgree: payload.policyAgree,
+    locale: payload.locale,
+    sourceSite: getSourceSite(),
+    sourcePage: payload.sourcePage,
+    website: payload.honeypot ?? '',
+    attachmentIds,
+  })
+}
+
+export async function confirmRequest(payload: RequestPayload & { locale: string; sourcePage: string }): Promise<void> {
+  await confirmSubmission({
+    formType: 'request',
+    inquiryCategory: payload.inquiryCategory || payload.requestType,
+    name: payload.name,
+    companyOrOrganization: payload.company,
+    email: payload.email,
+    phone: payload.phone,
+    subject: payload.subject,
+    message: payload.detail,
+    requestType: payload.requestType,
+    budget: payload.budget,
+    deadline: payload.deadline,
+    policyAgree: payload.policyAgree,
+    locale: payload.locale,
+    sourceSite: getSourceSite(),
+    sourcePage: payload.sourcePage,
+    website: payload.honeypot ?? '',
+  })
+}
+
+export async function submitRequest(payload: RequestPayload & { locale: string; sourcePage: string }): Promise<SubmitResult> {
+  const files = payload.files ?? []
+  const fileErr = validateFiles(files)
+  if (fileErr) throw new FormSubmissionError(fileErr, 'validation')
+
+  const attachmentIds = await uploadFiles(files)
+  return submitSubmission({
+    formType: 'request',
+    inquiryCategory: payload.inquiryCategory || payload.requestType,
+    name: payload.name,
+    companyOrOrganization: payload.company,
+    email: payload.email,
+    phone: payload.phone,
+    subject: payload.subject,
+    message: payload.detail,
+    requestType: payload.requestType,
+    budget: payload.budget,
+    deadline: payload.deadline,
+    policyAgree: payload.policyAgree,
+    locale: payload.locale,
+    sourceSite: getSourceSite(),
+    sourcePage: payload.sourcePage,
+    website: payload.honeypot ?? '',
+    attachmentIds,
+  })
+}
+
+export async function submitRestock(payload: RestockPayload & { sourcePage: string }): Promise<SubmitResult> {
+  return submitSubmission({
+    formType: 'restock',
+    inquiryCategory: 'restock',
+    name: payload.email,
+    email: payload.email,
+    subject: `[Restock] ${payload.productTitle}`,
+    message: `productId=${payload.productId},slug=${payload.productSlug}`,
+    locale: payload.locale,
+    sourceSite: getSourceSite(),
+    sourcePage: payload.sourcePage,
+    policyAgree: true,
+    attachmentIds: [],
+    productId: payload.productId,
+    productSlug: payload.productSlug,
+    productTitle: payload.productTitle,
+  })
+}
+
+export { MAX_FILE_BYTES, MAX_FILES, MAX_TOTAL_FILE_BYTES }

@@ -165,7 +165,10 @@
       "emailFormat": "올바른 이메일 주소를 입력해 주세요",
       "minLength": "{{min}}자 이상 입력해 주세요",
       "fileTooLarge": "파일 크기는 10MB 이하여야 합니다",
-      "fileType": "지원하지 않는 파일 형식입니다"
+      "fileType": "지원하지 않는 파일 형식입니다",
+      "policyRequired": "동의 체크가 필요합니다",
+      "fileCount": "첨부는 최대 {{max}}개까지 가능합니다",
+      "fileTotalTooLarge": "첨부파일 총합은 20MB 이하여야 합니다"
     },
     "requestTypes": {
       "video": "영상 제작",
@@ -173,6 +176,32 @@
       "music": "음악 제작",
       "web": "Web / 시스템 개발",
       "other": "기타"
+    },
+    "toConfirm": "확인 화면으로",
+    "confirmTitle": "전송 전 확인",
+    "backToEdit": "입력으로 돌아가기",
+    "sendConfirmed": "이 내용으로 전송",
+    "resultFailedTitle": "전송에 실패했습니다",
+    "backToContactTop": "문의 상단으로 돌아가기",
+    "policyAgreePrefix": "전송 전에",
+    "policyAgreeAnd": "및",
+    "policyAgreeSuffix": "에 동의해 주세요.",
+    "maxFiles": "최대 {{max}}개 파일",
+    "retry": "다시 전송",
+    "phone": "전화번호",
+    "inquiryCategory": "문의 종류",
+    "selectInquiryCategory": "문의 종류를 선택",
+    "errorValidation": "입력 내용을 확인한 뒤 다시 시도해 주세요.",
+    "errorTemporary": "일시적 오류입니다. 잠시 후 다시 시도해 주세요.",
+    "categories": {
+      "general": "일반 문의",
+      "works": "제작 문의",
+      "store": "스토어 문의",
+      "fanclub": "팬클럽 문의",
+      "other": "기타",
+      "project": "프로젝트 문의",
+      "estimate": "견적 문의",
+      "event": "이벤트 문의"
     }
   },
   "seo": {
