@@ -20,6 +20,7 @@ const NAV_ITEMS = [
   { labelKey: 'subdomain.fanclubNav.movies', to: ROUTES.FC_MOVIES },
   { labelKey: 'subdomain.fanclubNav.gallery', to: ROUTES.FC_GALLERY },
   { labelKey: 'nav.events', to: ROUTES.EVENTS },
+  { labelKey: 'nav.discovery', to: ROUTES.DISCOVERY },
   { labelKey: 'subdomain.fanclubNav.mypage', to: ROUTES.FC_MYPAGE },
 ]
 

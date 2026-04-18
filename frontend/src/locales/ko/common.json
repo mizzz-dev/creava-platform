@@ -15,7 +15,8 @@
     "closeMenu": "메뉴 닫기",
     "member": "Member",
     "skipToContent": "본문으로 건너뛰기",
-    "request": "작업 의뢰"
+    "request": "작업 의뢰",
+    "discovery": "탐색"
   },
   "footer": {
     "copyright": "© 2026 mizzz. All rights reserved.",
@@ -817,5 +818,30 @@
   },
   "favoriteAdd": "즐겨찾기에 추가",
   "favoriteSaved": "즐겨찾기 완료",
-  "delete": "삭제"
+  "delete": "삭제",
+  "discovery": {
+    "title": "통합 검색",
+    "description": "main / store / fanclub / support를 통합 검색합니다.",
+    "lead": "상품, FAQ, 가이드, 뉴스, 이벤트, FC 콘텐츠를 한 번에 찾고 다음 행동으로 연결합니다.",
+    "searchPlaceholder": "찾고 싶은 키워드 입력 (예: 배송, 한정, 티켓)",
+    "filterSource": "사이트",
+    "filterType": "유형",
+    "filterSort": "정렬",
+    "filterMember": "표시 범위",
+    "sortRelevance": "관련도순",
+    "sortUpdated": "최신순",
+    "memberGuest": "공개만",
+    "memberMember": "회원 콘텐츠 포함",
+    "resultCount": "{{count}}개 결과",
+    "reset": "필터 초기화",
+    "noResultTitle": "검색 결과가 없습니다",
+    "noResultDescription": "필터를 완화하거나 아래 추천 동선을 이용해 주세요.",
+    "recentHistory": "최근 본 콘텐츠",
+    "favoriteBase": "즐겨찾기 기반",
+    "notificationBase": "알림 기반",
+    "noHistory": "아직 조회 이력이 없습니다.",
+    "noFavorite": "즐겨찾기 후 추천이 표시됩니다.",
+    "noNotification": "읽지 않은 알림이 없습니다.",
+    "error": "검색 결과를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."
+  }
 }

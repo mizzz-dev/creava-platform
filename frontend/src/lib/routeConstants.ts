@@ -23,6 +23,7 @@ export const ROUTES = {
   FAQ: '/faq',
   SUPPORT_CENTER: '/support',
   SUPPORT_GUIDE_DETAIL: '/support/guides/:slug',
+  DISCOVERY: '/discover',
   LEGAL_PRIVACY: '/legal/privacy-policy',
   LEGAL_TERMS: '/legal/terms',
   LEGAL_COOKIE: '/legal/cookie-policy',
