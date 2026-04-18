@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { to: '/collections/digital', labelKey: 'subdomain.storeNav.digital' },
   { to: ROUTES.NEWS, labelKey: 'nav.news' },
   { to: ROUTES.FAQ, labelKey: 'nav.faq' },
+  { to: ROUTES.DISCOVERY, labelKey: 'nav.discovery' },
   { to: ROUTES.STORE_GUIDE, labelKey: 'subdomain.storeNav.guide' },
 ]
 

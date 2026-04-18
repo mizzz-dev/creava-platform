@@ -68,6 +68,7 @@ const PricingPage = lazy(() => import('@/pages/PricingPage'))
 const FAQPage = lazy(() => import('@/pages/FAQPage'))
 const SupportCenterPage = lazy(() => import('@/pages/support/SupportCenterPage'))
 const SupportGuideDetailPage = lazy(() => import('@/pages/support/SupportGuideDetailPage'))
+const DiscoveryPage = lazy(() => import('@/pages/DiscoveryPage'))
 const LegacySubdomainRedirectPage = lazy(() => import('@/pages/LegacySubdomainRedirectPage'))
 
 // 定数は循環参照を避けるため routeConstants から取得し re-export する
@@ -101,6 +102,7 @@ export function AppRoutes() {
             <Route path={ROUTES.FAQ} element={<FAQPage />} />
             <Route path={ROUTES.SUPPORT_CENTER} element={<SupportCenterPage />} />
             <Route path={ROUTES.SUPPORT_GUIDE_DETAIL} element={<SupportGuideDetailPage />} />
+            <Route path={ROUTES.DISCOVERY} element={<DiscoveryPage />} />
             <Route path={ROUTES.STORE_GUIDE} element={<StorefrontGuidePage />} />
             <Route path={ROUTES.STORE_SHIPPING_POLICY} element={<StorefrontShippingPolicyPage />} />
             <Route path={ROUTES.STORE_RETURNS} element={<StorefrontReturnsPage />} />
@@ -150,6 +152,7 @@ export function AppRoutes() {
             <Route path={ROUTES.FAQ} element={<FAQPage />} />
             <Route path={ROUTES.SUPPORT_CENTER} element={<SupportCenterPage />} />
             <Route path={ROUTES.SUPPORT_GUIDE_DETAIL} element={<SupportGuideDetailPage />} />
+            <Route path={ROUTES.DISCOVERY} element={<DiscoveryPage />} />
             <Route path={ROUTES.FC_GUIDE} element={<FanclubGuidePage />} />
             <Route path={ROUTES.CONTACT} element={<StorefrontContactRedirectPage />} />
             <Route path={ROUTES.FC_LEGAL} element={<FanclubLegalIndexPage />} />
@@ -194,6 +197,7 @@ export function AppRoutes() {
           <Route path={ROUTES.FAQ} element={<FAQPage />} />
           <Route path={ROUTES.SUPPORT_CENTER} element={<SupportCenterPage />} />
           <Route path={ROUTES.SUPPORT_GUIDE_DETAIL} element={<SupportGuideDetailPage />} />
+            <Route path={ROUTES.DISCOVERY} element={<DiscoveryPage />} />
           <Route path={ROUTES.LEGAL_PRIVACY} element={<PrivacyPolicyPage />} />
           <Route path={ROUTES.LEGAL_TERMS} element={<TermsPage />} />
           <Route path={ROUTES.LEGAL_COOKIE} element={<CookiePolicyPage />} />

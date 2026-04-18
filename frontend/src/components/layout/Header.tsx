@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { key: 'nav.news',    to: ROUTES.NEWS },
   { key: 'nav.blog',    to: ROUTES.BLOG },
   { key: 'nav.events',  to: ROUTES.EVENTS },
+  { key: 'nav.discovery', to: ROUTES.DISCOVERY },
   { key: 'nav.store',   to: storeLink(ROUTES.STORE) },
   { key: 'nav.fanclub', to: fanclubLink(ROUTES.FANCLUB) },
   { key: 'nav.contact', to: ROUTES.CONTACT },

@@ -15,7 +15,8 @@
     "closeMenu": "メニューを閉じる",
     "member": "マイページ",
     "skipToContent": "コンテンツへスキップ",
-    "request": "仕事依頼"
+    "request": "仕事依頼",
+    "discovery": "検索"
   },
   "footer": {
     "copyright": "© 2026 mizzz. All rights reserved.",
@@ -817,5 +818,30 @@
   },
   "favoriteAdd": "お気に入りに追加",
   "favoriteSaved": "お気に入り済み",
-  "delete": "削除"
+  "delete": "削除",
+  "discovery": {
+    "title": "横断検索",
+    "description": "main / store / fanclub / support を横断して検索できます。",
+    "lead": "商品 / FAQ / Guide / News / Event / FCコンテンツを横断検索し、次の行動までつなぎます。",
+    "searchPlaceholder": "知りたい内容を入力（例: 配送、限定、チケット）",
+    "filterSource": "サイト",
+    "filterType": "種別",
+    "filterSort": "並び順",
+    "filterMember": "表示範囲",
+    "sortRelevance": "関連度順",
+    "sortUpdated": "更新日順",
+    "memberGuest": "公開のみ",
+    "memberMember": "会員向け含む",
+    "resultCount": "{{count}} 件の結果",
+    "reset": "条件リセット",
+    "noResultTitle": "検索結果がありません",
+    "noResultDescription": "条件をゆるめるか、以下の発見導線から次のアクションを選んでください。",
+    "recentHistory": "最近見たコンテンツ",
+    "favoriteBase": "お気に入りから再発見",
+    "notificationBase": "通知からの導線",
+    "noHistory": "閲覧履歴がまだありません。",
+    "noFavorite": "お気に入り登録からおすすめを生成します。",
+    "noNotification": "未読通知はありません。",
+    "error": "検索結果の取得に失敗しました。時間をおいて再試行してください。"
+  }
 }

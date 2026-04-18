@@ -15,7 +15,8 @@
     "closeMenu": "Close menu",
     "member": "Member",
     "skipToContent": "Skip to main content",
-    "request": "Request"
+    "request": "Request",
+    "discovery": "Discover"
   },
   "footer": {
     "copyright": "© 2026 mizzz. All rights reserved.",
@@ -817,5 +818,30 @@
   },
   "favoriteAdd": "Add to favorites",
   "favoriteSaved": "Saved to favorites",
-  "delete": "Delete"
+  "delete": "Delete",
+  "discovery": {
+    "title": "Cross-site Search",
+    "description": "Search across main / store / fanclub / support.",
+    "lead": "Find products, FAQ, guides, news, events, and FC content in one place.",
+    "searchPlaceholder": "Search intent (e.g. shipping, limited, tickets)",
+    "filterSource": "Site",
+    "filterType": "Type",
+    "filterSort": "Sort",
+    "filterMember": "Visibility",
+    "sortRelevance": "Relevance",
+    "sortUpdated": "Updated",
+    "memberGuest": "Public only",
+    "memberMember": "Include member content",
+    "resultCount": "{{count}} results",
+    "reset": "Reset filters",
+    "noResultTitle": "No results found",
+    "noResultDescription": "Relax filters or continue from the recommended discovery links below.",
+    "recentHistory": "Recently viewed",
+    "favoriteBase": "From favorites",
+    "notificationBase": "From notifications",
+    "noHistory": "No history yet.",
+    "noFavorite": "Recommendations appear after adding favorites.",
+    "noNotification": "No unread notifications.",
+    "error": "Failed to load search results. Please try again later."
+  }
 }
