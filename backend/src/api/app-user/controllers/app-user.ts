@@ -1,4 +1,5 @@
 import { verifyLogtoToken, type AuthenticatedUser } from '../../../lib/auth/logto'
+import { requireInternalPermission, type InternalRole } from '../../../lib/auth/internal-access'
 
 type SiteType = 'main' | 'store' | 'fc' | 'cross'
 
@@ -194,6 +195,95 @@ async function ensureNotificationPreference(strapi: any, logtoUserId: string, so
   })
 }
 
+async function createInternalAuditLog(strapi: any, payload: {
+  actorLogtoUserId: string
+  actorInternalRoles: InternalRole[]
+  targetType: string
+  targetId: string
+  action: string
+  status: 'success' | 'denied' | 'failed'
+  reason?: string
+  sourceSite?: string
+  beforeState?: unknown
+  afterState?: unknown
+  metadata?: Record<string, unknown>
+  requestId?: string | null
+}) {
+  await strapi.documents('api::internal-audit-log.internal-audit-log').create({
+    data: {
+      actorLogtoUserId: payload.actorLogtoUserId,
+      actorInternalRoles: payload.actorInternalRoles,
+      targetType: payload.targetType,
+      targetId: payload.targetId,
+      action: payload.action,
+      status: payload.status,
+      reason: payload.reason ?? null,
+      sourceSite: normalizeSite(payload.sourceSite),
+      beforeState: payload.beforeState ?? null,
+      afterState: payload.afterState ?? null,
+      metadata: payload.metadata ?? {},
+      requestId: payload.requestId ?? null,
+    },
+  })
+}
+
+async function buildUserSummary(strapi: any, logtoUserId: string) {
+  const appUser = await strapi.documents('api::app-user.app-user').findFirst({ filters: { logtoUserId: { $eq: logtoUserId } } })
+  if (!appUser) return null
+
+  const [notificationPreference, inquirySubmissions, moderationLogs, favorites, viewHistories, reports] = await Promise.all([
+    strapi.documents('api::notification-preference.notification-preference').findFirst({ filters: { userId: { $eq: logtoUserId } } }),
+    strapi.documents('api::inquiry-submission.inquiry-submission').findMany({ filters: { email: { $eqi: appUser.primaryEmail ?? '' } }, limit: 10, sort: ['submittedAt:desc'] }),
+    strapi.documents('api::moderation-log.moderation-log').findMany({ filters: { performedBy: { $eq: logtoUserId } }, limit: 10, sort: ['createdAt:desc'] }),
+    strapi.documents('api::favorite.favorite').findMany({ filters: { userId: { $eq: logtoUserId } }, limit: 10, sort: ['updatedAt:desc'] }),
+    strapi.documents('api::view-history.view-history').findMany({ filters: { userId: { $eq: logtoUserId } }, limit: 10, sort: ['viewedAt:desc'] }),
+    strapi.documents('api::community-report.community-report').findMany({ filters: { reporterUserId: { $eq: logtoUserId } }, limit: 10, sort: ['createdAt:desc'] }),
+  ])
+
+  return {
+    appUser,
+    userSummary: {
+      membershipStatus: appUser.membershipStatus,
+      membershipPlan: appUser.membershipPlan,
+      accessLevel: appUser.accessLevel,
+      loyaltyState: appUser.loyaltyState,
+      accountStatus: appUser.accountStatus,
+      linkedProviders: appUser.linkedProviders,
+      firstLoginAt: appUser.firstLoginAt,
+      lastLoginAt: appUser.lastLoginAt,
+      sourceSite: appUser.sourceSite,
+      notificationPreference: notificationPreference
+        ? {
+          emailOptIn: notificationPreference.emailOptIn,
+          inAppOptIn: notificationPreference.inAppOptIn,
+          locale: notificationPreference.locale,
+          sourceSite: notificationPreference.sourceSite,
+          lastSyncedAt: notificationPreference.lastSyncedAt,
+        }
+        : null,
+      supportCaseLink: {
+        inquiryCount: inquirySubmissions.length,
+        latestInquiryStatus: inquirySubmissions[0]?.status ?? null,
+      },
+      moderationState: {
+        moderationActionCount: moderationLogs.length,
+        reportCount: reports.length,
+      },
+      activityState: {
+        favoriteCount: favorites.length,
+        recentHistoryCount: viewHistories.length,
+      },
+    },
+    related: {
+      inquiries: inquirySubmissions,
+      moderationLogs,
+      favorites,
+      viewHistories,
+      communityReports: reports,
+    },
+  }
+}
+
 export default ({ strapi }) => ({
   async provision(ctx) {
     try {
@@ -314,6 +404,181 @@ export default ({ strapi }) => ({
     ctx.body = {
       count: users.length,
       users,
+    }
+  },
+
+  async internalLookup(ctx) {
+    try {
+      const access = await requireInternalPermission(ctx, 'internal.user.read')
+      const { email, logtoUserId, appUserId } = ctx.query ?? {}
+      if (!email && !logtoUserId && !appUserId) {
+        return ctx.badRequest('email, logtoUserId, appUserId のいずれかが必要です。')
+      }
+
+      const filters: Record<string, unknown>[] = []
+      if (typeof email === 'string' && email) filters.push({ primaryEmail: { $eqi: email } })
+      if (typeof logtoUserId === 'string' && logtoUserId) filters.push({ logtoUserId: { $eq: logtoUserId } })
+      if (typeof appUserId === 'string' && appUserId) filters.push({ appUserId: { $eq: appUserId } })
+
+      const users = await strapi.documents('api::app-user.app-user').findMany({
+        filters: { $or: filters },
+        limit: 20,
+        sort: ['updatedAt:desc'],
+      })
+
+      ctx.body = {
+        count: users.length,
+        internalRoles: access.internalRoles,
+        users: users.map((user: any) => ({
+          appUserId: user.appUserId,
+          logtoUserId: user.logtoUserId,
+          primaryEmail: user.primaryEmail,
+          username: user.username,
+          membershipStatus: user.membershipStatus,
+          membershipPlan: user.membershipPlan,
+          accessLevel: user.accessLevel,
+          accountStatus: user.accountStatus,
+          sourceSite: user.sourceSite,
+          lastLoginAt: user.lastLoginAt,
+          lastSyncedAt: user.lastSyncedAt,
+        })),
+      }
+    } catch (error) {
+      if ((error as Error).message.includes('Internal permission denied')) {
+        return ctx.forbidden('internal 権限が不足しています。')
+      }
+      return ctx.unauthorized('認証に失敗しました。')
+    }
+  },
+
+  async internalSummary(ctx) {
+    try {
+      await requireInternalPermission(ctx, 'internal.user.read')
+      const logtoUserId = String(ctx.params.logtoUserId ?? '').trim()
+      if (!logtoUserId) return ctx.badRequest('logtoUserId が必要です。')
+
+      const summary = await buildUserSummary(strapi, logtoUserId)
+      if (!summary) return ctx.notFound('対象ユーザーが見つかりません。')
+
+      ctx.body = summary
+    } catch (error) {
+      if ((error as Error).message.includes('Internal permission denied')) {
+        return ctx.forbidden('internal 権限が不足しています。')
+      }
+      return ctx.unauthorized('認証に失敗しました。')
+    }
+  },
+
+  async updateAccountStatus(ctx) {
+    const requestId = String(ctx.request.headers['x-request-id'] ?? '') || null
+    try {
+      const access = await requireInternalPermission(ctx, 'internal.account.status.update')
+      const logtoUserId = String(ctx.params.logtoUserId ?? '').trim()
+      const reason = String(ctx.request.body?.reason ?? '').trim()
+      const nextStatus = String(ctx.request.body?.nextStatus ?? '').trim()
+
+      if (!logtoUserId || !reason || !nextStatus) {
+        return ctx.badRequest('logtoUserId, reason, nextStatus が必要です。')
+      }
+
+      const user = await strapi.documents('api::app-user.app-user').findFirst({ filters: { logtoUserId: { $eq: logtoUserId } } })
+      if (!user) return ctx.notFound('対象ユーザーが見つかりません。')
+
+      const updated = await strapi.documents('api::app-user.app-user').update({
+        documentId: user.documentId,
+        data: { accountStatus: nextStatus },
+      })
+
+      await createInternalAuditLog(strapi, {
+        actorLogtoUserId: access.authUser.userId,
+        actorInternalRoles: access.internalRoles,
+        targetType: 'app-user',
+        targetId: logtoUserId,
+        action: 'account_status_update',
+        status: 'success',
+        reason,
+        sourceSite: updated.sourceSite,
+        beforeState: { accountStatus: user.accountStatus },
+        afterState: { accountStatus: updated.accountStatus },
+        metadata: { dangerousOperation: true },
+        requestId,
+      })
+
+      ctx.body = {
+        ok: true,
+        dangerousOperation: true,
+        user: {
+          logtoUserId,
+          accountStatus: updated.accountStatus,
+        },
+      }
+    } catch (error) {
+      const message = (error as Error).message
+      if (message.includes('Internal permission denied')) {
+        return ctx.forbidden('internal 権限が不足しています。')
+      }
+      return ctx.unauthorized('認証に失敗しました。')
+    }
+  },
+
+  async resetNotificationPreference(ctx) {
+    const requestId = String(ctx.request.headers['x-request-id'] ?? '') || null
+    try {
+      const access = await requireInternalPermission(ctx, 'internal.notification.reset')
+      const logtoUserId = String(ctx.params.logtoUserId ?? '').trim()
+      const reason = String(ctx.request.body?.reason ?? '').trim()
+      if (!logtoUserId || !reason) return ctx.badRequest('logtoUserId, reason が必要です。')
+
+      const preference = await strapi.documents('api::notification-preference.notification-preference').findFirst({
+        filters: { userId: { $eq: logtoUserId } },
+      })
+
+      if (!preference) return ctx.notFound('notification preference が見つかりません。')
+
+      const updated = await strapi.documents('api::notification-preference.notification-preference').update({
+        documentId: preference.documentId,
+        data: {
+          emailOptIn: true,
+          inAppOptIn: true,
+          themeConfig: {
+            ...(preference.themeConfig ?? {}),
+            resetBy: 'internal_tool',
+            resetAt: new Date().toISOString(),
+          },
+        },
+      })
+
+      await createInternalAuditLog(strapi, {
+        actorLogtoUserId: access.authUser.userId,
+        actorInternalRoles: access.internalRoles,
+        targetType: 'notification-preference',
+        targetId: logtoUserId,
+        action: 'notification_preference_reset',
+        status: 'success',
+        reason,
+        sourceSite: updated.sourceSite,
+        beforeState: { emailOptIn: preference.emailOptIn, inAppOptIn: preference.inAppOptIn },
+        afterState: { emailOptIn: updated.emailOptIn, inAppOptIn: updated.inAppOptIn },
+        metadata: { dangerousOperation: true },
+        requestId,
+      })
+
+      ctx.body = {
+        ok: true,
+        dangerousOperation: true,
+        notificationPreference: {
+          userId: updated.userId,
+          emailOptIn: updated.emailOptIn,
+          inAppOptIn: updated.inAppOptIn,
+          sourceSite: updated.sourceSite,
+        },
+      }
+    } catch (error) {
+      const message = (error as Error).message
+      if (message.includes('Internal permission denied')) {
+        return ctx.forbidden('internal 権限が不足しています。')
+      }
+      return ctx.unauthorized('認証に失敗しました。')
     }
   },
 })

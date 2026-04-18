@@ -70,6 +70,7 @@ const SupportCenterPage = lazy(() => import('@/pages/support/SupportCenterPage')
 const SupportGuideDetailPage = lazy(() => import('@/pages/support/SupportGuideDetailPage'))
 const DiscoveryPage = lazy(() => import('@/pages/DiscoveryPage'))
 const LegacySubdomainRedirectPage = lazy(() => import('@/pages/LegacySubdomainRedirectPage'))
+const InternalAdminPage = lazy(() => import('@/pages/internal/InternalAdminPage'))
 
 // 定数は循環参照を避けるため routeConstants から取得し re-export する
 export { ROUTES, detailPath } from './routeConstants'
@@ -111,6 +112,7 @@ export function AppRoutes() {
             <Route path={ROUTES.STORE_TERMS} element={<TermsPage />} />
             <Route path={ROUTES.STORE_PRIVACY} element={<PrivacyPolicyPage />} />
             <Route path={ROUTES.AUTH_CALLBACK} element={<AuthCallbackPage />} />
+            <Route path={ROUTES.INTERNAL_ADMIN} element={<InternalAdminPage />} />
             <Route path={ROUTES.LEGAL_PRIVACY} element={<PrivacyPolicyPage />} />
             <Route path={ROUTES.LEGAL_TERMS} element={<TermsPage />} />
             <Route path={ROUTES.LEGAL_TRADE} element={<TokushohoPage />} />
@@ -163,6 +165,7 @@ export function AppRoutes() {
             <Route path={ROUTES.FC_COMMERCE_LAW} element={<TokushohoPage />} />
             <Route path={ROUTES.FC_SUBSCRIPTION_POLICY} element={<FanclubSubscriptionPolicyPage />} />
             <Route path={ROUTES.AUTH_CALLBACK} element={<AuthCallbackPage />} />
+            <Route path={ROUTES.INTERNAL_ADMIN} element={<InternalAdminPage />} />
             <Route path={ROUTES.FC_CHECKOUT_SUCCESS} element={<CheckoutResultPage title="入会手続きを受け付けました" description="継続課金の状態同期が完了次第、会員ステータスへ反映されます。" backTo={ROUTES.FC_MYPAGE} backLabel="マイページへ" />} />
             <Route path={ROUTES.FC_CHECKOUT_CANCEL} element={<CheckoutResultPage title="入会手続きをキャンセルしました" description="課金は確定していません。タイミングを変えて再度お試しください。" backTo={ROUTES.FC_JOIN} backLabel="入会ページへ戻る" />} />
             <Route path="*" element={<NotFoundPage />} />

@@ -30,6 +30,7 @@ export const ROUTES = {
   LEGAL_TRADE: '/legal/tokushoho',
   PREVIEW: '/preview',
   AUTH_CALLBACK: '/callback',
+  INTERNAL_ADMIN: '/internal/admin',
   STORE_HOME: '/',
   STORE_PRODUCTS: '/products',
   STORE_PRODUCT_DETAIL: '/products/:handle',
