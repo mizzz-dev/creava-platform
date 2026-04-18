@@ -1,15 +1,24 @@
 {
-  "name": "mizzz official site",
+  "name": "mizzz platform",
   "short_name": "mizzz",
+  "description": "main / store / fanclub を横断し、通知と再訪導線を強化した PWA 体験",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#ffffff",
   "theme_color": "#111827",
   "icons": [
     {
       "src": "/logo.svg",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
+  ],
+  "shortcuts": [
+    { "name": "Discover", "short_name": "Discover", "url": "/discover" },
+    { "name": "News", "short_name": "News", "url": "/news" },
+    { "name": "Support", "short_name": "Support", "url": "/support" }
   ]
 }

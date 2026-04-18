@@ -915,5 +915,34 @@
     "postSubmit": "投稿する",
     "recentPosts": "最近の投稿（承認待ち含む）",
     "report": "通報"
+  },
+  "pwa": {
+    "installBadge": "アプリ体験",
+    "installTitle": "ホーム画面に追加して再訪をもっと速く",
+    "installAction": "追加する",
+    "installLater": "あとで",
+    "installHint": {
+      "ios": "Safari共有メニューから「ホーム画面に追加」を選ぶと再訪が速くなります。",
+      "android": "ホーム画面に追加すると通知から main / store / fc に戻りやすくなります。",
+      "desktop": "ブラウザのインストール機能でデスクトップアプリとして利用できます。"
+    },
+    "offlineMessage": "オフラインです。接続復帰後に再試行してください。",
+    "quickNav": {
+      "ariaLabel": "モバイルクイックナビ",
+      "home": "ホーム",
+      "discover": "発見",
+      "events": "イベント",
+      "member": "マイページ",
+      "products": "商品",
+      "cart": "カート",
+      "mypage": "会員",
+      "news": "お知らせ"
+    },
+    "pushTitle": "Web Push 通知",
+    "pushSupported": "この端末はWeb Pushに対応しています。高頻度ではなく重要通知中心で配信します。",
+    "pushUnsupported": "このブラウザではWeb Pushが未対応です。in-app通知とメール通知をご利用ください。",
+    "pushEnableAction": "Pushを有効化",
+    "pushEnabled": "Push有効化済み",
+    "pushPermissionState": "状態: {{state}}"
   }
 }

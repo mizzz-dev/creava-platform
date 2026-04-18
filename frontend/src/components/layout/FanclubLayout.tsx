@@ -11,6 +11,9 @@ import LoadingScreen from '@/components/common/LoadingScreen'
 import CookieConsentBanner from '@/components/common/CookieConsentBanner'
 import NewYearExperience from '@/modules/seasonal/NewYearExperience'
 import { SeasonalThemeProvider } from '@/modules/seasonal/context'
+import PwaInstallPrompt from '@/modules/pwa/components/PwaInstallPrompt'
+import MobileQuickNav from '@/modules/pwa/components/MobileQuickNav'
+import NetworkStatusToast from '@/modules/pwa/components/NetworkStatusToast'
 
 const NAV_ITEMS = [
   { labelKey: 'nav.about', to: ROUTES.FC_ABOUT },
@@ -60,7 +63,10 @@ export default function FanclubLayout() {
       </main>
       <SubdomainFooter legalLinks={LEGAL_LINKS} />
       <CookieConsentBanner />
+      <NetworkStatusToast />
       <LoadingScreen />
+      <PwaInstallPrompt />
+      <MobileQuickNav />
       <NewYearExperience site="fanclub" />
     </div>
     </SeasonalThemeProvider>
