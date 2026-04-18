@@ -735,5 +735,42 @@
       "noteTitle": "ご注意",
       "noteBody": "お客様都合の返品は対応外です。また、開封済み・使用済みの商品は不良品の場合でも交換対象外になる場合があります。"
     }
+  },
+  "support": {
+    "title": "サポートセンター",
+    "description": "FAQ・ガイド・ポリシーを横断して、問い合わせ前に自己解決できる情報をまとめています。",
+    "searchPlaceholder": "キーワードでFAQ/ガイドを検索",
+    "faqSection": "よくある質問",
+    "guideSection": "ガイド記事",
+    "seeAllFaq": "FAQ一覧へ",
+    "seeAllGuides": "ガイド一覧へ",
+    "emptyFaq": "条件に一致するFAQはありません。",
+    "emptyGuide": "条件に一致するガイドはありません。",
+    "beforeContactTitle": "お問い合わせ前のチェック",
+    "beforeContactDescription": "まずはFAQとガイドをご確認ください。解決しない場合はお問い合わせフォームへ進んでください。",
+    "preFormDescription": "入力前に関連FAQ/ガイドを確認すると解決が早くなります。",
+    "toContact": "お問い合わせへ進む",
+    "toFaq": "FAQを見る",
+    "toSupportCenter": "サポートセンターを見る",
+    "relatedFaq": "関連FAQ",
+    "relatedGuide": "関連ガイド",
+    "guideFallbackTitle": "ガイド",
+    "backToSupport": "サポートセンターへ戻る",
+    "guideNotFound": "ガイドが見つかりませんでした。",
+    "loadError": "ガイドの取得に失敗しました。",
+    "filters": {
+      "all": "すべて"
+    },
+    "categories": {
+      "mainGeneral": "一般お問い合わせ",
+      "mainEvents": "イベント関連",
+      "mainRequest": "仕事依頼・コラボ",
+      "storeOrder": "注文について",
+      "storePayment": "支払いについて",
+      "storeShipping": "配送について",
+      "fcAccount": "会員登録・ログイン",
+      "fcPayment": "FC決済",
+      "fcCancel": "退会・解約"
+    }
   }
 }

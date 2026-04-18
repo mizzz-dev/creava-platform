@@ -15,6 +15,7 @@ const PRIMARY_LINKS = [
 ] as const
 
 const SUPPORT_LINKS = [
+  { key: 'support.title', to: ROUTES.SUPPORT_CENTER },
   { key: 'nav.faq',    to: ROUTES.FAQ  },
   { key: 'footer.cart', to: ROUTES.CART },
 ] as const

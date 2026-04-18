@@ -1,0 +1,59 @@
+{
+  "kind": "collectionType",
+  "collectionName": "guides",
+  "info": {
+    "singularName": "guide",
+    "pluralName": "guides",
+    "displayName": "Guide",
+    "description": "Support guide / help article"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": { "type": "string", "required": true },
+    "summary": { "type": "text" },
+    "body": { "type": "richtext", "required": true },
+    "locale": { "type": "string", "default": "ja" },
+    "category": { "type": "string", "required": true },
+    "sourceSite": {
+      "type": "enumeration",
+      "enum": ["main", "store", "fc", "all"],
+      "default": "all",
+      "required": true
+    },
+    "tags": { "type": "json" },
+    "coverImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "relatedFAQs": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::faq.faq"
+    },
+    "relatedForms": { "type": "json" },
+    "relatedProducts": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::store-product.store-product"
+    },
+    "relatedEvents": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::event.event"
+    },
+    "relatedNews": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::news-item.news-item"
+    },
+    "featured": { "type": "boolean", "default": false },
+    "displayPriority": { "type": "integer", "default": 0 },
+    "slug": { "type": "uid", "targetField": "title", "required": true },
+    "seoTitle": { "type": "string" },
+    "seoDescription": { "type": "text" }
+  }
+}

@@ -735,5 +735,42 @@
       "noteTitle": "Please note",
       "noteBody": "Returns due to customer preference are not accepted. Opened or used items may not qualify for exchange even in cases of defect."
     }
+  },
+  "support": {
+    "title": "Support Center",
+    "description": "Find answers across FAQ, guides, and policies before contacting us.",
+    "searchPlaceholder": "Search FAQ / guides",
+    "faqSection": "FAQ",
+    "guideSection": "Guides",
+    "seeAllFaq": "View all FAQ",
+    "seeAllGuides": "View all guides",
+    "emptyFaq": "No FAQ matched your filters.",
+    "emptyGuide": "No guides matched your filters.",
+    "beforeContactTitle": "Before contacting us",
+    "beforeContactDescription": "Please check FAQ and guides first. If not resolved, continue to the contact form.",
+    "preFormDescription": "Check related FAQ/guides before submitting to solve faster.",
+    "toContact": "Go to contact form",
+    "toFaq": "Open FAQ",
+    "toSupportCenter": "Open support center",
+    "relatedFaq": "Related FAQ",
+    "relatedGuide": "Related guides",
+    "guideFallbackTitle": "Guide",
+    "backToSupport": "Back to Support Center",
+    "guideNotFound": "Guide not found.",
+    "loadError": "Failed to load the guide.",
+    "filters": {
+      "all": "All"
+    },
+    "categories": {
+      "mainGeneral": "General inquiries",
+      "mainEvents": "Events",
+      "mainRequest": "Project / collaboration",
+      "storeOrder": "Orders",
+      "storePayment": "Payments",
+      "storeShipping": "Shipping",
+      "fcAccount": "Signup / Login",
+      "fcPayment": "FC payments",
+      "fcCancel": "Cancellation"
+    }
   }
 }

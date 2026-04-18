@@ -21,6 +21,8 @@ export const ROUTES = {
   MEMBER: '/member',
   PRICING: '/pricing',
   FAQ: '/faq',
+  SUPPORT_CENTER: '/support',
+  SUPPORT_GUIDE_DETAIL: '/support/guides/:slug',
   LEGAL_PRIVACY: '/legal/privacy-policy',
   LEGAL_TERMS: '/legal/terms',
   LEGAL_COOKIE: '/legal/cookie-policy',

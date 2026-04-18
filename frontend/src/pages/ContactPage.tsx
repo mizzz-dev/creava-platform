@@ -6,6 +6,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { ROUTES } from '@/lib/routeConstants'
 import { SplitWords } from '@/components/common/KineticText'
 import DynamicForm from '@/modules/contact/components/DynamicForm'
+import SupportAssistPanel from '@/modules/contact/components/SupportAssistPanel'
 import { fetchFormDefinitions, type FormDefinition } from '@/modules/contact/lib/formDefinitions'
 
 type FormTab = { key: string; icon: string; num: string; definition: FormDefinition }
@@ -103,6 +104,7 @@ export default function ContactPage() {
 
           <AnimatePresence mode="wait">
             <motion.div key={active?.key ?? 'none'} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.25 }} className="px-6 py-8">
+              <SupportAssistPanel formDefinition={active?.definition} />
               {active ? <DynamicForm definition={active.definition} sourcePage={`/contact?tab=${active.definition.formType}`} /> : <p className="text-sm text-gray-500">Loading...</p>}
             </motion.div>
           </AnimatePresence>

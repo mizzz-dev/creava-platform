@@ -11,6 +11,7 @@ import { ROUTES } from '@/lib/routeConstants'
 import { SITE_URL } from '@/lib/seo'
 import { getFaqList } from '@/modules/faq/api'
 import type { FAQItem as CmsFAQItem } from '@/types'
+import { isFanclubSite, isStoreSite } from '@/lib/siteLinks'
 
 type Category = 'request' | 'production' | 'pricing' | 'other'
 
@@ -185,25 +186,26 @@ export default function FAQPage() {
   const { t } = useTranslation()
   const [activeCategory, setActiveCategory] = useState<Category | 'all'>('all')
   const { items: cmsItems, loading, error, refetch } = useStrapiCollection<CmsFAQItem>(() => getFaqList())
+  const site = isStoreSite ? 'store' : isFanclubSite ? 'fc' : 'main'
 
   const mappedItems: FAQItem[] | null = cmsItems && cmsItems.length > 0
-    ? cmsItems.map((item) => {
-      const categoryMap: Record<CmsFAQItem['category'], Category> = {
-        general: 'other',
-        fanclub: 'other',
-        store: 'pricing',
-        works: 'production',
-        events: 'production',
-        contact: 'request',
-      }
+    ? cmsItems
+      .filter((item) => !item.sourceSite || item.sourceSite === 'all' || item.sourceSite === site)
+      .map((item) => {
+        const toCategory = (category: CmsFAQItem['category']): Category => {
+          if (category === 'store' || category.startsWith('store_')) return 'pricing'
+          if (category === 'works' || category === 'events' || category === 'profile_activity') return 'production'
+          if (category === 'contact' || category === 'contact_precheck') return 'request'
+          return 'other'
+        }
 
-      return {
-        id: `cms-${item.id}`,
-        category: categoryMap[item.category] ?? 'other',
-        q: item.question,
-        a: item.answer,
-      }
-    })
+        return {
+          id: `cms-${item.id}`,
+          category: toCategory(item.category),
+          q: item.question,
+          a: item.answer,
+        }
+      })
     : null
 
   const sourceItems = mappedItems ?? FAQ_ITEMS
@@ -330,6 +332,13 @@ export default function FAQPage() {
           className="group inline-flex items-center gap-2 border border-gray-200 dark:border-gray-800 px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all hover:border-gray-400 dark:hover:border-gray-600"
         >
           {t('faq.contactLink')}
+          <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
+        </Link>
+        <Link
+          to={ROUTES.SUPPORT_CENTER}
+          className="group inline-flex items-center gap-2 border border-gray-200 dark:border-gray-800 px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all hover:border-gray-400 dark:hover:border-gray-600"
+        >
+          {t('support.title')}
           <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
         </Link>
       </motion.div>

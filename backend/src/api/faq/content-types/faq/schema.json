@@ -22,9 +22,110 @@
     },
     "category": {
       "type": "enumeration",
-      "enum": ["general", "fanclub", "store", "works", "events", "contact"],
+      "enum": [
+        "general",
+        "contact_precheck",
+        "site_usage",
+        "events",
+        "profile_activity",
+        "news",
+        "store_order",
+        "store_payment",
+        "store_shipping",
+        "store_returns",
+        "store_digital",
+        "store_error",
+        "store_product",
+        "store_legal",
+        "fc_signup",
+        "fc_login",
+        "fc_payment",
+        "fc_benefit",
+        "fc_content",
+        "fc_cancel",
+        "fc_error",
+        "fc_members_only",
+        "fanclub",
+        "store",
+        "works",
+        "contact"
+      ],
       "default": "general",
       "required": true
+    },
+    "subcategory": {
+      "type": "string"
+    },
+    "locale": {
+      "type": "string",
+      "default": "ja"
+    },
+    "sourceSite": {
+      "type": "enumeration",
+      "enum": ["main", "store", "fc", "all"],
+      "default": "all",
+      "required": true
+    },
+    "tags": {
+      "type": "json"
+    },
+    "relatedForms": {
+      "type": "json"
+    },
+    "relatedProducts": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::store-product.store-product"
+    },
+    "relatedEvents": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::event.event"
+    },
+    "relatedNews": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::news-item.news-item"
+    },
+    "relatedFCContent": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::fanclub-content.fanclub-content"
+    },
+    "sortOrder": {
+      "type": "integer",
+      "default": 0
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "isPublic": {
+      "type": "boolean",
+      "default": true
+    },
+    "displayPriority": {
+      "type": "integer",
+      "default": 0
+    },
+    "keywords": {
+      "type": "json"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "question",
+      "required": true
+    },
+    "seoTitle": {
+      "type": "string"
+    },
+    "seoDescription": {
+      "type": "text"
+    },
+    "relatedGuides": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::guide.guide"
     },
     "order": {
       "type": "integer",

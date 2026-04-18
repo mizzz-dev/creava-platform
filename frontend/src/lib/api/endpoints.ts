@@ -29,6 +29,7 @@ export const API_ENDPOINTS = {
   mediaItems:      '/media-items',
   awards:          '/awards',
   faqs:            '/faqs',
+  guides:          '/guides',
 
   // Single Types
   profile:         '/profile',
