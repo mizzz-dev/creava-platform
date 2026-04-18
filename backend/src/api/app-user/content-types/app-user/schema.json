@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "app_users",
+  "info": {
+    "singularName": "app-user",
+    "pluralName": "app-users",
+    "displayName": "AppUser",
+    "description": "Logto identity と mizzz 業務データを接続するユーザードメイン"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "appUserId": { "type": "uid", "targetField": "logtoUserId", "required": true },
+    "authIdentity": { "type": "enumeration", "enum": ["logto"], "default": "logto", "required": true },
+    "logtoUserId": { "type": "string", "required": true, "unique": true },
+    "primaryEmail": { "type": "email" },
+    "primaryPhone": { "type": "string" },
+    "username": { "type": "string" },
+    "displayName": { "type": "string" },
+    "avatarUrl": { "type": "string" },
+    "locale": { "type": "string", "default": "ja", "required": true },
+    "timezone": { "type": "string" },
+    "sourceSite": { "type": "enumeration", "enum": ["main", "store", "fc", "cross"], "default": "cross", "required": true },
+    "membershipStatus": { "type": "enumeration", "enum": ["guest", "active", "grace_period", "paused", "cancelled"], "default": "guest", "required": true },
+    "membershipPlan": { "type": "enumeration", "enum": ["free", "standard", "premium"], "default": "free", "required": true },
+    "accessLevel": { "type": "enumeration", "enum": ["public", "logged_in", "member", "premium", "admin"], "default": "logged_in", "required": true },
+    "loyaltyState": { "type": "string", "default": "new" },
+    "notificationPreference": { "type": "json", "required": true },
+    "crmPreference": { "type": "json", "required": true },
+    "profileCompletionState": { "type": "enumeration", "enum": ["empty", "partial", "complete"], "default": "partial", "required": true },
+    "onboardingState": { "type": "enumeration", "enum": ["not_started", "in_progress", "completed"], "default": "not_started", "required": true },
+    "linkedProviders": { "type": "json", "required": true },
+    "lastLoginAt": { "type": "datetime" },
+    "firstLoginAt": { "type": "datetime" },
+    "accountStatus": { "type": "enumeration", "enum": ["active", "suspended", "closed", "pending_review"], "default": "active", "required": true },
+    "mergeState": { "type": "enumeration", "enum": ["none", "candidate", "merged"], "default": "none", "required": true },
+    "supportFlags": { "type": "json", "required": true },
+    "fieldSources": { "type": "json", "required": true },
+    "lastSyncedAt": { "type": "datetime" },
+    "syncVersion": { "type": "integer", "default": 1, "required": true }
+  }
+}

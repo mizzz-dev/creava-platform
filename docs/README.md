@@ -50,6 +50,7 @@
 - [デプロイ手順書](./09_operations/deploy-manual.md)
 - [トラブルシューティング](./09_operations/troubleshooting.md)
 - [Logto 本番運用ランブック](./09_operations/logto-production-auth-runbook.md)
+- [Logto ユーザー同期/プロビジョニング基盤 (2026-04-18)](./logto-user-sync-foundation-2026-04-18.md)
 - [フォーム運用マニュアル](./09_operations/form-operations-manual.md)
 - [分析基盤・改善運用ガイド](./09_operations/analytics-improvement-foundation.md)
 - [SEO/コンテンツ流入基盤メモ（2026-04）](./seo-content-growth-foundation.md)
