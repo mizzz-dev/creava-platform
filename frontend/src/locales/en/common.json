@@ -915,5 +915,34 @@
     "postSubmit": "Post",
     "recentPosts": "Recent posts (includes pending review)",
     "report": "Report"
+  },
+  "pwa": {
+    "installBadge": "App-like",
+    "installTitle": "Add to home screen for faster revisit",
+    "installAction": "Install",
+    "installLater": "Later",
+    "installHint": {
+      "ios": "Use Safari share menu and choose “Add to Home Screen”.",
+      "android": "Install for quick returns to main / store / fc from notifications.",
+      "desktop": "Install from your browser menu for desktop app-like launch."
+    },
+    "offlineMessage": "You are offline. Retry when connection returns.",
+    "quickNav": {
+      "ariaLabel": "Mobile quick navigation",
+      "home": "Home",
+      "discover": "Discover",
+      "events": "Events",
+      "member": "My page",
+      "products": "Products",
+      "cart": "Cart",
+      "mypage": "Member",
+      "news": "News"
+    },
+    "pushTitle": "Web Push notifications",
+    "pushSupported": "This device supports Web Push. We keep delivery focused on high-value notices.",
+    "pushUnsupported": "This browser does not support Web Push. Use in-app and email notifications instead.",
+    "pushEnableAction": "Enable push",
+    "pushEnabled": "Push enabled",
+    "pushPermissionState": "Status: {{state}}"
   }
 }

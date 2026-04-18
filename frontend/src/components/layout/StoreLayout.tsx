@@ -9,6 +9,9 @@ import SubdomainFooter from '@/components/layout/SubdomainFooter'
 import { ROUTES } from '@/lib/routeConstants'
 import { initializeAnalytics, trackPageView } from '@/modules/analytics'
 import { COOKIE_CONSENT_EVENT, loadCookieConsent, setAnalyticsEnabled } from '@/modules/cookie/consent'
+import PwaInstallPrompt from '@/modules/pwa/components/PwaInstallPrompt'
+import MobileQuickNav from '@/modules/pwa/components/MobileQuickNav'
+import NetworkStatusToast from '@/modules/pwa/components/NetworkStatusToast'
 
 const NAV_ITEMS = [
   { to: ROUTES.STORE_HOME, labelKey: 'nav.home' },
@@ -57,7 +60,10 @@ export default function StoreLayout() {
       </main>
       <SubdomainFooter legalLinks={LEGAL_LINKS} />
       <CookieConsentBanner />
+      <NetworkStatusToast />
       <LoadingScreen />
+      <PwaInstallPrompt />
+      <MobileQuickNav />
       <NewYearExperience site="store" />
     </div>
     </SeasonalThemeProvider>

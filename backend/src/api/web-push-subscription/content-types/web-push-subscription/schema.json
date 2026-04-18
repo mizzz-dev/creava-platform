@@ -1,0 +1,26 @@
+{
+  "kind": "collectionType",
+  "collectionName": "web_push_subscriptions",
+  "info": {
+    "singularName": "web-push-subscription",
+    "pluralName": "web-push-subscriptions",
+    "displayName": "WebPushSubscription"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "userId": { "type": "string" },
+    "sourceSite": { "type": "enumeration", "enum": ["main", "store", "fc"], "default": "main", "required": true },
+    "locale": { "type": "string", "default": "ja" },
+    "membershipStatus": { "type": "enumeration", "enum": ["guest", "member", "premium"], "default": "guest" },
+    "endpoint": { "type": "text", "required": true },
+    "keys": { "type": "json", "required": true },
+    "permissionState": { "type": "enumeration", "enum": ["granted", "denied", "default"], "default": "default", "required": true },
+    "isActive": { "type": "boolean", "default": true, "required": true },
+    "lastDeliveredAt": { "type": "datetime" },
+    "lastClickedAt": { "type": "datetime" },
+    "campaignTag": { "type": "string" },
+    "userAgent": { "type": "text" }
+  }
+}

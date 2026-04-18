@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ROUTES } from '@/lib/routeConstants'
 import { trackMizzzEvent } from '@/modules/analytics/tracking'
 import { loadPreferenceCenter, notificationThemes, savePreferenceCenter } from '@/modules/notifications/preferences'
 import type { NotificationTheme } from '@/modules/crm/types'
+import { requestPushPermission, subscribeWebPush, supportsWebPush } from '@/modules/pwa/lib/push'
 
 const THEME_LABELS: Record<NotificationTheme, string> = {
   fc_update: 'notificationPreference.themeFcUpdate',
@@ -19,6 +20,12 @@ const THEME_LABELS: Record<NotificationTheme, string> = {
 export default function NotificationPreferenceCenter({ location }: { location: string }) {
   const { t, i18n } = useTranslation()
   const [state, setState] = useState(() => loadPreferenceCenter(i18n.language || 'ja'))
+  const [pushSupported, setPushSupported] = useState(false)
+  const [pushPermission, setPushPermission] = useState<NotificationPermission>(() => (typeof Notification === 'undefined' ? 'default' : Notification.permission))
+
+  useEffect(() => {
+    void supportsWebPush().then(setPushSupported)
+  }, [])
 
   const optionalThemes = useMemo(() => notificationThemes.filter((theme) => !state.themes[theme].required), [state.themes])
 
@@ -135,6 +142,34 @@ export default function NotificationPreferenceCenter({ location }: { location: s
             </div>
           </div>
         ))}
+      </div>
+
+
+      <div className="mt-4 rounded-lg border border-cyan-200 bg-cyan-50/70 p-3 text-xs text-cyan-900 dark:border-cyan-900/60 dark:bg-cyan-950/40 dark:text-cyan-100">
+        <p className="font-semibold">{t('pwa.pushTitle')}</p>
+        <p className="mt-1 text-[11px]">{pushSupported ? t('pwa.pushSupported') : t('pwa.pushUnsupported')}</p>
+        <div className="mt-2 flex items-center gap-2">
+          <button
+            type="button"
+            disabled={!pushSupported || pushPermission === 'granted'}
+            onClick={() => {
+              trackMizzzEvent('push_opt_in_prompt_impression', { location })
+              void requestPushPermission().then(async (permission) => {
+                setPushPermission(permission)
+                if (permission === 'granted') {
+                  await subscribeWebPush()
+                  trackMizzzEvent('push_opt_in_success', { location })
+                  return
+                }
+                trackMizzzEvent('push_opt_in_decline', { location, permission })
+              })
+            }}
+            className="rounded-md bg-cyan-500 px-3 py-1.5 text-[11px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {pushPermission === 'granted' ? t('pwa.pushEnabled') : t('pwa.pushEnableAction')}
+          </button>
+          <span className="text-[11px] text-cyan-800 dark:text-cyan-200">{t('pwa.pushPermissionState', { state: pushPermission })}</span>
+        </div>
       </div>
 
       <div className="mt-4 rounded-lg border border-dashed border-gray-300 px-3 py-2 text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400">

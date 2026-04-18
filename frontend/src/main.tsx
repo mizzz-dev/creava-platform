@@ -9,6 +9,8 @@ import App from './App'
 import { CartProvider } from '@/modules/cart/context'
 import './lib/i18n'
 import './index.css'
+import { registerServiceWorker } from '@/modules/pwa/lib/registerServiceWorker'
+import { applySiteAppMeta } from '@/modules/pwa/lib/appMeta'
 
 if (!HAS_LOGTO && import.meta.env.DEV) {
   console.warn(
@@ -17,6 +19,10 @@ if (!HAS_LOGTO && import.meta.env.DEV) {
     '認証機能は無効化された状態で起動します。',
   )
 }
+
+
+applySiteAppMeta()
+registerServiceWorker()
 
 const inner = (
   <ThemeProvider>

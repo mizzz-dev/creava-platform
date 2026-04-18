@@ -9,6 +9,9 @@ import CookieConsentBanner from '@/components/common/CookieConsentBanner'
 import CustomCursor from '@/components/common/CustomCursor'
 import { COOKIE_CONSENT_EVENT, loadCookieConsent, setAnalyticsEnabled } from '@/modules/cookie/consent'
 import { initializeAnalytics, trackPageView } from '@/modules/analytics'
+import PwaInstallPrompt from '@/modules/pwa/components/PwaInstallPrompt'
+import MobileQuickNav from '@/modules/pwa/components/MobileQuickNav'
+import NetworkStatusToast from '@/modules/pwa/components/NetworkStatusToast'
 
 export default function MainLayout() {
   const { pathname } = useLocation()
@@ -38,6 +41,8 @@ export default function MainLayout() {
     <>
       <CustomCursor />
       <LoadingScreen />
+      <PwaInstallPrompt />
+      <MobileQuickNav />
       <div className="flex min-h-screen flex-col">
         <a
           href="#main-content"
@@ -52,6 +57,7 @@ export default function MainLayout() {
         </main>
         <Footer />
         <CookieConsentBanner />
+        <NetworkStatusToast />
       </div>
     </>
   )
