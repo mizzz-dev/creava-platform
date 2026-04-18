@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "internal_audit_logs",
+  "info": {
+    "singularName": "internal-audit-log",
+    "pluralName": "internal-audit-logs",
+    "displayName": "Internal Audit Log",
+    "description": "内部運用操作の監査ログ"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "actorLogtoUserId": { "type": "string", "required": true },
+    "actorInternalRoles": { "type": "json", "required": true },
+    "targetType": { "type": "string", "required": true },
+    "targetId": { "type": "string", "required": true },
+    "action": { "type": "string", "required": true },
+    "status": { "type": "enumeration", "enum": ["success", "denied", "failed"], "required": true },
+    "reason": { "type": "text" },
+    "sourceSite": { "type": "enumeration", "enum": ["main", "store", "fc", "cross", "unknown"], "default": "unknown", "required": true },
+    "beforeState": { "type": "json" },
+    "afterState": { "type": "json" },
+    "metadata": { "type": "json" },
+    "requestId": { "type": "string" }
+  }
+}
