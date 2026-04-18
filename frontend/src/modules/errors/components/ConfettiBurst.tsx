@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface BurstParticle {
   id: number
@@ -51,6 +51,8 @@ interface Props {
 export default function ConfettiBurst({ trigger, size = 160 }: Props) {
   const prefersReduced = useReducedMotion()
   const [bursts, setBursts] = useState<{ id: number; particles: BurstParticle[] }[]>([])
+  // 連打時に直前の cleanup タイマーが先に消されて burst が DOM 残留しないよう、ref で集約管理する
+  const timersRef = useRef<Set<number>>(new Set())
 
   useEffect(() => {
     if (prefersReduced || trigger <= 0) return
@@ -58,9 +60,19 @@ export default function ConfettiBurst({ trigger, size = 160 }: Props) {
     setBursts(prev => [...prev, { id, particles: buildBurst(id) }])
     const timer = window.setTimeout(() => {
       setBursts(prev => prev.filter(b => b.id !== id))
+      timersRef.current.delete(timer)
     }, 850)
-    return () => window.clearTimeout(timer)
+    timersRef.current.add(timer)
   }, [trigger, prefersReduced])
+
+  // unmount 時のみ全タイマーをクリーンアップ
+  useEffect(() => {
+    const timers = timersRef.current
+    return () => {
+      timers.forEach(t => window.clearTimeout(t))
+      timers.clear()
+    }
+  }, [])
 
   if (prefersReduced) return null
 

@@ -51,7 +51,11 @@ export default function Lock403({ variant }: Props) {
         <motion.g
           initial={{ x: 22, opacity: 0 }}
           animate={prefersReduced ? { x: 0, opacity: 1 } : { x: [22, 4, 22], opacity: [0, 1, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }}
+          transition={
+            prefersReduced
+              ? { duration: 0.4, ease: 'easeOut' }
+              : { duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }
+          }
         >
           <circle cx="80" cy="60" r="3.5" stroke="currentColor" strokeWidth="1.5" fill="none" className="text-amber-400/70 dark:text-amber-300/65" />
           <line x1="76" y1="60" x2="68" y2="60" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-amber-400/70 dark:text-amber-300/65" />
