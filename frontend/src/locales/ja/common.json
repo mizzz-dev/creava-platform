@@ -400,6 +400,12 @@
     "403hint": "ログインまたはご入会のうえ、再度アクセスしてください。",
     "reload": "ページを再読み込み",
     "discover": "他のサイトも見る",
+    "eyebrow": {
+      "notFound": "404 · 迷子の画面",
+      "serverError": "500 · 一時的な不調",
+      "maintenance": "503 · ただいま整備中",
+      "restricted": "403 · アクセス制限"
+    },
     "nav": {
       "mainHomeDesc": "トップページ",
       "mainWorksDesc": "制作一覧",

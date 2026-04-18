@@ -400,6 +400,12 @@
     "403hint": "로그인 또는 가입 후 다시 접속해 주세요.",
     "reload": "페이지 새로고침",
     "discover": "다른 사이트도 보기",
+    "eyebrow": {
+      "notFound": "404 · 길을 잃은 화면",
+      "serverError": "500 · 잠시 어긋남",
+      "maintenance": "503 · 점검 중",
+      "restricted": "403 · 접근 제한"
+    },
     "nav": {
       "mainHomeDesc": "메인 페이지",
       "mainWorksDesc": "작품 목록",
