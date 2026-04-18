@@ -1057,7 +1057,27 @@ export function FanclubSchedulePage() {
 }
 
 export function FanclubGuidePage() {
-  return <SimpleStaticPage title="GUIDE" description="入会から解約までのガイド、閲覧環境、よくあるトラブルをまとめます。" />
+  const links = [
+    { to: ROUTES.SUPPORT_CENTER, label: 'サポートセンター' },
+    { to: ROUTES.FAQ, label: 'FAQ' },
+    { to: ROUTES.FC_SUBSCRIPTION_POLICY, label: '継続課金 / 解約ポリシー' },
+    { to: ROUTES.CONTACT, label: 'お問い合わせ' },
+  ]
+
+  return (
+    <section className="mx-auto max-w-4xl px-4 py-14">
+      <PageHead title="GUIDE | mizzz official fanclub" description="入会から解約までのガイド、閲覧環境、よくあるトラブルをまとめます。" />
+      <h1 className="text-3xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">GUIDE</h1>
+      <p className="mt-4 text-sm leading-7 text-gray-600 dark:text-gray-300">入会から解約までのガイド、閲覧環境、よくあるトラブルをまとめます。</p>
+      <ul className="mt-6 space-y-2">
+        {links.map((item) => (
+          <li key={item.to}>
+            <Link to={item.to} className="text-sm text-violet-600 underline-offset-2 hover:underline dark:text-violet-300">{item.label}</Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
 }
 
 export function FanclubLegalIndexPage() {

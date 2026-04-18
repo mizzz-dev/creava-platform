@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import PageHead from '@/components/seo/PageHead'
 import { MAIN_SITE_URL } from '@/lib/siteLinks'
+import { ROUTES } from '@/lib/routeConstants'
 import { trackCtaClick } from '@/modules/analytics/tracking'
 
 export default function StorefrontGuidePage() {
@@ -52,6 +53,14 @@ export default function StorefrontGuidePage() {
           <span>{t('storefront.guide.links.contact')}</span>
           <span className="text-gray-400 transition group-hover:translate-x-0.5 dark:text-gray-600">↗</span>
         </a>
+        <Link
+          to={ROUTES.SUPPORT_CENTER}
+          onClick={() => trackCtaClick('store_guide', 'support_center')}
+          className="group flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm text-gray-700 transition hover:border-gray-400 hover:shadow-sm dark:border-gray-800 dark:bg-gray-950 dark:text-gray-200 dark:hover:border-gray-600"
+        >
+          <span>{t('support.title')}</span>
+          <span className="text-gray-400 transition group-hover:translate-x-0.5 dark:text-gray-600">→</span>
+        </Link>
       </div>
 
       <p className="mt-5 text-xs text-gray-500 dark:text-gray-400">

@@ -144,13 +144,77 @@ export interface Award extends StrapiBase {
   organization: string | null
 }
 
-export type FaqCategory = 'general' | 'fanclub' | 'store' | 'works' | 'events' | 'contact'
+export type SourceSite = 'main' | 'store' | 'fc' | 'all'
+
+export type FaqCategory =
+  | 'general'
+  | 'contact_precheck'
+  | 'site_usage'
+  | 'events'
+  | 'profile_activity'
+  | 'news'
+  | 'store_order'
+  | 'store_payment'
+  | 'store_shipping'
+  | 'store_returns'
+  | 'store_digital'
+  | 'store_error'
+  | 'store_product'
+  | 'store_legal'
+  | 'fc_signup'
+  | 'fc_login'
+  | 'fc_payment'
+  | 'fc_benefit'
+  | 'fc_content'
+  | 'fc_cancel'
+  | 'fc_error'
+  | 'fc_members_only'
+  | 'fanclub'
+  | 'store'
+  | 'works'
+  | 'contact'
 
 export interface FAQItem extends StrapiBase {
   question: string
   answer: string
   category: FaqCategory
+  subcategory?: string | null
+  sourceSite: SourceSite
+  tags?: string[] | null
+  relatedGuides?: Array<{ id: number; title: string; slug: string }> | null
+  relatedForms?: string[] | null
+  relatedProducts?: Array<{ id: number; title: string; slug: string }> | null
+  relatedEvents?: Array<{ id: number; title: string; slug: string }> | null
+  relatedNews?: Array<{ id: number; title: string; slug: string }> | null
+  relatedFCContent?: Array<{ id: number; title: string; slug: string }> | null
+  isPublic: boolean
+  displayPriority: number
+  featured: boolean
+  keywords?: string[] | null
+  slug: string
+  seoTitle?: string | null
+  seoDescription?: string | null
   order: number
+}
+
+export interface GuideItem extends StrapiBase {
+  title: string
+  slug: string
+  summary: string | null
+  body: string | null
+  locale: string | null
+  category: string
+  sourceSite: SourceSite
+  tags?: string[] | null
+  relatedFAQs?: Array<{ id: number; question: string; slug: string }> | null
+  relatedForms?: string[] | null
+  relatedProducts?: Array<{ id: number; title: string; slug: string }> | null
+  relatedEvents?: Array<{ id: number; title: string; slug: string }> | null
+  relatedNews?: Array<{ id: number; title: string; slug: string }> | null
+  featured: boolean
+  displayPriority: number
+  seoTitle?: string | null
+  seoDescription?: string | null
 }
 
 /**
