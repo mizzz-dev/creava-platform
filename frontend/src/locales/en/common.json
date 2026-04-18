@@ -400,6 +400,12 @@
     "403hint": "Please sign in or join to access this content.",
     "reload": "Reload page",
     "discover": "Explore other sites",
+    "eyebrow": {
+      "notFound": "404 · lost in space",
+      "serverError": "500 · temporary glitch",
+      "maintenance": "503 · tuning in progress",
+      "restricted": "403 · access restricted"
+    },
     "nav": {
       "mainHomeDesc": "Top page",
       "mainWorksDesc": "All works",
