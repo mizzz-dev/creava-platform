@@ -17,6 +17,7 @@
 | `VITE_STRAPI_API_URL` | 問い合わせ送信先/コンテンツAPI | 必須 | 必須 | 必須 |
 | `VITE_STRAPI_API_TOKEN` | 公開コンテンツ取得トークン | 任意 | 推奨 | 推奨 |
 | `VITE_LOGTO_*` | 認証 | 任意 | 必須 | 必須 |
+| `VITE_USER_SYNC_ENABLED` | user provisioning bridge の有効化 | 任意 | 任意 | 任意 |
 | `VITE_SHOPIFY_*` | store 商品取得 | 任意 | 必須 | 必須 |
 | `VITE_STRIPE_PUBLISHABLE_KEY` | 決済公開キー | 任意 | 必須 | 必須 |
 | `VITE_PERSONALIZATION_MAX_HISTORY` | 閲覧履歴の保存上限 | 任意 | 任意 | 任意 |
@@ -36,6 +37,7 @@
 - `VITE_LOGTO_ACCOUNT_CENTER_URL`（例: `https://auth.mizzz.jp/account-center`）
 - `VITE_LOGTO_ISSUER`
 - `VITE_LOGTO_MANAGEMENT_API_ENDPOINT`（default tenant endpoint）
+- `VITE_USER_SYNC_ENABLED`（`false` で同期ブリッジ停止）
 
 > `VITE_LOGTO_ACCOUNT_CENTER_URL` 未設定時は frontend 側で `VITE_LOGTO_ENDPOINT + /account-center` をフォールバック利用する。
 
@@ -70,6 +72,7 @@
 - `LOGTO_MANAGEMENT_API_ENDPOINT`（default tenant endpoint）
 - `LOGTO_M2M_APP_ID`
 - `LOGTO_M2M_APP_SECRET`
+- `LOGTO_USER_SYNC_OPS_TOKEN`（support lookup API 用）
 
 ## 3. GitHub Secrets（推奨一覧）
 
@@ -100,6 +103,7 @@
 - `ANALYTICS_IP_HASH_SALT`
 - `INQUIRY_NOTIFY_TO`（通知を使う場合）
 - SMTP で必要な Secret（`SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM`）
+- `LOGTO_USER_SYNC_OPS_TOKEN`（user lookup API 用。staging/prod で分離）
 
 ## 4. GitHub Variables（推奨一覧）
 - `VITE_SNS_X_URL`
@@ -162,3 +166,10 @@
 - monitoring は `.github/workflows/ops-monitoring.yml` から参照される。
 - staging / production で URL を分離して設定すること。
 - 既存ドメインで完結するため DNS 変更は不要。
+
+
+### user-sync 追加メモ（2026-04-18）
+- backend の `LOGTO_USER_SYNC_OPS_TOKEN` は runtime secret として扱い、frontend には露出しない。
+- `POST /api/user-sync/provision` は Bearer token で認証し、`GET /api/user-sync/support/lookup` は `x-ops-token` で保護する。
+- Logto Cloud の Management API は引き続き default tenant endpoint を使い、custom domain (`auth.mizzz.jp`) はエンドユーザー認証 UI 用に限定する。
+- 既存 `auth.mizzz.jp` を使う構成では DNS変更不要。

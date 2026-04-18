@@ -5,6 +5,7 @@ export type AuthenticatedUser = {
   email: string | null
   sessionId: string | null
   scopes: string[]
+  claims: Record<string, unknown>
 }
 
 export function hasRequiredScopes(userScopes: string[], requiredScopes: string[]): boolean {
@@ -179,5 +180,6 @@ export async function verifyLogtoToken(authorization: string | undefined): Promi
     email: typeof payload.email === 'string' ? payload.email : null,
     sessionId: typeof payload.sid === 'string' ? payload.sid : null,
     scopes,
+    claims: payload as Record<string, unknown>,
   }
 }

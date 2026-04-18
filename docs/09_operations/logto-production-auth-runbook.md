@@ -154,6 +154,21 @@ backend の payment controller で操作単位にスコープ検証を行う。
 - Management API token 取得は backend/job 側でのみ実行。
 - Secret は GitHub Secrets + runtime env のみ管理（frontend 禁止）。
 
+
+### 8.1 user provisioning / sync 基盤（2026-04追加）
+
+- `POST /api/user-sync/provision`
+  - Bearer token 検証後、`logtoUserId` で app-user を idempotent upsert。
+  - 初回ログイン時は app-user seed + notification-preference seed を実行。
+- `GET /api/user-sync/me`
+  - support / mypage で使える user summary（auth + membership + preference）を返却。
+- `GET /api/user-sync/support/lookup`
+  - `x-ops-token: LOGTO_USER_SYNC_OPS_TOKEN` で保護。
+  - `email` / `logtoUserId` / `appUserId` で user を検索。
+
+> Cloud の Management API は従来通り default tenant endpoint を使う。
+> user provisioning API 自体は Management API に依存しない。
+
 ## 9. env / GitHub Secrets / runtime / CI
 
 ## 9.1 frontend env
@@ -169,6 +184,7 @@ backend の payment controller で操作単位にスコープ検証を行う。
 - `VITE_LOGTO_ACCOUNT_CENTER_URL`
 - `VITE_LOGTO_ISSUER`
 - `VITE_LOGTO_MANAGEMENT_API_ENDPOINT`
+- `VITE_USER_SYNC_ENABLED`
 
 ## 9.2 backend env
 
@@ -179,6 +195,7 @@ backend の payment controller で操作単位にスコープ検証を行う。
 - `LOGTO_MANAGEMENT_API_ENDPOINT`
 - `LOGTO_M2M_APP_ID`
 - `LOGTO_M2M_APP_SECRET`
+- `LOGTO_USER_SYNC_OPS_TOKEN`
 
 ## 9.3 CI Secrets（推奨）
 
@@ -191,6 +208,7 @@ backend の payment controller で操作単位にスコープ検証を行う。
 - `VITE_LOGTO_ACCOUNT_CENTER_URL`
 - `VITE_LOGTO_ISSUER`
 - `VITE_LOGTO_MANAGEMENT_API_ENDPOINT`
+- `VITE_USER_SYNC_ENABLED`
 
 ## 10. local / staging / production 確認手順
 
