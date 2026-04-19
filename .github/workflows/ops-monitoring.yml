@@ -85,11 +85,11 @@ jobs:
       - name: Backend health checks
         run: |
           set -euo pipefail
-          HEALTH_URL="${{ secrets.MONITORING_BACKEND_HEALTH_URL }}"
-          READY_URL="${{ secrets.MONITORING_BACKEND_READY_URL }}"
+          HEALTH_URL="${{ secrets.MONITORING_BACKEND_HEALTH_URL || vars.MONITORING_BACKEND_HEALTH_URL }}"
+          READY_URL="${{ secrets.MONITORING_BACKEND_READY_URL || vars.MONITORING_BACKEND_READY_URL }}"
 
           if [ -z "$HEALTH_URL" ] || [ -z "$READY_URL" ]; then
-            echo "::error::MONITORING_BACKEND_HEALTH_URL / MONITORING_BACKEND_READY_URL が未設定です"
+            echo "::error::MONITORING_BACKEND_HEALTH_URL / MONITORING_BACKEND_READY_URL が Secrets または Variables に未設定です"
             exit 1
           fi
 
