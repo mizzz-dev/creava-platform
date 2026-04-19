@@ -30,5 +30,17 @@ export default {
       handler: 'analytics-event.internalBiExportCsv',
       config: { auth: false },
     },
+    {
+      method: 'GET',
+      path: '/internal/bi/alerts',
+      handler: 'analytics-event.internalBiAlerts',
+      config: { auth: false },
+    },
+    {
+      method: 'GET',
+      path: '/internal/bi/report',
+      handler: 'analytics-event.internalBiReport',
+      config: { auth: false },
+    },
   ],
 }
