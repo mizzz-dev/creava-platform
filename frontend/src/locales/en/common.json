@@ -1031,5 +1031,25 @@
       "campaignTitle": "Members Campaign",
       "collectionTitle": "Member Visual"
     }
+  },
+  "lifecycle": {
+    "guestTitle": "Sign in to unlock a connected main / store / fc experience.",
+    "guestDescription": "Start by signing in and check your status plus next actions in My Page.",
+    "suspendedTitle": "Your account is currently restricted.",
+    "suspendedDescription": "Please contact support to review your status and next steps.",
+    "graceTitle": "You are in a grace membership period.",
+    "graceDescription": "Review renewal options to keep your member experience active.",
+    "renew": "Review renewal",
+    "expiredTitle": "Your membership is currently inactive.",
+    "expiredDescription": "Rejoin to restore member-only content and benefits.",
+    "rejoin": "Rejoin now",
+    "memberTitle": "Your membership is active.",
+    "memberDescription": "Use member-only content, early access, and exclusive guidance.",
+    "onboardingTitle": "Complete initial setup to personalize your experience.",
+    "onboardingDescription": "Set profile, notifications, and interests now (you can resume later).",
+    "continueOnboarding": "Continue setup",
+    "nonMemberTitle": "Membership unlocks deeper experiences.",
+    "nonMemberDescription": "Explore main / store / fc first, then join when a benefit matches your interest.",
+    "join": "See member benefits"
   }
 }

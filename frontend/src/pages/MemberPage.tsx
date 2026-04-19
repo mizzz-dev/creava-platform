@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import PageHead from '@/components/seo/PageHead'
 import SocialAuthProviderStatus from '@/components/auth/SocialAuthProviderStatus'
-import { useCurrentUser } from '@/hooks'
+import { useCurrentUser, useUserLifecycleApi } from '@/hooks'
 import { ROUTES } from '@/lib/routeConstants'
 import { clearWithdrawRequest, getMemberAccountSettings, getMemberBillingSummary, getMemberDashboard, requestWithdraw, updateMemberAccountSettings, type MemberBillingSummary } from '@/modules/member/api'
 import type { MemberAccountSettings, MemberDashboardData, MemberOrderStatus, MemberPaymentSettings, MemberShippingSettings, ShipmentStatus } from '@/modules/member/types'
@@ -18,6 +18,7 @@ import { SITE_TYPE } from '@/lib/siteLinks'
 import { trackMizzzEvent } from '@/modules/analytics/tracking'
 import { resolveAccountCenterUrl } from '@/lib/auth/config'
 import { useAuthClient } from '@/lib/auth/AuthProvider'
+import UserLifecycleBanner from '@/components/common/UserLifecycleBanner'
 
 const MEMBER_BENEFITS = [
   'member.benefitEarly',
@@ -104,8 +105,9 @@ function maskUserId(userId: string): string {
 
 export default function MemberPage() {
   const { t } = useTranslation()
-  const { user, isLoaded, isSignedIn } = useCurrentUser()
+  const { user, lifecycle, isLoaded, isSignedIn } = useCurrentUser()
   const authClient = useAuthClient()
+  const lifecycleSummary = useUserLifecycleApi()
   const [dashboardData, setDashboardData] = useState<MemberDashboardData | null>(null)
   const [accountSettings, setAccountSettings] = useState<MemberAccountSettings | null>(null)
   const [dashboardLoading, setDashboardLoading] = useState(false)
@@ -117,7 +119,7 @@ export default function MemberPage() {
   const [campaigns, setCampaigns] = useState<CampaignSummary[]>([])
   const [billingSummary, setBillingSummary] = useState<MemberBillingSummary | null>(null)
   const role = user?.role ?? 'guest'
-  const isMember = role === 'member'
+  const isMember = user?.membershipStatus === 'member' || user?.membershipStatus === 'grace'
   const isAdmin = role === 'admin'
   const canViewMemberNotices = isMember || isAdmin
   const roleTodo = isAdmin ? ADMIN_TODO : isMember ? MEMBER_TODO : GUEST_TODO
@@ -430,6 +432,30 @@ export default function MemberPage() {
 
       {isLoaded && isSignedIn && (
         <div className="mt-6 space-y-4">
+          <UserLifecycleBanner user={user} lifecycle={lifecycle} context="member" />
+          {lifecycleSummary && (
+            <div className="rounded border border-gray-200 p-5 dark:border-gray-800">
+              <p className="font-mono text-[11px] text-gray-400">account summary</p>
+              <div className="mt-3 grid gap-2 text-sm text-gray-600 dark:text-gray-300 sm:grid-cols-2">
+                <p>{t('member.accountStatusLabel', { defaultValue: 'アカウント状態' })}: <span className="font-medium">{lifecycleSummary.accountStatus}</span></p>
+                <p>{t('member.membershipStatusLabel', { defaultValue: '会員状態' })}: <span className="font-medium">{lifecycleSummary.membershipStatus}</span></p>
+                <p>{t('member.onboardingStatusLabel', { defaultValue: 'オンボーディング' })}: <span className="font-medium">{lifecycleSummary.onboardingStatus}</span></p>
+                <p>{t('member.lifecycleStageLabel', { defaultValue: 'ライフサイクル段階' })}: <span className="font-medium">{lifecycleSummary.lifecycleStage}</span></p>
+              </div>
+              {lifecycleSummary.onboardingStatus !== 'completed' && (
+                <div className="mt-3 rounded bg-violet-50 px-3 py-2 text-xs text-violet-700 dark:bg-violet-950/30 dark:text-violet-200">
+                  {t('member.onboardingHelp', { defaultValue: '初回設定を完了すると、通知・おすすめ・サポート導線が最適化されます。' })}
+                  <Link
+                    to={ROUTES.MEMBER}
+                    className="ml-2 font-semibold underline"
+                    onClick={() => trackMizzzEvent('profile_completion_click', { membershipStatus: lifecycleSummary.membershipStatus })}
+                  >
+                    {t('member.onboardingCta', { defaultValue: '設定を進める' })}
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
           {loyaltyProfile && (
             <MemberLoyaltyPanel profile={loyaltyProfile} campaigns={visibleCampaigns} />
           )}

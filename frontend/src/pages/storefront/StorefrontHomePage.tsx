@@ -10,7 +10,7 @@ import PageHead from '@/components/seo/PageHead'
 import StructuredData from '@/components/seo/StructuredData'
 import SeoInternalLinkSection from '@/components/common/SeoInternalLinkSection'
 import { DEFAULT_COLLECTIONS, inferCollectionSlug } from '@/modules/store/lib/catalog'
-import { useStrapiCollection, useStrapiSingle } from '@/hooks'
+import { useCurrentUser, useStrapiCollection, useStrapiSingle } from '@/hooks'
 import { getNewsList } from '@/modules/news/api'
 import { getFaqList } from '@/modules/faq/api'
 import type { FAQItem, NewsItem } from '@/types'
@@ -39,9 +39,11 @@ import WeeklyPickupCard from '@/modules/playful/components/WeeklyPickupCard'
 import SurpriseCard from '@/modules/playful/components/SurpriseCard'
 import HiddenQuote from '@/modules/playful/components/HiddenQuote'
 import EasterEggTrigger from '@/modules/playful/components/EasterEggTrigger'
+import UserLifecycleBanner from '@/components/common/UserLifecycleBanner'
 
 export default function StorefrontHomePage() {
   const { i18n, t } = useTranslation()
+  const { user, lifecycle } = useCurrentUser()
   const { resolution, config } = useSeasonalTheme()
   const { products, loading, error, refetch } = useProductList(24)
   const { item: settings } = useStrapiSingle(() => getSiteSettings({
@@ -202,6 +204,8 @@ export default function StorefrontHomePage() {
   return (
     <section className="ds-container py-8 sm:py-12">
       <PageHead title="mizzz Official Store" description="mizzz公式オンラインストア。新商品・デジタル商品・お知らせをまとめて確認できます。" />
+
+      <UserLifecycleBanner user={user} lifecycle={lifecycle} context="store" />
 
       <StructuredData
         schema={{

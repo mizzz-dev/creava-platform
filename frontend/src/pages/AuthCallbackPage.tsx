@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { HAS_LOGTO } from '@/lib/auth/config'
 import { isFanclubSite } from '@/lib/siteLinks'
 import { useAuthClient } from '@/lib/auth/AuthProvider'
+import { trackMizzzEvent } from '@/modules/analytics/tracking'
 
 export default function AuthCallbackPage() {
   const navigate = useNavigate()
@@ -16,7 +17,14 @@ export default function AuthCallbackPage() {
 
     void handleCallback()
       .then((redirectPath) => {
-        navigate(redirectPath, { replace: true })
+        const firstLoginDetected = window.sessionStorage.getItem('creava.user-lifecycle.first-login') === 'true'
+        const onboardingState = window.sessionStorage.getItem('creava.user-lifecycle.onboarding-state')
+        if (firstLoginDetected) {
+          trackMizzzEvent('onboarding_start', { sourceSite: 'cross', onboardingStatus: onboardingState ?? 'not_started' })
+          window.sessionStorage.removeItem('creava.user-lifecycle.first-login')
+        }
+        const nextPath = firstLoginDetected && (redirectPath === '/' || redirectPath === '') ? '/member' : redirectPath
+        navigate(nextPath, { replace: true })
       })
       .catch(() => {
         navigate(isFanclubSite ? '/login' : '/member', { replace: true })

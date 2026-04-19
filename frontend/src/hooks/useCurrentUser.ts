@@ -1,8 +1,10 @@
 import { useAuthClient } from '@/lib/auth/AuthProvider'
 import { toAppUserFromLogtoClaims } from '@/lib/auth/logto'
+import { lifecycleFromClaims, type UserLifecycleSummary } from '@/lib/auth/lifecycle'
 import type { AppUser } from '@/types'
 
 export interface UseCurrentUserResult {
+  lifecycle: UserLifecycleSummary | null
   /** 正規化済みのユーザー情報。未ログイン / 読み込み中は null */
   user: AppUser | null
   /** 認証状態の読み込みが完了しているか */
@@ -11,7 +13,7 @@ export interface UseCurrentUserResult {
   isSignedIn: boolean
 }
 
-const GUEST: UseCurrentUserResult = { user: null, isLoaded: true, isSignedIn: false }
+const GUEST: UseCurrentUserResult = { user: null, lifecycle: null, isLoaded: true, isSignedIn: false }
 
 /**
  * Logto 有効時は claims から AppUser を解決する。
@@ -21,9 +23,10 @@ export function useCurrentUser(): UseCurrentUserResult {
   const auth = useAuthClient()
 
   if (!auth.isEnabled) return GUEST
-  if (!auth.isLoaded) return { user: null, isLoaded: false, isSignedIn: false }
+  if (!auth.isLoaded) return { user: null, lifecycle: null, isLoaded: false, isSignedIn: false }
   if (!auth.isSignedIn || !auth.claims) return GUEST
 
   const user: AppUser = toAppUserFromLogtoClaims(auth.claims)
-  return { user, isLoaded: true, isSignedIn: true }
+  const lifecycle = lifecycleFromClaims(user, auth.claims)
+  return { user, lifecycle, isLoaded: true, isSignedIn: true }
 }

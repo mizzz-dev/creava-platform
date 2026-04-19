@@ -18,7 +18,13 @@ async function parseJson(response: Response): Promise<Record<string, unknown>> {
   return response.json() as Promise<Record<string, unknown>>
 }
 
-async function postProvision(accessToken: string, locale: string): Promise<void> {
+type ProvisionResult = {
+  provisioned: boolean
+  reason: string
+  appUser?: { onboardingState?: string; membershipStatus?: string; sourceSite?: string }
+}
+
+async function postProvision(accessToken: string, locale: string): Promise<ProvisionResult> {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS)
 
@@ -42,14 +48,14 @@ async function postProvision(accessToken: string, locale: string): Promise<void>
       throw new Error(`user-sync provision failed: ${response.status} ${response.statusText} ${raw.slice(0, 120)}`)
     }
 
-    await parseJson(response)
+    return await parseJson(response) as unknown as ProvisionResult
   } finally {
     clearTimeout(timeout)
   }
 }
 
-export async function provisionUserAfterLogin(getAccessToken: () => Promise<string | null>, locale: string): Promise<void> {
+export async function provisionUserAfterLogin(getAccessToken: () => Promise<string | null>, locale: string): Promise<ProvisionResult | null> {
   const accessToken = await getAccessToken()
-  if (!accessToken) return
-  await postProvision(accessToken, locale)
+  if (!accessToken) return null
+  return postProvision(accessToken, locale)
 }

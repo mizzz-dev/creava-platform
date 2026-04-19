@@ -1031,5 +1031,25 @@
       "campaignTitle": "メンバー限定キャンペーン",
       "collectionTitle": "Member Visual"
     }
+  },
+  "lifecycle": {
+    "guestTitle": "ログインすると、main / store / fc を横断した体験が始まります。",
+    "guestDescription": "まずはログインして、マイページでステータスと次のおすすめアクションを確認してください。",
+    "suspendedTitle": "アカウント制限中です。",
+    "suspendedDescription": "状況確認と再開手続きのため、サポートにお問い合わせください。",
+    "graceTitle": "会員猶予期間中です。",
+    "graceDescription": "会員体験を継続するため、更新手続きをご確認ください。",
+    "renew": "更新を確認する",
+    "expiredTitle": "会員ステータスが停止中です。",
+    "expiredDescription": "再入会で限定コンテンツ・会員特典を再開できます。",
+    "rejoin": "再入会する",
+    "memberTitle": "会員ステータスが有効です。",
+    "memberDescription": "限定コンテンツ・先行販売・会員向け案内を活用してください。",
+    "onboardingTitle": "初回設定を完了すると、体験が最適化されます。",
+    "onboardingDescription": "プロフィール・通知・興味カテゴリの設定を進めましょう（後で再開可能）。",
+    "continueOnboarding": "初期設定を続ける",
+    "nonMemberTitle": "会員登録でさらに深い体験を利用できます。",
+    "nonMemberDescription": "まずは main / store / fc を回遊し、気になる特典が見つかったら入会を検討してください。",
+    "join": "会員特典を見る"
   }
 }

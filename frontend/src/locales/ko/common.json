@@ -1031,5 +1031,25 @@
       "campaignTitle": "멤버 전용 캠페인",
       "collectionTitle": "Member Visual"
     }
+  },
+  "lifecycle": {
+    "guestTitle": "로그인하면 main / store / fc를 잇는 통합 경험이 시작됩니다.",
+    "guestDescription": "먼저 로그인하고 마이페이지에서 현재 상태와 다음 행동을 확인하세요.",
+    "suspendedTitle": "계정이 제한된 상태입니다.",
+    "suspendedDescription": "상태 확인 및 재개 절차를 위해 고객지원으로 문의해 주세요.",
+    "graceTitle": "멤버십 유예 기간입니다.",
+    "graceDescription": "멤버십 혜택을 계속 이용하려면 갱신 정보를 확인해 주세요.",
+    "renew": "갱신 확인",
+    "expiredTitle": "멤버십이 비활성 상태입니다.",
+    "expiredDescription": "재가입하면 멤버 전용 콘텐츠와 혜택을 다시 이용할 수 있습니다.",
+    "rejoin": "재가입하기",
+    "memberTitle": "멤버십이 활성 상태입니다.",
+    "memberDescription": "전용 콘텐츠, 선공개, 멤버 안내를 적극 활용해 보세요.",
+    "onboardingTitle": "초기 설정을 완료하면 경험이 최적화됩니다.",
+    "onboardingDescription": "프로필/알림/관심 카테고리를 설정하세요(나중에 이어서 가능).",
+    "continueOnboarding": "초기 설정 계속",
+    "nonMemberTitle": "멤버십으로 더 깊은 경험을 이용할 수 있습니다.",
+    "nonMemberDescription": "먼저 main / store / fc를 둘러본 뒤 필요할 때 자연스럽게 가입하세요.",
+    "join": "멤버 혜택 보기"
   }
 }

@@ -12,7 +12,7 @@ const MEMBER_PAGE_SIZE = 10
 export type MemberBillingSummary = {
   membership: {
     membershipPlan: 'free' | 'standard' | 'premium'
-    membershipStatus: 'guest' | 'active' | 'grace_period' | 'paused' | 'cancelled'
+    membershipStatus: 'non_member' | 'member' | 'grace' | 'expired' | 'canceled' | 'suspended'
     accessLevel: 'public' | 'logged_in' | 'member' | 'premium' | 'admin'
   }
   billingSummary: {
@@ -39,7 +39,7 @@ export async function getMemberBillingSummary(authToken: string): Promise<Member
   const baseUrl = import.meta.env.VITE_STRAPI_API_URL
   if (!baseUrl) {
     return {
-      membership: { membershipPlan: 'free', membershipStatus: 'guest', accessLevel: 'logged_in' },
+      membership: { membershipPlan: 'free', membershipStatus: 'non_member', accessLevel: 'logged_in' },
       billingSummary: null,
       entitlementSummary: null,
     }
