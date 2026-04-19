@@ -1,6 +1,7 @@
 import { SITE_TYPE } from '@/lib/siteLinks'
 
 export const LOGTO_ENDPOINT = import.meta.env.VITE_LOGTO_ENDPOINT?.trim() ?? ''
+const LOGTO_APP_ID_UNIFIED = import.meta.env.VITE_LOGTO_APP_ID_UNIFIED?.trim() ?? ''
 const LOGTO_APP_ID_MAIN = import.meta.env.VITE_LOGTO_APP_ID_MAIN?.trim() ?? ''
 const LOGTO_APP_ID_STORE = import.meta.env.VITE_LOGTO_APP_ID_STORE?.trim() ?? ''
 const LOGTO_APP_ID_FC = import.meta.env.VITE_LOGTO_APP_ID_FC?.trim() ?? ''
@@ -13,6 +14,7 @@ export const LOGTO_MANAGEMENT_API_ENDPOINT = import.meta.env.VITE_LOGTO_MANAGEME
 export const LOGTO_ACCOUNT_CENTER_URL = import.meta.env.VITE_LOGTO_ACCOUNT_CENTER_URL?.trim() ?? ''
 
 function resolveAppIdBySiteType(): string {
+  if (LOGTO_APP_ID_UNIFIED) return LOGTO_APP_ID_UNIFIED
   if (SITE_TYPE === 'main') return LOGTO_APP_ID_MAIN || LOGTO_APP_ID_LEGACY
   if (SITE_TYPE === 'store') return LOGTO_APP_ID_STORE || LOGTO_APP_ID_LEGACY
   return LOGTO_APP_ID_FC || LOGTO_APP_ID_LEGACY

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useCurrentUser } from '@/hooks'
 import { useAuthClient } from '@/lib/auth/AuthProvider'
 import { HAS_LOGTO } from '@/lib/auth/config'
+import { isMemberUser } from '@/lib/auth/membership'
 import RestrictedNotice from '@/components/common/RestrictedNotice'
 
 interface Props {
@@ -36,7 +37,7 @@ function FanclubGuardWithAuth({ children }: Props) {
     )
   }
 
-  if (user?.role === 'guest') {
+  if (!isMemberUser(user)) {
     return <RestrictedNotice variant="not_member" />
   }
 

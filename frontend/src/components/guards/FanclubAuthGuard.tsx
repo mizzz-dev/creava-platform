@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import { useCurrentUser } from '@/hooks'
 import { ROUTES } from '@/lib/routeConstants'
-import { canAccessByRole, isMembershipActive, type VisibilityScope } from '@/lib/auth/membership'
+import { canAccessByRole, isMembershipActive, isMembershipActiveStatus, type VisibilityScope } from '@/lib/auth/membership'
 
 interface Props {
   children: ReactNode
@@ -34,7 +34,7 @@ export default function FanclubAuthGuard({ children, requiredVisibility = DEFAUL
     )
   }
 
-  if (!isMembershipActive(user.contractStatus) || !canAccessByRole(user.role, requiredVisibility)) {
+  if ((!isMembershipActive(user.contractStatus) && !isMembershipActiveStatus(user.membershipStatus)) || !canAccessByRole(user.role, requiredVisibility)) {
     return (
       <section className="mx-auto max-w-xl px-4 py-14">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">会員プランの確認が必要です</h1>
