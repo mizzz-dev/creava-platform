@@ -988,5 +988,48 @@
       "highlightSupportTitle": "Support flow before and after joining",
       "highlightSupportDesc": "Users can move quickly to FAQ / Guide / Contact without confusion."
     }
+  },
+  "visuals": {
+    "titleDefault": "Visual Highlights",
+    "leadDefault": "A resilient visual layout that works without assets and scales up when CMS images are swapped.",
+    "collectionCaptionDefault": "Featured visual slot managed from CMS.",
+    "fallbackLabel": "fallback visual",
+    "altDefault": "mizzz visual asset",
+    "badgeCollection": "COLLECTION",
+    "badgeCampaign": "CAMPAIGN",
+    "badgeFeatured": "FEATURED",
+    "featureTitle": "Feature Visual",
+    "featureCaption": "Main card to express mood through featured content.",
+    "pickupTitle": "Pickup Banner",
+    "pickupCaption": "Compact banner for new and highlighted updates.",
+    "campaignTitle": "Campaign Banner",
+    "campaignCaption": "Operational slot for seasonal and limited campaigns.",
+    "main": {
+      "eyebrow": "brand visual",
+      "title": "Brand Visual Highlights",
+      "lead": "Visual layer that extends the hero mood and keeps hub navigation clear.",
+      "collectionTitle": "World View",
+      "collectionTitle1": "Story Visual",
+      "collectionTitle2": "Editorial Cut",
+      "collectionTitle3": "Featured Scene"
+    },
+    "store": {
+      "eyebrow": "store showcase",
+      "title": "Store Visual Highlights",
+      "lead": "Keeps shelf density even with fewer items and boosts campaign appeal when needed.",
+      "featureTitle": "Featured Picks",
+      "pickupTitle": "New Pickup",
+      "campaignTitle": "Seasonal Campaign",
+      "collectionTitle": "Collection Visual"
+    },
+    "fanclub": {
+      "eyebrow": "member experience",
+      "title": "Member Visual Highlights",
+      "lead": "Strengthens premium member feel while guiding benefits and updates.",
+      "featureTitle": "Member Benefits Focus",
+      "pickupTitle": "Weekly Update Pickup",
+      "campaignTitle": "Members Campaign",
+      "collectionTitle": "Member Visual"
+    }
   }
 }

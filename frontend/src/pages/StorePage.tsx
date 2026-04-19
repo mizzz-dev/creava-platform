@@ -29,6 +29,7 @@ import StoreStatusGuide from '@/modules/store/sections/StoreStatusGuide'
 import StoreGuideLinks from '@/modules/store/sections/StoreGuideLinks'
 import StoreProductGrid from '@/modules/store/sections/StoreProductGrid'
 import StoreFooterCta from '@/modules/store/sections/StoreFooterCta'
+import CmsVisualShowcaseSection from '@/components/common/CmsVisualShowcaseSection'
 
 export default function StorePage() {
   const { t, i18n } = useTranslation()
@@ -210,6 +211,15 @@ export default function StorePage() {
         />
 
         <StoreStockoutAlert forecasts={stockoutForecast} />
+        <CmsVisualShowcaseSection
+          site="store"
+          settings={settings}
+          primaryCta={{
+            label: t('store.featuredTitle', { defaultValue: '特集ピックアップ' }),
+            to: '#store-products',
+          }}
+        />
+
 
         <StoreStatusGuide />
 

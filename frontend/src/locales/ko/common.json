@@ -988,5 +988,48 @@
       "highlightSupportTitle": "가입 전후 지원 동선 강화",
       "highlightSupportDesc": "FAQ / Guide / 문의하기로 빠르게 이동할 수 있습니다."
     }
+  },
+  "visuals": {
+    "titleDefault": "비주얼 하이라이트",
+    "leadDefault": "이미지가 없어도 완성되고, CMS 교체 시 매력이 커지는 비주얼 구성입니다.",
+    "collectionCaptionDefault": "CMS에서 교체 가능한 대표 비주얼 슬롯입니다.",
+    "fallbackLabel": "fallback visual",
+    "altDefault": "mizzz visual asset",
+    "badgeCollection": "COLLECTION",
+    "badgeCampaign": "CAMPAIGN",
+    "badgeFeatured": "FEATURED",
+    "featureTitle": "특집 비주얼",
+    "featureCaption": "특집 콘텐츠의 분위기를 전달하는 메인 카드.",
+    "pickupTitle": "픽업 배너",
+    "pickupCaption": "신규/주요 정보를 빠르게 전달하는 배너 슬롯.",
+    "campaignTitle": "캠페인 배너",
+    "campaignCaption": "시즌/한정 캠페인을 교체 운영하기 위한 슬롯.",
+    "main": {
+      "eyebrow": "brand visual",
+      "title": "브랜드 비주얼 하이라이트",
+      "lead": "히어로의 무드를 이어가면서 허브 동선을 분명하게 유지합니다.",
+      "collectionTitle": "World View",
+      "collectionTitle1": "Story Visual",
+      "collectionTitle2": "Editorial Cut",
+      "collectionTitle3": "Featured Scene"
+    },
+    "store": {
+      "eyebrow": "store showcase",
+      "title": "스토어 비주얼 하이라이트",
+      "lead": "상품 수가 적어도 밀도를 유지하고 캠페인 시에는 전환력을 높입니다.",
+      "featureTitle": "추천 특집",
+      "pickupTitle": "신규 픽업",
+      "campaignTitle": "시즈널 캠페인",
+      "collectionTitle": "Collection Visual"
+    },
+    "fanclub": {
+      "eyebrow": "member experience",
+      "title": "멤버 전용 비주얼 하이라이트",
+      "lead": "한정감은 유지하고 멤버 혜택/업데이트 동선을 강화합니다.",
+      "featureTitle": "멤버 혜택 포커스",
+      "pickupTitle": "이번 주 업데이트",
+      "campaignTitle": "멤버 전용 캠페인",
+      "collectionTitle": "Member Visual"
+    }
   }
 }

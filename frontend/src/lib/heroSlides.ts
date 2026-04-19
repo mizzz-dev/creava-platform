@@ -96,6 +96,30 @@ export function normalizeHeroSlides(raw: unknown): HeroSlide[] {
   return items
 }
 
+
+
+export function buildSlidesFromMedia(mediaDesktop?: StrapiMedia[] | null, mediaMobile?: StrapiMedia[] | null): HeroSlide[] {
+  const desktop = Array.isArray(mediaDesktop) ? mediaDesktop : []
+  const mobile = Array.isArray(mediaMobile) ? mediaMobile : []
+  return desktop
+    .map((image, index): HeroSlide | null => {
+      const desktopUrl = resolveImageUrl(image, 'large')
+      if (!desktopUrl) return null
+      const mobileUrl = resolveImageUrl(mobile[index] ?? null, 'large') ?? desktopUrl
+      return {
+        id: `media-slide-${image.id ?? index}`,
+        image: desktopUrl,
+        mobileImage: mobileUrl,
+        title: null,
+        description: null,
+        alt: image.alternativeText ?? null,
+        overlay: 'soft',
+        align: 'left',
+      }
+    })
+    .filter((slide): slide is HeroSlide => slide !== null)
+}
+
 export interface StoreHeroDefaults {
   title: string
   description: string

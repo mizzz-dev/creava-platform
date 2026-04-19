@@ -5,7 +5,7 @@ import { ROUTES } from '@/lib/routeConstants'
 import type { StoreProductSummary } from '@/modules/store/types'
 import type { SiteSettings } from '@/types'
 import HeroImageSlider, { type HeroSlide } from '@/components/common/HeroImageSlider'
-import { buildStoreHeroFallbackSlides, normalizeHeroSlides } from '@/lib/heroSlides'
+import { buildSlidesFromMedia, buildStoreHeroFallbackSlides, normalizeHeroSlides } from '@/lib/heroSlides'
 import { trackCtaClick } from '@/modules/analytics/tracking'
 
 interface Props {
@@ -25,9 +25,12 @@ export default function StoreHeroSection({ products, region, heroVariant, ctaVar
   const limitedCount = products.filter((p) => p.isLimited || p.campaignType === 'drop').length
 
   const cmsSlides = slides ?? normalizeHeroSlides((settings as unknown as { heroSlides?: unknown })?.heroSlides)
+  const mediaSlides = buildSlidesFromMedia(settings?.heroSlidesDesktop ?? null, settings?.heroSlidesMobile ?? null)
   const resolvedSlides: HeroSlide[] = cmsSlides.length
     ? cmsSlides
-    : buildStoreHeroFallbackSlides(settings ?? null, {
+    : mediaSlides.length
+      ? mediaSlides
+      : buildStoreHeroFallbackSlides(settings ?? null, {
         title: t('store.heroSliderDefaultTitle', { defaultValue: 'featured / pickup / weekly update' }),
         description:
           heroVariant === 'A'
