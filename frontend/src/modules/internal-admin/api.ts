@@ -110,6 +110,76 @@ export type InternalBiCohorts = {
   }
 }
 
+export type InternalBiAlerts = {
+  range: { from: string; to: string }
+  refreshState: { latestDay?: string; generatedAt: string }
+  sourceOfTruth: Record<string, string>
+  metricDefinition: Array<{ metricKey: string; ownerTeam: string; sourceOfTruth: string; unit: string }>
+  metricSeries: {
+    sessions: Array<{ day: string; value: number }>
+    storeNetRevenue: Array<{ day: string; value: number }>
+    fcSubscriptionRevenue: Array<{ day: string; value: number }>
+    supportCases: Array<{ day: string; value: number }>
+  }
+  alertRules: Array<{ metricKey: string; alertScope: string; comparisonWindow: string; alertThreshold: { type: string; value: number }; ownerTeam: string }>
+  anomalyEvents: Array<{
+    metricKey: string
+    anomalySeverity: 'low' | 'medium' | 'high'
+    comparisonWindow: string
+    baselineSeries: number
+    metricSeries: number
+    explanationText: string
+    confidenceState: string
+    actionHint: string
+    ownerTeam: string
+    muteState: string
+    acknowledgementState: string
+  }>
+  forecastSeries: Array<{
+    metricKey: string
+    forecastHorizon: string
+    baselineSeries: Array<{ day: string; value: number }>
+    forecastSeries: Array<{ dayOffset: number; value: number }>
+    confidenceState: string
+  }>
+  summaryInsights: Array<{
+    reportAudience: string
+    insightSeverity: string
+    businessSignal: string
+    signalSource: string
+    explanationText: string
+    actionHint: string
+  }>
+  muteState: string
+  notificationChannel: string[]
+  acknowledgementState: string
+  businessHealthSnapshot: {
+    churnSignals: number
+    paymentFailures: number
+    supportWeeklyAverage: number
+    webhookFailureWeeklyAverage: number
+  }
+}
+
+export type InternalBiReport = {
+  reportTemplate: {
+    reportAudience: string
+    period: string
+    sections: string[]
+    sourceOfTruth: string[]
+  }
+  reportRun: {
+    generatedAt: string
+    range: { from: string; to: string }
+    reportAudience: string
+    period: string
+    summaryInsight: { explanationText: string; insightSeverity: string; confidenceState: string }
+    reportSections: Array<{ reportSection: string; explanationText: string; actionHint: string; insightSeverity: string }>
+    kpiSnapshot: { gross: number; net: number; refund: number; refundRate: number; supportTotal: number }
+    exportState: { csv: string; dashboard: string; reviewOwner: string }
+  }
+}
+
 function getApiBaseUrl(): string {
   const baseUrl = import.meta.env.VITE_STRAPI_API_URL
   if (!baseUrl) throw new Error('VITE_STRAPI_API_URL が未設定です。')
@@ -171,6 +241,20 @@ export function useInternalAdminApi() {
       if (from) query.set('from', from)
       if (to) query.set('to', to)
       return internalFetch<InternalBiCohorts>(`/internal/bi/cohorts${query.toString() ? `?${query.toString()}` : ''}`, token)
+    }),
+    getBiAlerts: async (from?: string, to?: string) => withToken((token) => {
+      const query = new URLSearchParams()
+      if (from) query.set('from', from)
+      if (to) query.set('to', to)
+      return internalFetch<InternalBiAlerts>(`/internal/bi/alerts${query.toString() ? `?${query.toString()}` : ''}`, token)
+    }),
+    getBiReport: async (audience: 'executive' | 'operations' | 'support' | 'crm' = 'operations', period: 'weekly' | 'monthly' = 'weekly', from?: string, to?: string) => withToken((token) => {
+      const query = new URLSearchParams()
+      query.set('audience', audience)
+      query.set('period', period)
+      if (from) query.set('from', from)
+      if (to) query.set('to', to)
+      return internalFetch<InternalBiReport>(`/internal/bi/report?${query.toString()}`, token)
     }),
     downloadBiCsv: async (from?: string, to?: string) => withToken(async (token) => {
       const query = new URLSearchParams()

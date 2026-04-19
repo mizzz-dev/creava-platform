@@ -6,6 +6,10 @@ const OPS_TOKEN = process.env.ANALYTICS_OPS_TOKEN ?? process.env.INQUIRY_OPS_TOK
 const SALT = process.env.ANALYTICS_IP_HASH_SALT ?? process.env.INQUIRY_IP_HASH_SALT ?? 'mizzz-analytics'
 const BI_DEFAULT_RANGE_DAYS = Number(process.env.BI_DEFAULT_RANGE_DAYS ?? 30)
 const BI_MAX_FETCH_ROWS = Number(process.env.BI_MAX_FETCH_ROWS ?? 10000)
+const BI_ALERT_MIN_VOLUME = Number(process.env.BI_ALERT_MIN_VOLUME ?? 20)
+const BI_ALERT_DROP_RATIO = Number(process.env.BI_ALERT_DROP_RATIO ?? 0.2)
+const BI_ALERT_SPIKE_RATIO = Number(process.env.BI_ALERT_SPIKE_RATIO ?? 0.35)
+const BI_FORECAST_HORIZON_DAYS = Number(process.env.BI_FORECAST_HORIZON_DAYS ?? 14)
 
 const ALLOWED_EVENTS = new Set([
   'page_view', 'cta_click', 'nav_click', 'hero_click', 'card_click',
@@ -130,6 +134,27 @@ function toCsvCell(value: unknown): string {
 
 function toCsvRow(values: unknown[]): string {
   return values.map(toCsvCell).join(',')
+}
+
+function movingAverage(values: number[], window = 7): number[] {
+  if (values.length === 0) return []
+  return values.map((_, index) => {
+    const start = Math.max(0, index - window + 1)
+    const slice = values.slice(start, index + 1)
+    return slice.reduce((acc, item) => acc + item, 0) / slice.length
+  })
+}
+
+function safeRatio(current: number, base: number): number {
+  if (base <= 0) return 0
+  return (current - base) / base
+}
+
+function toSeverity(delta: number): 'low' | 'medium' | 'high' {
+  const absolute = Math.abs(delta)
+  if (absolute >= 0.35) return 'high'
+  if (absolute >= 0.2) return 'medium'
+  return 'low'
 }
 
 export default factories.createCoreController('api::analytics-event.analytics-event', ({ strapi }) => ({
@@ -544,6 +569,409 @@ export default factories.createCoreController('api::analytics-event.analytics-ev
       if (message.includes('Internal permission denied')) return ctx.forbidden('internal BI cohort の権限がありません。')
       strapi.log.error(`[analytics-event] internalBiCohorts failed: ${message}`)
       return ctx.internalServerError('BI cohort の取得に失敗しました。')
+    }
+  },
+
+  async internalBiAlerts(ctx) {
+    try {
+      await requireInternalPermission(ctx, 'internal.user.read')
+      const to = parseDateInput(ctx.query.to) ?? new Date()
+      const from = parseDateInput(ctx.query.from) ?? new Date(to.getTime() - Math.max(30, BI_DEFAULT_RANGE_DAYS) * 24 * 60 * 60 * 1000)
+
+      const [events, orders, revenues, subscriptions, inquiries, deliveries, webhooks] = await Promise.all([
+        strapi.documents('api::analytics-event.analytics-event').findMany({
+          filters: { eventAt: { $gte: from.toISOString(), $lte: to.toISOString() } },
+          fields: ['eventName', 'sourceSite', 'locale', 'eventAt', 'payload'],
+          limit: BI_MAX_FETCH_ROWS,
+          sort: ['eventAt:desc'],
+        }),
+        strapi.documents('api::order.order').findMany({
+          filters: { orderedAt: { $gte: from.toISOString(), $lte: to.toISOString() } },
+          fields: ['sourceSite', 'orderedAt', 'paymentStatus'],
+          limit: BI_MAX_FETCH_ROWS,
+          sort: ['orderedAt:desc'],
+        }),
+        strapi.documents('api::revenue-record.revenue-record').findMany({
+          filters: { financialEventAt: { $gte: from.toISOString(), $lte: to.toISOString() } },
+          fields: ['sourceSite', 'revenueType', 'grossAmount', 'netAmount', 'refundAmount', 'partialRefundAmount', 'financialEventAt'],
+          limit: BI_MAX_FETCH_ROWS,
+          sort: ['financialEventAt:desc'],
+        }),
+        strapi.documents('api::subscription-record.subscription-record').findMany({
+          fields: ['subscriptionStatus', 'billingStatus', 'entitlementState', 'renewalDate', 'createdAt', 'updatedAt'],
+          limit: BI_MAX_FETCH_ROWS,
+          sort: ['updatedAt:desc'],
+        }),
+        strapi.documents('api::inquiry-submission.inquiry-submission').findMany({
+          filters: { submittedAt: { $gte: from.toISOString(), $lte: to.toISOString() } },
+          fields: ['sourceSite', 'formType', 'inquiryCategory', 'submittedAt'],
+          limit: BI_MAX_FETCH_ROWS,
+          sort: ['submittedAt:desc'],
+        }),
+        strapi.documents('api::delivery-log.delivery-log').findMany({
+          filters: { sentAt: { $gte: from.toISOString(), $lte: to.toISOString() } },
+          fields: ['sourceSite', 'status', 'channel', 'sentAt', 'clickedAt'],
+          limit: BI_MAX_FETCH_ROWS,
+          sort: ['sentAt:desc'],
+        }),
+        strapi.documents('api::webhook-event-log.webhook-event-log').findMany({
+          fields: ['provider', 'eventType', 'status', 'receivedAt'],
+          limit: BI_MAX_FETCH_ROWS,
+          sort: ['receivedAt:desc'],
+        }),
+      ])
+
+      const eventRows = events as Array<Record<string, unknown>>
+      const orderRows = orders as Array<Record<string, unknown>>
+      const revenueRows = revenues as Array<Record<string, unknown>>
+      const subscriptionRows = subscriptions as Array<Record<string, unknown>>
+      const inquiryRows = inquiries as Array<Record<string, unknown>>
+      const deliveryRows = deliveries as Array<Record<string, unknown>>
+      const webhookRows = (webhooks as Array<Record<string, unknown>>).filter((item) => withinRange(item.receivedAt, from, to))
+
+      const dailyMap = new Map<string, {
+        day: string
+        sessions: number
+        checkoutStarts: number
+        paidOrders: number
+        mainToStore: number
+        mainToFc: number
+        formStart: number
+        formComplete: number
+        netRevenue: number
+        grossRevenue: number
+        refundAmount: number
+        fcRevenue: number
+        supportCount: number
+        notificationSent: number
+        notificationClicked: number
+        webhookFailure: number
+      }>()
+      const ensureDay = (day: string) => {
+        if (!dailyMap.has(day)) {
+          dailyMap.set(day, {
+            day,
+            sessions: 0,
+            checkoutStarts: 0,
+            paidOrders: 0,
+            mainToStore: 0,
+            mainToFc: 0,
+            formStart: 0,
+            formComplete: 0,
+            netRevenue: 0,
+            grossRevenue: 0,
+            refundAmount: 0,
+            fcRevenue: 0,
+            supportCount: 0,
+            notificationSent: 0,
+            notificationClicked: 0,
+            webhookFailure: 0,
+          })
+        }
+        return dailyMap.get(day)!
+      }
+
+      for (const item of eventRows) {
+        const day = toIsoDay(item.eventAt)
+        if (day === 'unknown') continue
+        const row = ensureDay(day)
+        if (item.eventName === 'page_view') row.sessions += 1
+        if (item.eventName === 'cart_click') row.checkoutStarts += 1
+        if (item.eventName === 'form_start') row.formStart += 1
+        if (item.eventName === 'form_submit_success') row.formComplete += 1
+        if (item.eventName === 'cta_click') {
+          const destination = String((item.payload ?? {})['destination'] ?? '')
+          if (destination.includes('/store')) row.mainToStore += 1
+          if (destination.includes('/fanclub')) row.mainToFc += 1
+        }
+      }
+
+      for (const item of orderRows) {
+        const day = toIsoDay(item.orderedAt)
+        if (day === 'unknown') continue
+        if (item.paymentStatus !== 'paid' && item.paymentStatus !== 'succeeded') continue
+        ensureDay(day).paidOrders += 1
+      }
+      for (const item of revenueRows) {
+        const day = toIsoDay(item.financialEventAt)
+        if (day === 'unknown') continue
+        const row = ensureDay(day)
+        row.grossRevenue += numberValue(item.grossAmount)
+        row.netRevenue += numberValue(item.netAmount)
+        row.refundAmount += numberValue(item.refundAmount) + numberValue(item.partialRefundAmount)
+        if (item.revenueType === 'fc_subscription') row.fcRevenue += numberValue(item.netAmount)
+      }
+      for (const item of inquiryRows) {
+        const day = toIsoDay(item.submittedAt)
+        if (day === 'unknown') continue
+        ensureDay(day).supportCount += 1
+      }
+      for (const item of deliveryRows) {
+        const day = toIsoDay(item.sentAt)
+        if (day === 'unknown') continue
+        const row = ensureDay(day)
+        if (item.status === 'sent') row.notificationSent += 1
+        if (item.clickedAt) row.notificationClicked += 1
+      }
+      for (const item of webhookRows) {
+        const day = toIsoDay(item.receivedAt)
+        if (day === 'unknown') continue
+        if (String(item.status ?? '').toLowerCase() === 'failed') ensureDay(day).webhookFailure += 1
+      }
+
+      const daily = [...dailyMap.values()].sort((a, b) => a.day.localeCompare(b.day))
+      const latestWindow = daily.slice(-7)
+      const previousWindow = daily.slice(-14, -7)
+      const sumWindow = (rows: typeof daily, key: keyof (typeof daily)[number]) => rows.reduce((acc, row) => acc + numberValue(row[key]), 0)
+      const avg = (rows: typeof daily, key: keyof (typeof daily)[number]) => rows.length > 0 ? sumWindow(rows, key) / rows.length : 0
+
+      const currentSessions = sumWindow(latestWindow, 'sessions')
+      const previousSessions = sumWindow(previousWindow, 'sessions')
+      const currentMainToStoreRate = currentSessions > 0 ? sumWindow(latestWindow, 'mainToStore') / currentSessions : 0
+      const previousMainToStoreRate = previousSessions > 0 ? sumWindow(previousWindow, 'mainToStore') / previousSessions : 0
+      const currentMainToFcRate = currentSessions > 0 ? sumWindow(latestWindow, 'mainToFc') / currentSessions : 0
+      const previousMainToFcRate = previousSessions > 0 ? sumWindow(previousWindow, 'mainToFc') / previousSessions : 0
+      const currentCheckoutRate = currentSessions > 0 ? sumWindow(latestWindow, 'checkoutStarts') / currentSessions : 0
+      const previousCheckoutRate = previousSessions > 0 ? sumWindow(previousWindow, 'checkoutStarts') / previousSessions : 0
+      const currentPurchaseRate = sumWindow(latestWindow, 'checkoutStarts') > 0 ? sumWindow(latestWindow, 'paidOrders') / sumWindow(latestWindow, 'checkoutStarts') : 0
+      const previousPurchaseRate = sumWindow(previousWindow, 'checkoutStarts') > 0 ? sumWindow(previousWindow, 'paidOrders') / sumWindow(previousWindow, 'checkoutStarts') : 0
+      const currentFormRate = sumWindow(latestWindow, 'formStart') > 0 ? sumWindow(latestWindow, 'formComplete') / sumWindow(latestWindow, 'formStart') : 0
+      const previousFormRate = sumWindow(previousWindow, 'formStart') > 0 ? sumWindow(previousWindow, 'formComplete') / sumWindow(previousWindow, 'formStart') : 0
+      const currentNotificationCtr = sumWindow(latestWindow, 'notificationSent') > 0 ? sumWindow(latestWindow, 'notificationClicked') / sumWindow(latestWindow, 'notificationSent') : 0
+      const previousNotificationCtr = sumWindow(previousWindow, 'notificationSent') > 0 ? sumWindow(previousWindow, 'notificationClicked') / sumWindow(previousWindow, 'notificationSent') : 0
+      const currentRefundRate = sumWindow(latestWindow, 'grossRevenue') > 0 ? sumWindow(latestWindow, 'refundAmount') / sumWindow(latestWindow, 'grossRevenue') : 0
+      const previousRefundRate = sumWindow(previousWindow, 'grossRevenue') > 0 ? sumWindow(previousWindow, 'refundAmount') / sumWindow(previousWindow, 'grossRevenue') : 0
+
+      const metricSeries = {
+        sessions: daily.map((row) => ({ day: row.day, value: row.sessions })),
+        storeNetRevenue: daily.map((row) => ({ day: row.day, value: row.netRevenue - row.fcRevenue })),
+        fcSubscriptionRevenue: daily.map((row) => ({ day: row.day, value: row.fcRevenue })),
+        supportCases: daily.map((row) => ({ day: row.day, value: row.supportCount })),
+      }
+
+      const metricDefinition = [
+        { metricKey: 'sessions', ownerTeam: 'growth', sourceOfTruth: 'api::analytics-event.analytics-event', unit: 'count' },
+        { metricKey: 'main_to_store_rate', ownerTeam: 'growth', sourceOfTruth: 'api::analytics-event.analytics-event', unit: 'ratio' },
+        { metricKey: 'main_to_fc_rate', ownerTeam: 'growth', sourceOfTruth: 'api::analytics-event.analytics-event', unit: 'ratio' },
+        { metricKey: 'checkout_start_rate', ownerTeam: 'growth', sourceOfTruth: 'api::analytics-event.analytics-event', unit: 'ratio' },
+        { metricKey: 'purchase_complete_rate', ownerTeam: 'commerce', sourceOfTruth: 'api::order.order', unit: 'ratio' },
+        { metricKey: 'form_completion_rate', ownerTeam: 'support', sourceOfTruth: 'api::analytics-event.analytics-event', unit: 'ratio' },
+        { metricKey: 'notification_click_rate', ownerTeam: 'crm', sourceOfTruth: 'api::delivery-log.delivery-log', unit: 'ratio' },
+        { metricKey: 'store_net_revenue', ownerTeam: 'finance', sourceOfTruth: 'api::revenue-record.revenue-record', unit: 'currency' },
+        { metricKey: 'fc_subscription_revenue', ownerTeam: 'finance', sourceOfTruth: 'api::revenue-record.revenue-record', unit: 'currency' },
+        { metricKey: 'refund_rate', ownerTeam: 'finance', sourceOfTruth: 'api::revenue-record.revenue-record', unit: 'ratio' },
+        { metricKey: 'support_cases', ownerTeam: 'support', sourceOfTruth: 'api::inquiry-submission.inquiry-submission', unit: 'count' },
+        { metricKey: 'webhook_failure_count', ownerTeam: 'operations', sourceOfTruth: 'api::webhook-event-log.webhook-event-log', unit: 'count' },
+      ]
+
+      const alertRules = [
+        { metricKey: 'sessions', alertScope: 'global', comparisonWindow: 'last_7d_vs_prev_7d', alertThreshold: { type: 'relative_drop', value: BI_ALERT_DROP_RATIO }, ownerTeam: 'growth' },
+        { metricKey: 'purchase_complete_rate', alertScope: 'store', comparisonWindow: 'last_7d_vs_prev_7d', alertThreshold: { type: 'relative_drop', value: BI_ALERT_DROP_RATIO }, ownerTeam: 'commerce' },
+        { metricKey: 'form_completion_rate', alertScope: 'main,store,fc', comparisonWindow: 'last_7d_vs_prev_7d', alertThreshold: { type: 'relative_drop', value: BI_ALERT_DROP_RATIO }, ownerTeam: 'support' },
+        { metricKey: 'store_net_revenue', alertScope: 'store', comparisonWindow: 'last_7d_vs_prev_7d', alertThreshold: { type: 'relative_drop', value: BI_ALERT_DROP_RATIO }, ownerTeam: 'finance' },
+        { metricKey: 'fc_subscription_revenue', alertScope: 'fc', comparisonWindow: 'last_7d_vs_prev_7d', alertThreshold: { type: 'relative_drop', value: BI_ALERT_DROP_RATIO }, ownerTeam: 'finance' },
+        { metricKey: 'refund_rate', alertScope: 'store,fc', comparisonWindow: 'last_7d_vs_prev_7d', alertThreshold: { type: 'relative_spike', value: BI_ALERT_SPIKE_RATIO }, ownerTeam: 'finance' },
+        { metricKey: 'support_cases', alertScope: 'global', comparisonWindow: 'last_7d_vs_prev_7d', alertThreshold: { type: 'relative_spike', value: BI_ALERT_SPIKE_RATIO }, ownerTeam: 'support' },
+      ]
+
+      const candidates = [
+        { metricKey: 'sessions', current: currentSessions, baseline: previousSessions, hint: '流入低下時は main 導線 / 集客チャネル / 配信停止を確認' },
+        { metricKey: 'main_to_store_rate', current: currentMainToStoreRate, baseline: previousMainToStoreRate, hint: 'main の store CTA 配置・文言・リンク切れを確認' },
+        { metricKey: 'main_to_fc_rate', current: currentMainToFcRate, baseline: previousMainToFcRate, hint: 'main から fanclub 導線、会員特典訴求を確認' },
+        { metricKey: 'checkout_start_rate', current: currentCheckoutRate, baseline: previousCheckoutRate, hint: '商品詳細→カート導線、在庫表示、価格表記を確認' },
+        { metricKey: 'purchase_complete_rate', current: currentPurchaseRate, baseline: previousPurchaseRate, hint: '決済失敗、配送オプション、エラー率を確認' },
+        { metricKey: 'form_completion_rate', current: currentFormRate, baseline: previousFormRate, hint: 'フォーム必須項目、バリデーション、入力補助を確認' },
+        { metricKey: 'notification_click_rate', current: currentNotificationCtr, baseline: previousNotificationCtr, hint: '配信チャネル別 CTR、件名、配信タイミングを確認' },
+        { metricKey: 'store_net_revenue', current: sumWindow(latestWindow, 'netRevenue') - sumWindow(latestWindow, 'fcRevenue'), baseline: sumWindow(previousWindow, 'netRevenue') - sumWindow(previousWindow, 'fcRevenue'), hint: 'store の checkout / 決済 / 在庫 / キャンペーンを確認' },
+        { metricKey: 'fc_subscription_revenue', current: sumWindow(latestWindow, 'fcRevenue'), baseline: sumWindow(previousWindow, 'fcRevenue'), hint: '継続更新成功率、失敗課金、churn を確認' },
+        { metricKey: 'refund_rate', current: currentRefundRate, baseline: previousRefundRate, hint: '返品理由、配送遅延、不良率、誤配送を確認' },
+        { metricKey: 'support_cases', current: sumWindow(latestWindow, 'supportCount'), baseline: sumWindow(previousWindow, 'supportCount'), hint: 'FAQ/Guide不足、決済/配送障害、フォーム障害を確認' },
+        { metricKey: 'webhook_failure_count', current: sumWindow(latestWindow, 'webhookFailure'), baseline: sumWindow(previousWindow, 'webhookFailure'), hint: 'Webhook endpoint とリトライ失敗ログを確認' },
+      ]
+
+      const anomalyEvents = candidates.flatMap((candidate) => {
+        const totalVolume = candidate.current + candidate.baseline
+        if (totalVolume < BI_ALERT_MIN_VOLUME) return []
+        const deltaRatio = safeRatio(candidate.current, candidate.baseline)
+        const negativeAnomaly = deltaRatio <= -BI_ALERT_DROP_RATIO && ['refund_rate', 'support_cases', 'webhook_failure_count'].includes(candidate.metricKey) === false
+        const positiveAnomaly = deltaRatio >= BI_ALERT_SPIKE_RATIO && ['refund_rate', 'support_cases', 'webhook_failure_count'].includes(candidate.metricKey)
+        if (!negativeAnomaly && !positiveAnomaly) return []
+        const direction = deltaRatio >= 0 ? 'increase' : 'decrease'
+        return [{
+          metricKey: candidate.metricKey,
+          anomalySeverity: toSeverity(deltaRatio),
+          comparisonWindow: 'last_7d_vs_prev_7d',
+          baselineSeries: candidate.baseline,
+          metricSeries: candidate.current,
+          explanationText: `${candidate.metricKey} が ${direction}（${(deltaRatio * 100).toFixed(1)}%）`,
+          confidenceState: totalVolume >= BI_ALERT_MIN_VOLUME * 3 ? 'high' : 'medium',
+          actionHint: candidate.hint,
+          ownerTeam: metricDefinition.find((item) => item.metricKey === candidate.metricKey)?.ownerTeam ?? 'operations',
+          muteState: 'unmuted',
+          acknowledgementState: 'unacked',
+        }]
+      })
+
+      const revenueSeriesValues = metricSeries.storeNetRevenue.map((item) => item.value)
+      const supportSeriesValues = metricSeries.supportCases.map((item) => item.value)
+      const revenueBaseline = movingAverage(revenueSeriesValues, 7)
+      const supportBaseline = movingAverage(supportSeriesValues, 7)
+      const latestDay = daily[daily.length - 1]?.day
+      const forecastSeries = [
+        {
+          metricKey: 'store_net_revenue',
+          forecastHorizon: `${BI_FORECAST_HORIZON_DAYS}d`,
+          baselineSeries: metricSeries.storeNetRevenue.map((row, index) => ({ day: row.day, value: revenueBaseline[index] ?? row.value })),
+          forecastSeries: Array.from({ length: BI_FORECAST_HORIZON_DAYS }).map((_, index) => ({ dayOffset: index + 1, value: revenueBaseline[revenueBaseline.length - 1] ?? 0 })),
+          confidenceState: 'medium',
+        },
+        {
+          metricKey: 'support_cases',
+          forecastHorizon: `${BI_FORECAST_HORIZON_DAYS}d`,
+          baselineSeries: metricSeries.supportCases.map((row, index) => ({ day: row.day, value: supportBaseline[index] ?? row.value })),
+          forecastSeries: Array.from({ length: BI_FORECAST_HORIZON_DAYS }).map((_, index) => ({ dayOffset: index + 1, value: supportBaseline[supportBaseline.length - 1] ?? 0 })),
+          confidenceState: 'medium',
+        },
+      ]
+
+      const summaryInsights = [
+        {
+          reportAudience: 'executive',
+          insightSeverity: anomalyEvents.some((item) => item.anomalySeverity === 'high') ? 'high' : 'medium',
+          businessSignal: anomalyEvents.length > 0 ? `${anomalyEvents.length}件の重要変化を検知` : '重大な変化なし',
+          signalSource: 'internal.bi.alerts',
+          explanationText: anomalyEvents.length > 0 ? anomalyEvents.slice(0, 3).map((item) => item.explanationText).join(' / ') : '主要KPIは安定推移',
+          actionHint: 'high のアラートは当日中に ownerTeam が一次調査し、acknowledge を更新',
+        },
+      ]
+
+      ctx.body = {
+        range: { from: from.toISOString(), to: to.toISOString() },
+        refreshState: { latestDay, generatedAt: new Date().toISOString() },
+        sourceOfTruth: {
+          rawEvent: 'api::analytics-event.analytics-event',
+          orderFact: 'api::order.order',
+          revenueFact: 'api::revenue-record.revenue-record',
+          supportFact: 'api::inquiry-submission.inquiry-submission',
+          webhookFact: 'api::webhook-event-log.webhook-event-log',
+          subscriptionFact: 'api::subscription-record.subscription-record',
+        },
+        metricDefinition,
+        metricSeries,
+        alertRules,
+        anomalyEvents,
+        forecastSeries,
+        summaryInsights,
+        muteState: 'managed_in_runbook',
+        notificationChannel: ['internal-dashboard', 'ops-runbook'],
+        acknowledgementState: anomalyEvents.length > 0 ? 'pending' : 'none',
+        businessHealthSnapshot: {
+          churnSignals: subscriptionRows.filter((item) => item.subscriptionStatus === 'canceled' || item.entitlementState === 'grace_period').length,
+          paymentFailures: subscriptionRows.filter((item) => item.billingStatus === 'failed').length,
+          supportWeeklyAverage: avg(latestWindow, 'supportCount'),
+          webhookFailureWeeklyAverage: avg(latestWindow, 'webhookFailure'),
+        },
+      }
+    } catch (error) {
+      const message = (error as Error).message
+      if (message.includes('Internal permission denied')) return ctx.forbidden('internal BI alerts の権限がありません。')
+      strapi.log.error(`[analytics-event] internalBiAlerts failed: ${message}`)
+      return ctx.internalServerError('BI alerts の取得に失敗しました。')
+    }
+  },
+
+  async internalBiReport(ctx) {
+    try {
+      await requireInternalPermission(ctx, 'internal.user.read')
+      const audience = sanitizeText(ctx.query.audience, 40) ?? 'operations'
+      const period = sanitizeText(ctx.query.period, 20) ?? 'weekly'
+      const to = parseDateInput(ctx.query.to) ?? new Date()
+      const days = period === 'monthly' ? 30 : 7
+      const from = parseDateInput(ctx.query.from) ?? new Date(to.getTime() - days * 24 * 60 * 60 * 1000)
+
+      const [alerts, revenues, inquiries] = await Promise.all([
+        strapi.documents('api::analytics-event.analytics-event').count({
+          filters: { eventName: { $eq: 'api_failure' }, eventAt: { $gte: from.toISOString(), $lte: to.toISOString() } },
+        }),
+        strapi.documents('api::revenue-record.revenue-record').findMany({
+          filters: { financialEventAt: { $gte: from.toISOString(), $lte: to.toISOString() } },
+          fields: ['netAmount', 'grossAmount', 'refundAmount', 'partialRefundAmount', 'sourceSite', 'financialEventAt'],
+          limit: BI_MAX_FETCH_ROWS,
+          sort: ['financialEventAt:desc'],
+        }),
+        strapi.documents('api::inquiry-submission.inquiry-submission').findMany({
+          filters: { submittedAt: { $gte: from.toISOString(), $lte: to.toISOString() } },
+          fields: ['sourceSite', 'inquiryCategory', 'submittedAt'],
+          limit: BI_MAX_FETCH_ROWS,
+          sort: ['submittedAt:desc'],
+        }),
+      ])
+
+      const revenueRows = revenues as Array<Record<string, unknown>>
+      const inquiryRows = inquiries as Array<Record<string, unknown>>
+      const gross = revenueRows.reduce((acc, item) => acc + numberValue(item.grossAmount), 0)
+      const net = revenueRows.reduce((acc, item) => acc + numberValue(item.netAmount), 0)
+      const refund = revenueRows.reduce((acc, item) => acc + numberValue(item.refundAmount) + numberValue(item.partialRefundAmount), 0)
+      const refundRate = gross > 0 ? refund / gross : 0
+      const supportTotal = inquiryRows.length
+      const supportByCategory = (Object.entries(inquiryRows.reduce((acc: Record<string, number>, item) => {
+        const key = String(item.inquiryCategory ?? 'unknown')
+        acc[key] = (acc[key] ?? 0) + 1
+        return acc
+      }, {})) as Array<[string, number]>).sort((a, b) => b[1] - a[1]).slice(0, 5)
+
+      const sections = [
+        {
+          reportSection: 'summary',
+          explanationText: `${period === 'monthly' ? '月次' : '週次'}の net 売上は ${Math.round(net).toLocaleString()}、返金率は ${(refundRate * 100).toFixed(2)}%。support 件数は ${supportTotal} 件。`,
+          actionHint: refundRate > 0.08 ? '返金理由上位カテゴリを優先調査し、商品説明・配送・品質改善を実行' : '現行運用を維持し、キャンペーン比較を継続',
+          insightSeverity: refundRate > 0.12 ? 'high' : refundRate > 0.08 ? 'medium' : 'low',
+        },
+        {
+          reportSection: 'operations',
+          explanationText: `API失敗イベントは ${alerts} 件。support 上位カテゴリ: ${supportByCategory.map(([category, count]) => `${category}(${count})`).join(', ') || 'なし'}.`,
+          actionHint: alerts > 0 ? 'internal admin の anomaly center で当日原因を確認し、runbookに追記' : '引き続き15分監視と週次レビューを継続',
+          insightSeverity: alerts > 20 ? 'high' : alerts > 5 ? 'medium' : 'low',
+        },
+      ]
+
+      ctx.body = {
+        reportTemplate: {
+          reportAudience: audience,
+          period,
+          sections: ['summary', 'operations', 'finance', 'support'],
+          sourceOfTruth: ['api::revenue-record.revenue-record', 'api::inquiry-submission.inquiry-submission', 'api::analytics-event.analytics-event'],
+        },
+        reportRun: {
+          generatedAt: new Date().toISOString(),
+          range: { from: from.toISOString(), to: to.toISOString() },
+          reportAudience: audience,
+          period,
+          summaryInsight: {
+            explanationText: sections[0].explanationText,
+            insightSeverity: sections.some((item) => item.insightSeverity === 'high') ? 'high' : 'medium',
+            confidenceState: 'medium',
+          },
+          reportSections: sections,
+          kpiSnapshot: {
+            gross,
+            net,
+            refund,
+            refundRate,
+            supportTotal,
+          },
+          exportState: {
+            csv: '/api/internal/bi/export.csv',
+            dashboard: '/internal/admin',
+            reviewOwner: audience === 'executive' ? '経営チーム' : audience === 'support' ? 'support/CS' : '運営チーム',
+          },
+        },
+      }
+    } catch (error) {
+      const message = (error as Error).message
+      if (message.includes('Internal permission denied')) return ctx.forbidden('internal BI report の権限がありません。')
+      strapi.log.error(`[analytics-event] internalBiReport failed: ${message}`)
+      return ctx.internalServerError('BI report の生成に失敗しました。')
     }
   },
 

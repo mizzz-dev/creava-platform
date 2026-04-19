@@ -7,6 +7,8 @@ import {
   type InternalRevenueSummary,
   type InternalBiOverview,
   type InternalBiCohorts,
+  type InternalBiAlerts,
+  type InternalBiReport,
 } from '@/modules/internal-admin/api'
 
 export default function InternalAdminPage() {
@@ -24,6 +26,8 @@ export default function InternalAdminPage() {
   const [revenueSummary, setRevenueSummary] = useState<InternalRevenueSummary | null>(null)
   const [biOverview, setBiOverview] = useState<InternalBiOverview | null>(null)
   const [biCohorts, setBiCohorts] = useState<InternalBiCohorts | null>(null)
+  const [biAlerts, setBiAlerts] = useState<InternalBiAlerts | null>(null)
+  const [biReport, setBiReport] = useState<InternalBiReport | null>(null)
 
   if (!isSignedIn) return <section className="mx-auto max-w-4xl px-4 py-16">ログインが必要です。</section>
   if (user?.role !== 'admin') return <section className="mx-auto max-w-4xl px-4 py-16">internal admin は管理者ロールのみアクセスできます。</section>
@@ -162,6 +166,30 @@ export default function InternalAdminPage() {
             }}
             className="rounded border border-gray-300 px-3 py-2 text-sm"
           >BI CSV export</button>
+          <button
+            type="button"
+            onClick={() => {
+              setMessage(null)
+              api.getBiAlerts().then(setBiAlerts).catch((e: Error) => setMessage(e.message))
+            }}
+            className="rounded border border-gray-300 px-3 py-2 text-sm"
+          >Alert/Anomaly更新</button>
+          <button
+            type="button"
+            onClick={() => {
+              setMessage(null)
+              api.getBiReport('executive', 'weekly').then(setBiReport).catch((e: Error) => setMessage(e.message))
+            }}
+            className="rounded border border-gray-300 px-3 py-2 text-sm"
+          >経営レポート生成</button>
+          <button
+            type="button"
+            onClick={() => {
+              setMessage(null)
+              api.getBiReport('support', 'weekly').then(setBiReport).catch((e: Error) => setMessage(e.message))
+            }}
+            className="rounded border border-gray-300 px-3 py-2 text-sm"
+          >Supportレポート生成</button>
         </div>
         {biOverview && (
           <div className="mt-3 space-y-3 text-xs">
@@ -184,6 +212,27 @@ export default function InternalAdminPage() {
           <div className="mt-3 space-y-2 text-xs">
             <p className="text-gray-500">cohort windows: {biCohorts.retentionWindow.join(', ')}</p>
             <pre className="overflow-auto rounded bg-gray-50 p-3 dark:bg-gray-900">{JSON.stringify(biCohorts.cohorts, null, 2)}</pre>
+          </div>
+        )}
+        {biAlerts && (
+          <div className="mt-3 space-y-2 text-xs">
+            <p className="font-medium">
+              anomaly: {biAlerts.anomalyEvents.length} / forecast: {biAlerts.forecastSeries.length} / generatedAt: {biAlerts.refreshState.generatedAt}
+            </p>
+            <p className="text-gray-500">
+              churnSignals: {biAlerts.businessHealthSnapshot.churnSignals} / paymentFailures: {biAlerts.businessHealthSnapshot.paymentFailures} / supportAvg: {biAlerts.businessHealthSnapshot.supportWeeklyAverage.toFixed(1)}
+            </p>
+            <pre className="overflow-auto rounded bg-gray-50 p-3 dark:bg-gray-900">{JSON.stringify({
+              summaryInsights: biAlerts.summaryInsights,
+              anomalyEvents: biAlerts.anomalyEvents,
+              alertRules: biAlerts.alertRules,
+            }, null, 2)}</pre>
+          </div>
+        )}
+        {biReport && (
+          <div className="mt-3 space-y-2 text-xs">
+            <p className="font-medium">report audience: {biReport.reportRun.reportAudience} / period: {biReport.reportRun.period}</p>
+            <pre className="overflow-auto rounded bg-gray-50 p-3 dark:bg-gray-900">{JSON.stringify(biReport.reportRun, null, 2)}</pre>
           </div>
         )}
       </div>

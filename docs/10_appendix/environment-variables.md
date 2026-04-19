@@ -56,6 +56,10 @@
 | `REVENUE_EXPORT_MAX_ROWS` | revenue CSV export 上限行数（internal admin 用） | 任意 |
 | `BI_DEFAULT_RANGE_DAYS` | internal BI overview/cohort の既定集計期間（日） | 任意 |
 | `BI_MAX_FETCH_ROWS` | BI集計時の1ドメインあたり最大取得行数（メモリ保護） | 任意 |
+| `BI_ALERT_MIN_VOLUME` | alert/anomaly 判定の最小母数（誤検知抑制） | 任意 |
+| `BI_ALERT_DROP_RATIO` | 重要KPI低下を判定する比率閾値（例: 0.20=20%） | 任意 |
+| `BI_ALERT_SPIKE_RATIO` | 重要KPI増加を判定する比率閾値（例: 0.35=35%） | 任意 |
+| `BI_FORECAST_HORIZON_DAYS` | 短期forecast生成日数 | 任意 |
 | `ANALYTICS_IP_HASH_SALT` | analytics IPハッシュソルト | 推奨 |
 | `INQUIRY_NOTIFY_TO` | 管理通知メール宛先（カンマ区切り） | 任意 |
 | `INQUIRY_ENABLE_AUTO_REPLY` | 自動返信有効化 (`true/false`) | 任意 |
@@ -105,6 +109,10 @@
 - `ANALYTICS_OPS_TOKEN`
 - `BI_DEFAULT_RANGE_DAYS`
 - `BI_MAX_FETCH_ROWS`
+- `BI_ALERT_MIN_VOLUME`
+- `BI_ALERT_DROP_RATIO`
+- `BI_ALERT_SPIKE_RATIO`
+- `BI_FORECAST_HORIZON_DAYS`
 - `ANALYTICS_IP_HASH_SALT`
 - `INQUIRY_NOTIFY_TO`（通知を使う場合）
 - SMTP で必要な Secret（`SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM`）
