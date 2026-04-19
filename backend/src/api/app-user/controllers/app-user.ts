@@ -71,6 +71,59 @@ function normalizeClaims(authUser: AuthenticatedUser, requestedLocale?: unknown)
   }
 }
 
+
+function normalizeOnboardingStatus(raw: unknown): 'not_started' | 'in_progress' | 'completed' | 'skipped' {
+  const value = String(raw ?? '').trim()
+  if (value === 'in_progress' || value === 'completed' || value === 'skipped') return value
+  return 'not_started'
+}
+
+function normalizeProfileCompletionStatus(raw: unknown): 'not_started' | 'in_progress' | 'completed' {
+  const value = String(raw ?? '').trim()
+  if (value === 'complete' || value === 'completed') return 'completed'
+  if (value === 'partial' || value === 'in_progress') return 'in_progress'
+  return 'not_started'
+}
+
+function resolveLifecycleStage(params: {
+  accountStatus: string
+  membershipStatus: string
+  onboardingStatus: 'not_started' | 'in_progress' | 'completed' | 'skipped'
+}): string {
+  if (params.accountStatus === 'suspended' || params.accountStatus === 'restricted' || params.membershipStatus === 'suspended') return 'suspended_user'
+  if (params.onboardingStatus === 'not_started' || params.onboardingStatus === 'in_progress') return 'onboarding_user'
+  if (params.membershipStatus === 'member') return 'active_member'
+  if (params.membershipStatus === 'grace') return 'grace_member'
+  if (params.membershipStatus === 'expired' || params.membershipStatus === 'canceled') return 'inactive_member'
+  return 'authenticated_non_member'
+}
+
+function buildLifecycleSummary(appUser: any, latestSubscription: any, latestEntitlement: any) {
+  const onboardingStatus = normalizeOnboardingStatus(appUser?.onboardingState)
+  const profileCompletionStatus = normalizeProfileCompletionStatus(appUser?.profileCompletionState)
+  const membershipStatus = latestEntitlement?.membershipStatus ?? appUser?.membershipStatus ?? 'non_member'
+  const accountStatus = appUser?.accountStatus ?? 'active'
+
+  return {
+    onboardingStatus,
+    profileCompletionStatus,
+    lifecycleStage: resolveLifecycleStage({ accountStatus, membershipStatus, onboardingStatus }),
+    membershipStatus,
+    accountStatus,
+    accessLevel: latestEntitlement?.accessLevel ?? appUser?.accessLevel ?? 'logged_in',
+    entitlementState: latestEntitlement?.entitlementState ?? 'none',
+    firstLoginAt: appUser?.firstLoginAt ?? null,
+    lastLoginAt: appUser?.lastLoginAt ?? null,
+    joinedAt: latestSubscription?.startAt ?? null,
+    renewedAt: latestSubscription?.renewalDate ?? latestSubscription?.currentPeriodEnd ?? null,
+    canceledAt: latestSubscription?.canceledAt ?? null,
+    graceEndsAt: latestSubscription?.currentPeriodEnd ?? latestSubscription?.endAt ?? null,
+    suspendedAt: accountStatus === 'suspended' || membershipStatus === 'suspended' ? (appUser?.updatedAt ?? null) : null,
+    reactivatedAt: accountStatus === 'active' && membershipStatus === 'member' ? (latestSubscription?.updatedAt ?? null) : null,
+    sourceSite: appUser?.sourceSite ?? 'cross',
+  }
+}
+
 function normalizeMembershipStatus(status: MembershipStatus): MembershipStatus {
   if (status === 'guest') return 'non_member'
   if (status === 'active') return 'member'
@@ -141,6 +194,15 @@ function buildSeedData(logtoUserId: string, claims: NormalizedClaims, sourceSite
     },
     profileCompletionState: completedFields >= 3 ? 'complete' : completedFields > 0 ? 'partial' : 'empty',
     onboardingState: 'not_started',
+    lifecycleStage: membership.membershipStatus === 'member' ? 'active_member' : membership.membershipStatus === 'grace' ? 'grace_member' : 'authenticated_non_member',
+    entitlementState: membership.membershipStatus === 'member' || membership.membershipStatus === 'grace' ? 'active' : 'none',
+    joinedAt: membership.membershipStatus === 'member' || membership.membershipStatus === 'grace' ? nowIso : null,
+    renewedAt: null,
+    canceledAt: null,
+    graceEndsAt: null,
+    suspendedAt: membership.membershipStatus === 'suspended' ? nowIso : null,
+    reactivatedAt: null,
+    acquisitionSource: sourceSite,
     linkedProviders: claims.linkedProviders,
     firstLoginAt: nowIso,
     lastLoginAt: nowIso,
@@ -260,6 +322,8 @@ async function buildUserSummary(strapi: any, logtoUserId: string) {
     findLatestEntitlement(strapi, logtoUserId),
   ])
 
+  const lifecycleSummary = buildLifecycleSummary(appUser, latestSubscription, latestEntitlement)
+
   return {
     appUser,
     userSummary: {
@@ -272,6 +336,9 @@ async function buildUserSummary(strapi: any, logtoUserId: string) {
       firstLoginAt: appUser.firstLoginAt,
       lastLoginAt: appUser.lastLoginAt,
       sourceSite: appUser.sourceSite,
+      lifecycleStage: lifecycleSummary.lifecycleStage,
+      onboardingStatus: lifecycleSummary.onboardingStatus,
+      profileCompletionStatus: lifecycleSummary.profileCompletionStatus,
       notificationPreference: notificationPreference
         ? {
           emailOptIn: notificationPreference.emailOptIn,
@@ -373,6 +440,14 @@ export default ({ strapi }) => ({
           membershipPlan: membership.membershipPlan,
           membershipStatus: membership.membershipStatus,
           accessLevel: claims.role === 'admin' ? 'admin' : membership.accessLevel,
+          lifecycleStage: resolveLifecycleStage({
+            accountStatus: existing.accountStatus,
+            membershipStatus: membership.membershipStatus,
+            onboardingStatus: normalizeOnboardingStatus(existing.onboardingState),
+          }),
+          entitlementState: membership.membershipStatus === 'member' || membership.membershipStatus === 'grace' ? 'active' : 'none',
+          suspendedAt: membership.membershipStatus === 'suspended' ? nowIso : existing.suspendedAt ?? null,
+          renewedAt: membership.membershipStatus === 'member' ? nowIso : existing.renewedAt ?? null,
           lastSyncedAt: nowIso,
         },
       })
@@ -418,6 +493,8 @@ export default ({ strapi }) => ({
         }
         : toMembershipSummary(latestSubscription)
 
+      const lifecycleSummary = buildLifecycleSummary(appUser, latestSubscription, latestEntitlement)
+
       ctx.body = {
         appUser,
         auth: {
@@ -452,6 +529,7 @@ export default ({ strapi }) => ({
           }
           : null,
         notificationPreference,
+        lifecycleSummary,
       }
     } catch (error) {
       const message = (error as Error).message
@@ -519,6 +597,13 @@ export default ({ strapi }) => ({
           accessLevel: user.accessLevel,
           accountStatus: user.accountStatus,
           sourceSite: user.sourceSite,
+          lifecycleStage: resolveLifecycleStage({
+            accountStatus: user.accountStatus,
+            membershipStatus: user.membershipStatus,
+            onboardingStatus: normalizeOnboardingStatus(user.onboardingState),
+          }),
+          onboardingStatus: normalizeOnboardingStatus(user.onboardingState),
+          profileCompletionStatus: normalizeProfileCompletionStatus(user.profileCompletionState),
           lastLoginAt: user.lastLoginAt,
           lastSyncedAt: user.lastSyncedAt,
         })),

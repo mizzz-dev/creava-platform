@@ -18,6 +18,8 @@
 | `VITE_STRAPI_API_TOKEN` | 公開コンテンツ取得トークン | 任意 | 推奨 | 推奨 |
 | `VITE_LOGTO_*` | 認証 | 任意 | 必須 | 必須 |
 | `VITE_USER_SYNC_ENABLED` | user provisioning bridge の有効化 | 任意 | 任意 | 任意 |
+| `VITE_USER_LIFECYCLE_ONBOARDING_ENABLED` | lifecycle/onboarding UI 表示フラグ | 任意 | 推奨 | 推奨 |
+| `VITE_ONBOARDING_REMINDER_DAYS` | onboarding 再表示までの日数 | 任意 | 任意 | 推奨 |
 | `VITE_SHOPIFY_*` | store 商品取得 | 任意 | 必須 | 必須 |
 | `VITE_STRIPE_PUBLISHABLE_KEY` | 決済公開キー | 任意 | 必須 | 必須 |
 | `VITE_PERSONALIZATION_MAX_HISTORY` | 閲覧履歴の保存上限 | 任意 | 任意 | 任意 |
@@ -38,6 +40,8 @@
 - `VITE_LOGTO_ISSUER`
 - `VITE_LOGTO_MANAGEMENT_API_ENDPOINT`（default tenant endpoint）
 - `VITE_USER_SYNC_ENABLED`（`false` で同期ブリッジ停止）
+- `VITE_USER_LIFECYCLE_ONBOARDING_ENABLED`
+- `VITE_ONBOARDING_REMINDER_DAYS`
 
 > `VITE_LOGTO_ACCOUNT_CENTER_URL` 未設定時は frontend 側で `VITE_LOGTO_ENDPOINT + /account-center` をフォールバック利用する。
 
@@ -80,6 +84,7 @@
 - `LOGTO_M2M_APP_ID`
 - `LOGTO_M2M_APP_SECRET`
 - `LOGTO_USER_SYNC_OPS_TOKEN`（support lookup API 用）
+- `USER_LIFECYCLE_GRACE_NOTICE_DAYS`（grace 通知表示のしきい値日数）
 
 ## 3. GitHub Secrets（推奨一覧）
 

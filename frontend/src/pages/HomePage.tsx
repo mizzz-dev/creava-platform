@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useStrapiSingle } from '@/hooks'
+import { useCurrentUser, useStrapiSingle } from '@/hooks'
 import { getSiteSettings } from '@/modules/settings/api'
 import PageHead from '@/components/seo/PageHead'
 import StructuredData from '@/components/seo/StructuredData'
@@ -25,9 +25,11 @@ import { getNewsList } from '@/modules/news/api'
 import { getBlogList } from '@/modules/blog/api'
 import { getEventsList } from '@/modules/events/api'
 import { getProducts } from '@/modules/store/api'
+import UserLifecycleBanner from '@/components/common/UserLifecycleBanner'
 
 export default function HomePage() {
   const { t, i18n } = useTranslation()
+  const { user, lifecycle } = useCurrentUser()
   const { item: settings } = useStrapiSingle(() =>
     getSiteSettings({ locale: i18n.resolvedLanguage }),
   )
@@ -109,6 +111,9 @@ export default function HomePage() {
       />
 
       <HeroSection />
+      <div className="mx-auto max-w-5xl px-4">
+        <UserLifecycleBanner user={user} lifecycle={lifecycle} context="main" />
+      </div>
       <AboutTeaserSection />
       <GitHubTrustSection />
       <LatestSection />

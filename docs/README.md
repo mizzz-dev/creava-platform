@@ -50,6 +50,7 @@
 - [デプロイ手順書](./09_operations/deploy-manual.md)
 - [トラブルシューティング](./09_operations/troubleshooting.md)
 - [Logto 本番運用ランブック](./09_operations/logto-production-auth-runbook.md)
+- [統一認証基盤を前提にした user lifecycle / onboarding / 会員導線整備 (2026-04-19)](./user-lifecycle-membership-onboarding-foundation-2026-04-19.md)
 - [Logto ユーザー同期/プロビジョニング基盤 (2026-04-18)](./logto-user-sync-foundation-2026-04-18.md)
 - [internal admin / support / 監査ログ 基盤整備 (2026-04-18)](./internal-admin-support-audit-foundation-2026-04-18.md)
 - [フォーム運用マニュアル](./09_operations/form-operations-manual.md)

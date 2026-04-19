@@ -68,7 +68,7 @@ export default function InternalAdminPage() {
                 }}
               >
                 <p>{item.primaryEmail ?? item.logtoUserId}</p>
-                <p className="text-xs text-gray-500">{item.membershipStatus} / {item.accountStatus} / {item.sourceSite}</p>
+                <p className="text-xs text-gray-500">{item.membershipStatus} / {item.accountStatus} / {item.lifecycleStage} / {item.sourceSite}</p>
               </button>
             </li>
           ))}

@@ -30,6 +30,9 @@ export type InternalLookupUser = {
   accessLevel: string
   accountStatus: string
   sourceSite: string
+  lifecycleStage: string
+  onboardingStatus: string
+  profileCompletionStatus: string
   lastLoginAt: string | null
   lastSyncedAt: string | null
 }
