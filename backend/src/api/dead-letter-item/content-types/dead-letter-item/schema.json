@@ -1,0 +1,35 @@
+{
+  "kind": "collectionType",
+  "collectionName": "dead_letter_items",
+  "info": {
+    "singularName": "dead-letter-item",
+    "pluralName": "dead-letter-items",
+    "displayName": "Dead Letter Item",
+    "description": "integration 失敗の隔離キュー"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "category": { "type": "enumeration", "enum": ["inbound_event", "outbound_delivery", "sync_run", "reconciliation"], "required": true },
+    "status": { "type": "enumeration", "enum": ["open", "retrying", "resolved", "ignored"], "default": "open", "required": true },
+    "connectorType": { "type": "string", "required": true },
+    "connectorKey": { "type": "string", "required": true },
+    "sourceSite": { "type": "enumeration", "enum": ["main", "store", "fc", "cross"], "default": "cross", "required": true },
+    "environment": { "type": "enumeration", "enum": ["local", "staging", "production"], "default": "local", "required": true },
+    "severity": { "type": "enumeration", "enum": ["low", "medium", "high", "critical"], "default": "medium", "required": true },
+    "idempotencyKey": { "type": "string" },
+    "externalResourceId": { "type": "string" },
+    "internalResourceId": { "type": "string" },
+    "failureReason": { "type": "text", "required": true },
+    "lastError": { "type": "text" },
+    "retryCount": { "type": "integer", "default": 0, "min": 0 },
+    "nextRetryAt": { "type": "datetime" },
+    "resolvedAt": { "type": "datetime" },
+    "replayable": { "type": "boolean", "default": true },
+    "dangerous": { "type": "boolean", "default": false },
+    "auditLogRef": { "type": "string" },
+    "payloadSummary": { "type": "json" },
+    "metadata": { "type": "json" }
+  }
+}

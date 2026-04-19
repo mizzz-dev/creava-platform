@@ -60,6 +60,12 @@
 | `BI_ALERT_DROP_RATIO` | 重要KPI低下を判定する比率閾値（例: 0.20=20%） | 任意 |
 | `BI_ALERT_SPIKE_RATIO` | 重要KPI増加を判定する比率閾値（例: 0.35=35%） | 任意 |
 | `BI_FORECAST_HORIZON_DAYS` | 短期forecast生成日数 | 任意 |
+| `INTEGRATION_DEFAULT_ENV` | integration console が返す既定環境識別 | 任意 |
+| `INTEGRATION_REPLAY_RETRY_DELAY_MS` | replay 要求時の次回試行遅延(ms) | 任意 |
+| `INTEGRATION_CONNECTOR_TIMEOUT_MS` | connector outbound/inbound 共通 timeout(ms) | 任意 |
+| `INTEGRATION_CONNECTOR_MAX_RETRY` | connector 単位 retry 回数上限 | 任意 |
+| `INTEGRATION_CONNECTOR_BACKOFF_MS` | connector retry の基礎 backoff(ms) | 任意 |
+| `INTEGRATION_RECONCILIATION_MAX_ROWS` | reconciliation 差分比較の最大取得件数 | 任意 |
 | `ANALYTICS_IP_HASH_SALT` | analytics IPハッシュソルト | 推奨 |
 | `INQUIRY_NOTIFY_TO` | 管理通知メール宛先（カンマ区切り） | 任意 |
 | `INQUIRY_ENABLE_AUTO_REPLY` | 自動返信有効化 (`true/false`) | 任意 |
@@ -117,6 +123,12 @@
 - `INQUIRY_NOTIFY_TO`（通知を使う場合）
 - SMTP で必要な Secret（`SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM`）
 - `LOGTO_USER_SYNC_OPS_TOKEN`（user lookup API 用。staging/prod で分離）
+- `INTEGRATION_DEFAULT_ENV`
+- `INTEGRATION_REPLAY_RETRY_DELAY_MS`
+- `INTEGRATION_CONNECTOR_TIMEOUT_MS`
+- `INTEGRATION_CONNECTOR_MAX_RETRY`
+- `INTEGRATION_CONNECTOR_BACKOFF_MS`
+- `INTEGRATION_RECONCILIATION_MAX_ROWS`
 
 ## 4. GitHub Variables（推奨一覧）
 - `VITE_SNS_X_URL`

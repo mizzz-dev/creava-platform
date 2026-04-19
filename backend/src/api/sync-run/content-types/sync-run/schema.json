@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "sync_runs",
+  "info": {
+    "singularName": "sync-run",
+    "pluralName": "sync-runs",
+    "displayName": "Sync Run",
+    "description": "scheduled/manual/reconciliation run log"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "integration": { "type": "string", "required": true },
+    "connectorType": { "type": "string", "required": true },
+    "connectorKey": { "type": "string", "required": true },
+    "syncDirection": { "type": "enumeration", "enum": ["inbound", "outbound", "bidirectional", "scheduled_pull", "scheduled_push", "reconciliation"], "required": true },
+    "runMode": { "type": "enumeration", "enum": ["manual", "scheduled", "replay", "reconciliation"], "required": true },
+    "safeMode": { "type": "boolean", "default": true, "required": true },
+    "sourceOfTruth": { "type": "string", "required": true },
+    "sourceSite": { "type": "enumeration", "enum": ["main", "store", "fc", "cross"], "default": "cross", "required": true },
+    "environment": { "type": "enumeration", "enum": ["local", "staging", "production"], "default": "local", "required": true },
+    "status": { "type": "enumeration", "enum": ["queued", "running", "succeeded", "failed", "partial", "dead_lettered"], "default": "queued", "required": true },
+    "startedAt": { "type": "datetime" },
+    "finishedAt": { "type": "datetime" },
+    "idempotencyKey": { "type": "string" },
+    "externalResourceId": { "type": "string" },
+    "internalResourceId": { "type": "string" },
+    "failureReason": { "type": "text" },
+    "retryPolicy": { "type": "json" },
+    "circuitState": { "type": "enumeration", "enum": ["closed", "half_open", "open"], "default": "closed" },
+    "healthState": { "type": "enumeration", "enum": ["healthy", "degraded", "unhealthy"], "default": "healthy" },
+    "scope": { "type": "json" },
+    "ownerTeam": { "type": "string" },
+    "auditLogRef": { "type": "string" },
+    "stats": { "type": "json" },
+    "metadata": { "type": "json" }
+  }
+}

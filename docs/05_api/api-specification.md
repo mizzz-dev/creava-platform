@@ -21,6 +21,12 @@
 | POST | `/api/payments/customer-portal/session` | 顧客ポータルURL | 必須(Logto access token) |
 | POST | `/api/payments/stripe/webhook` | Stripe通知受信 | Stripe署名 |
 | GET | `/api/internal/orders/lookup` | 注文検索（support/internal） | 必須(Logto + internal role) |
+| GET | `/api/internal/integrations/overview` | 連携状態サマリ（connector health / dead-letter） | 必須(Logto + internal role) |
+| GET | `/api/internal/integrations/inbound-events` | inbound webhook 一覧 | 必須(Logto + internal role) |
+| GET | `/api/internal/integrations/outbound-deliveries` | outbound delivery 一覧 | 必須(Logto + internal role) |
+| GET | `/api/internal/integrations/dead-letters` | dead-letter 一覧 | 必須(Logto + internal role) |
+| POST | `/api/internal/integrations/replay` | replay request 登録 | 必須(Logto + internal role) |
+| POST | `/api/internal/integrations/reconciliation/run` | 照合ジョブ実行 | 必須(Logto + internal role) |
 | GET | `/api/internal/revenue/summary` | 売上/返金サマリ | 必須(Logto + internal role) |
 | GET | `/api/internal/revenue/records` | 売上明細 | 必須(Logto + internal role) |
 | GET | `/api/internal/revenue/export.csv` | 売上CSV出力 | 必須(Logto + internal role) |

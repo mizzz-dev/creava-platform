@@ -1,0 +1,37 @@
+name: Integration Contract Check
+
+on:
+  pull_request:
+    paths:
+      - 'backend/src/api/integration-console/**'
+      - 'backend/src/api/dead-letter-item/**'
+      - 'backend/src/api/replay-request/**'
+      - 'backend/src/api/sync-run/**'
+      - 'docs/09_operations/integration-webhook-hub-runbook-2026-04-19.md'
+      - 'docs/10_appendix/environment-variables.md'
+
+jobs:
+  contract-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify required integration models exist
+        run: |
+          set -euo pipefail
+          test -f backend/src/api/dead-letter-item/content-types/dead-letter-item/schema.json
+          test -f backend/src/api/replay-request/content-types/replay-request/schema.json
+          test -f backend/src/api/sync-run/content-types/sync-run/schema.json
+
+      - name: Verify integration runbook keywords
+        run: |
+          set -euo pipefail
+          rg -n "replay|reconciliation|dead-letter|source of truth" docs/09_operations/integration-webhook-hub-runbook-2026-04-19.md
+
+      - name: Summary
+        run: |
+          {
+            echo "## Integration Contract Check"
+            echo "- dead-letter / replay-request / sync-run schema existence: OK"
+            echo "- integration runbook keywords check: OK"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -9,6 +9,7 @@ import {
   type InternalBiCohorts,
   type InternalBiAlerts,
   type InternalBiReport,
+  type IntegrationOverview,
 } from '@/modules/internal-admin/api'
 
 export default function InternalAdminPage() {
@@ -28,6 +29,11 @@ export default function InternalAdminPage() {
   const [biCohorts, setBiCohorts] = useState<InternalBiCohorts | null>(null)
   const [biAlerts, setBiAlerts] = useState<InternalBiAlerts | null>(null)
   const [biReport, setBiReport] = useState<InternalBiReport | null>(null)
+  const [integrationOverview, setIntegrationOverview] = useState<IntegrationOverview | null>(null)
+  const [inboundEvents, setInboundEvents] = useState<Array<Record<string, unknown>>>([])
+  const [outboundDeliveries, setOutboundDeliveries] = useState<Array<Record<string, unknown>>>([])
+  const [deadLetters, setDeadLetters] = useState<Array<Record<string, unknown>>>([])
+  const [replayReason, setReplayReason] = useState('運用確認のため')
 
   if (!isSignedIn) return <section className="mx-auto max-w-4xl px-4 py-16">ログインが必要です。</section>
   if (user?.role !== 'admin') return <section className="mx-auto max-w-4xl px-4 py-16">internal admin は管理者ロールのみアクセスできます。</section>
@@ -136,6 +142,93 @@ export default function InternalAdminPage() {
             </p>
             <pre className="overflow-auto rounded bg-gray-50 p-3 dark:bg-gray-900">{JSON.stringify({ bySourceSite: revenueSummary.bySourceSite, byRevenueType: revenueSummary.byRevenueType }, null, 2)}</pre>
           </div>
+        )}
+      </div>
+
+      <div className="mt-6 rounded border border-gray-200 p-4 dark:border-gray-800">
+        <p className="text-xs text-gray-500">integration console</p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setMessage(null)
+              api.getIntegrationOverview().then(setIntegrationOverview).catch((e: Error) => setMessage(e.message))
+            }}
+            className="rounded bg-gray-900 px-3 py-2 text-sm text-white"
+          >連携状態更新</button>
+          <button
+            type="button"
+            onClick={() => {
+              setMessage(null)
+              api.listInboundEvents('failed').then((res) => setInboundEvents(res.items)).catch((e: Error) => setMessage(e.message))
+            }}
+            className="rounded border border-gray-300 px-3 py-2 text-sm"
+          >failed inbound</button>
+          <button
+            type="button"
+            onClick={() => {
+              setMessage(null)
+              api.listOutboundDeliveries('failed').then((res) => setOutboundDeliveries(res.items)).catch((e: Error) => setMessage(e.message))
+            }}
+            className="rounded border border-gray-300 px-3 py-2 text-sm"
+          >failed outbound</button>
+          <button
+            type="button"
+            onClick={() => {
+              setMessage(null)
+              api.listDeadLetters().then((res) => setDeadLetters(res.items)).catch((e: Error) => setMessage(e.message))
+            }}
+            className="rounded border border-gray-300 px-3 py-2 text-sm"
+          >dead-letter</button>
+          <button
+            type="button"
+            onClick={() => {
+              setMessage(null)
+              api.runReconciliation({ reason: 'internal admin manual reconciliation', sourceSite: 'cross' })
+                .then((res) => setMessage(`reconciliation completed: ${JSON.stringify(res.summary)}`))
+                .catch((e: Error) => setMessage(e.message))
+            }}
+            className="rounded border border-gray-300 px-3 py-2 text-sm"
+          >reconciliation実行</button>
+        </div>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <input value={replayReason} onChange={(e) => setReplayReason(e.target.value)} className="rounded border border-gray-300 px-3 py-2 text-sm" placeholder="replay理由" />
+          <button
+            type="button"
+            className="rounded border border-amber-400 px-3 py-2 text-sm text-amber-700"
+            onClick={() => {
+              if (deadLetters.length === 0) return setMessage('先に dead-letter を読み込んでください。')
+              const first = deadLetters[0]
+              api.requestReplay({
+                targetType: 'dead_letter',
+                targetId: String(first.documentId ?? first.id ?? ''),
+                connectorType: String(first.connectorType ?? 'unknown'),
+                sourceSite: String(first.sourceSite ?? 'cross'),
+                runMode: 'safe',
+                reason: replayReason || 'manual replay',
+              })
+                .then((res) => setMessage(`replay request created: ${res.replayRequestId}`))
+                .catch((e: Error) => setMessage(e.message))
+            }}
+          >先頭dead-letterをsafe replay</button>
+        </div>
+        {integrationOverview && (
+          <div className="mt-3 space-y-2 text-xs">
+            <p className="font-medium">
+              env: {integrationOverview.environment} / inboundFailed: {integrationOverview.summary.inboundFailed} / outboundFailed: {integrationOverview.summary.outboundFailed} / deadLetters: {integrationOverview.summary.deadLetters}
+            </p>
+            <pre className="overflow-auto rounded bg-gray-50 p-3 dark:bg-gray-900">{JSON.stringify({
+              connectors: integrationOverview.connectors.slice(0, 8),
+              latestReconciliation: integrationOverview.latestReconciliation,
+            }, null, 2)}</pre>
+          </div>
+        )}
+        {(inboundEvents.length > 0 || outboundDeliveries.length > 0 || deadLetters.length > 0) && (
+          <pre className="mt-3 overflow-auto rounded bg-gray-50 p-3 text-xs dark:bg-gray-900">{JSON.stringify({
+            inboundEvents: inboundEvents.slice(0, 5),
+            outboundDeliveries: outboundDeliveries.slice(0, 5),
+            deadLetters: deadLetters.slice(0, 5),
+          }, null, 2)}</pre>
         )}
       </div>
 

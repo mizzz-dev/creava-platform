@@ -1,0 +1,30 @@
+{
+  "kind": "collectionType",
+  "collectionName": "replay_requests",
+  "info": {
+    "singularName": "replay-request",
+    "pluralName": "replay-requests",
+    "displayName": "Replay Request",
+    "description": "integration replay / retry 実行履歴"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "targetType": { "type": "enumeration", "enum": ["inbound_event", "outbound_delivery", "sync_run", "dead_letter"], "required": true },
+    "targetId": { "type": "string", "required": true },
+    "connectorType": { "type": "string", "required": true },
+    "sourceSite": { "type": "enumeration", "enum": ["main", "store", "fc", "cross"], "default": "cross", "required": true },
+    "runMode": { "type": "enumeration", "enum": ["safe", "dangerous"], "default": "safe", "required": true },
+    "safeMode": { "type": "boolean", "default": true, "required": true },
+    "status": { "type": "enumeration", "enum": ["requested", "running", "succeeded", "failed", "rejected"], "default": "requested", "required": true },
+    "reason": { "type": "text", "required": true },
+    "failureReason": { "type": "text" },
+    "requestedBy": { "type": "string", "required": true },
+    "approvedBy": { "type": "string" },
+    "executedAt": { "type": "datetime" },
+    "auditLogRef": { "type": "string" },
+    "resultSummary": { "type": "json" },
+    "metadata": { "type": "json" }
+  }
+}

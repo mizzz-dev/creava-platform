@@ -180,6 +180,32 @@ export type InternalBiReport = {
   }
 }
 
+export type IntegrationOverview = {
+  generatedAt: string
+  environment: string
+  connectors: Array<{
+    connectorType: string
+    connectorKey: string
+    inbound: { total: number; failed: number; latestSuccessAt: string | null; latestFailureAt: string | null }
+    outbound: { total: number; failed: number; latestSuccessAt: string | null; latestFailureAt: string | null }
+    deadLetters: number
+    healthState: 'healthy' | 'degraded' | 'unhealthy'
+    sourceSites: string[]
+  }>
+  summary: {
+    inboundFailed: number
+    outboundFailed: number
+    deadLetters: number
+    replayPending: number
+  }
+  latestReconciliation: Record<string, unknown> | null
+}
+
+export type IntegrationListResponse<T = Record<string, unknown>> = {
+  count: number
+  items: T[]
+}
+
 function getApiBaseUrl(): string {
   const baseUrl = import.meta.env.VITE_STRAPI_API_URL
   if (!baseUrl) throw new Error('VITE_STRAPI_API_URL が未設定です。')
@@ -289,5 +315,14 @@ export function useInternalAdminApi() {
       link.remove()
       URL.revokeObjectURL(url)
     }),
+    getIntegrationOverview: async () => withToken((token) => internalFetch<IntegrationOverview>('/internal/integrations/overview', token)),
+    listInboundEvents: async (status?: string) => withToken((token) => internalFetch<IntegrationListResponse>(`/internal/integrations/inbound-events${status ? `?status=${encodeURIComponent(status)}` : ''}`, token)),
+    listOutboundDeliveries: async (status?: string) => withToken((token) => internalFetch<IntegrationListResponse>(`/internal/integrations/outbound-deliveries${status ? `?status=${encodeURIComponent(status)}` : ''}`, token)),
+    listDeadLetters: async (severity?: string) => withToken((token) => internalFetch<IntegrationListResponse>(`/internal/integrations/dead-letters${severity ? `?severity=${encodeURIComponent(severity)}` : ''}`, token)),
+    listReplayRequests: async () => withToken((token) => internalFetch<IntegrationListResponse>('/internal/integrations/replay-requests', token)),
+    requestReplay: async (payload: { targetType: string; targetId: string; connectorType: string; sourceSite?: string; runMode?: 'safe' | 'dangerous'; reason: string }) =>
+      withToken((token) => internalFetch<{ ok: boolean; replayRequestId: string; auditLogId: string }>('/internal/integrations/replay', token, { method: 'POST', body: JSON.stringify(payload) })),
+    runReconciliation: async (payload: { reason: string; sourceSite?: string }) =>
+      withToken((token) => internalFetch<{ ok: boolean; runId: string; summary: Record<string, number>; samples: Record<string, string[]> }>('/internal/integrations/reconciliation/run', token, { method: 'POST', body: JSON.stringify(payload) })),
   }
 }
