@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { getSiteSettings } from '@/modules/settings/api'
 import FanclubGuard from '@/components/guards/FanclubGuard'
-import { useStrapiCollection, useContentAccess } from '@/hooks'
+import { useStrapiCollection, useContentAccess, useStrapiSingle } from '@/hooks'
 import { getFanclubList } from '@/modules/fanclub/api'
 import PageHead from '@/components/seo/PageHead'
+import { ROUTES } from '@/lib/routeConstants'
 import SkeletonListItem from '@/components/common/SkeletonListItem'
 import type { FanclubContent } from '@/types'
 import { getHistoryByKind } from '@/modules/store/lib/commerceOptimization'
@@ -17,15 +19,24 @@ import FanclubRecentlyViewed from '@/modules/fanclub/sections/FanclubRecentlyVie
 import FanclubContentList from '@/modules/fanclub/sections/FanclubContentList'
 import FanclubBenefitsSection from '@/modules/fanclub/sections/FanclubBenefitsSection'
 import FanclubShortcuts from '@/modules/fanclub/sections/FanclubShortcuts'
+import CmsVisualShowcaseSection from '@/components/common/CmsVisualShowcaseSection'
 
 export default function FanclubPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const { item: settings } = useStrapiSingle(() =>
+    getSiteSettings({ locale: i18n.resolvedLanguage }),
+  )
 
   return (
     <div className="min-h-screen">
       <PageHead title={t('nav.fanclub')} description={t('seo.fanclub')} noindex />
       <FanclubHeroSection />
-      <div className="mx-auto max-w-5xl px-4 py-10 sm:py-14">
+      <div className="mx-auto max-w-5xl space-y-6 px-4 py-10 sm:py-14">
+        <CmsVisualShowcaseSection
+          site="fanclub"
+          settings={settings}
+          primaryCta={{ label: t('nav.member', { defaultValue: 'マイページ' }), to: ROUTES.MEMBER }}
+        />
         <FanclubGuard>
           <FanclubContentSections />
         </FanclubGuard>

@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useStrapiSingle } from '@/hooks'
+import { getSiteSettings } from '@/modules/settings/api'
 import PageHead from '@/components/seo/PageHead'
 import StructuredData from '@/components/seo/StructuredData'
 import HeroSection from '@/modules/home/components/HeroSection'
@@ -16,6 +18,7 @@ import CaseStudyTeaserSection from '@/modules/home/components/CaseStudyTeaserSec
 import { SITE_URL, SITE_NAME, buildCanonicalUrl } from '@/lib/seo'
 import SeoInternalLinkSection from '@/components/common/SeoInternalLinkSection'
 import ExperienceHighlightsSection from '@/components/common/ExperienceHighlightsSection'
+import CmsVisualShowcaseSection from '@/components/common/CmsVisualShowcaseSection'
 import { ROUTES } from '@/lib/routeConstants'
 import { fanclubLink, storeLink } from '@/lib/siteLinks'
 import { getNewsList } from '@/modules/news/api'
@@ -24,7 +27,10 @@ import { getEventsList } from '@/modules/events/api'
 import { getProducts } from '@/modules/store/api'
 
 export default function HomePage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const { item: settings } = useStrapiSingle(() =>
+    getSiteSettings({ locale: i18n.resolvedLanguage }),
+  )
 
   useEffect(() => {
     const warmup = () => {
@@ -109,6 +115,12 @@ export default function HomePage() {
       <PersonalizedHubSection />
       <FeaturedWorksSection />
       <CaseStudyTeaserSection />
+
+      <CmsVisualShowcaseSection
+        site="main"
+        settings={settings}
+        primaryCta={{ label: t('home.hero.ctaWorks'), to: ROUTES.WORKS }}
+      />
       <PricingTeaserSection />
       <StorePreviewSection />
       <ContactCTASection />

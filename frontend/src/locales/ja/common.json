@@ -988,5 +988,48 @@
       "highlightSupportTitle": "入会前後の不安を減らす支援導線",
       "highlightSupportDesc": "FAQ / Guide / お問い合わせに迷わず移動できる構成。"
     }
+  },
+  "visuals": {
+    "titleDefault": "Visual Highlights",
+    "leadDefault": "画像が無くても成立し、CMS 差し替え時は訴求力が上がる構成です。",
+    "collectionCaptionDefault": "CMS から差し替え可能な注目ビジュアル枠です。",
+    "fallbackLabel": "fallback visual",
+    "altDefault": "mizzz visual asset",
+    "badgeCollection": "COLLECTION",
+    "badgeCampaign": "CAMPAIGN",
+    "badgeFeatured": "FEATURED",
+    "featureTitle": "特集ビジュアル",
+    "featureCaption": "特集・Pickupで世界観を伝えるメインカード。",
+    "pickupTitle": "ピックアップバナー",
+    "pickupCaption": "新着や注目情報を短く強く伝える枠。",
+    "campaignTitle": "キャンペーンバナー",
+    "campaignCaption": "季節施策・限定施策を即時に差し替える運用枠。",
+    "main": {
+      "eyebrow": "brand visual",
+      "title": "ブランドの特集ビジュアル",
+      "lead": "Heroの余韻を活かしながら、世界観と導線を両立するビジュアル枠。",
+      "collectionTitle": "World View",
+      "collectionTitle1": "Story Visual",
+      "collectionTitle2": "Editorial Cut",
+      "collectionTitle3": "Featured Scene"
+    },
+    "store": {
+      "eyebrow": "store showcase",
+      "title": "売り場ビジュアルハイライト",
+      "lead": "商品点数が少ない時も密度を保ち、キャンペーン時は訴求を強める運用枠。",
+      "featureTitle": "おすすめ特集",
+      "pickupTitle": "新着ピックアップ",
+      "campaignTitle": "シーズナルキャンペーン",
+      "collectionTitle": "Collection Visual"
+    },
+    "fanclub": {
+      "eyebrow": "member experience",
+      "title": "会員向けビジュアルハイライト",
+      "lead": "限定感を維持しながら、会員特典・更新情報の導線を強化するビジュアル枠。",
+      "featureTitle": "会員特典フォーカス",
+      "pickupTitle": "今週の更新ピックアップ",
+      "campaignTitle": "メンバー限定キャンペーン",
+      "collectionTitle": "Member Visual"
+    }
   }
 }
