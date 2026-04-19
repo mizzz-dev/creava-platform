@@ -4,7 +4,7 @@ import { requireInternalPermission, type InternalRole } from '../../../lib/auth/
 type SiteType = 'main' | 'store' | 'fc' | 'cross'
 
 type MembershipPlan = 'free' | 'standard' | 'premium'
-type MembershipStatus = 'guest' | 'active' | 'grace_period' | 'paused' | 'cancelled'
+type MembershipStatus = 'non_member' | 'member' | 'grace' | 'canceled' | 'expired' | 'suspended' | 'guest' | 'active' | 'grace_period' | 'paused' | 'cancelled'
 
 type AccessLevel = 'public' | 'logged_in' | 'member' | 'premium' | 'admin'
 
@@ -71,23 +71,34 @@ function normalizeClaims(authUser: AuthenticatedUser, requestedLocale?: unknown)
   }
 }
 
+function normalizeMembershipStatus(status: MembershipStatus): MembershipStatus {
+  if (status === 'guest') return 'non_member'
+  if (status === 'active') return 'member'
+  if (status === 'grace_period') return 'grace'
+  if (status === 'paused') return 'suspended'
+  if (status === 'cancelled') return 'canceled'
+  return status
+}
+
 function toMembershipSummary(record: any): { membershipPlan: MembershipPlan; membershipStatus: MembershipStatus; accessLevel: AccessLevel } {
   if (!record) {
-    return { membershipPlan: 'free', membershipStatus: 'guest', accessLevel: 'logged_in' }
+    return { membershipPlan: 'free', membershipStatus: 'non_member', accessLevel: 'logged_in' }
   }
 
   const membershipPlan = record.membershipType === 'premium' ? 'premium' : record.membershipType === 'paid' ? 'standard' : 'free'
 
   const statusRaw = String(record.subscriptionStatus ?? '').toLowerCase()
   const membershipStatus = statusRaw.includes('active')
-    ? 'active'
+    ? 'member'
     : statusRaw.includes('trial')
-      ? 'grace_period'
+      ? 'grace'
       : statusRaw.includes('past_due')
-        ? 'paused'
+        ? 'suspended'
         : statusRaw.includes('cancel')
-          ? 'cancelled'
-          : 'guest'
+          ? 'canceled'
+          : statusRaw.includes('expire')
+            ? 'expired'
+            : 'non_member'
 
   const accessLevel = membershipPlan === 'premium'
     ? 'premium'
@@ -95,7 +106,7 @@ function toMembershipSummary(record: any): { membershipPlan: MembershipPlan; mem
       ? 'member'
       : 'logged_in'
 
-  return { membershipPlan, membershipStatus, accessLevel }
+  return { membershipPlan, membershipStatus: normalizeMembershipStatus(membershipStatus), accessLevel }
 }
 
 function buildSeedData(logtoUserId: string, claims: NormalizedClaims, sourceSite: SiteType, membership: { membershipPlan: MembershipPlan; membershipStatus: MembershipStatus; accessLevel: AccessLevel }, nowIso: string) {

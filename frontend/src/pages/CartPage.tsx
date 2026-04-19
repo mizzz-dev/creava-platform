@@ -8,6 +8,7 @@ import { formatPriceNum } from '@/utils'
 import { useCurrentUser } from '@/hooks'
 import { getMemberAccountSettings } from '@/modules/member/api'
 import type { MemberAccountSettings } from '@/modules/member/types'
+import { isMemberUser } from '@/lib/auth/membership'
 
 export default function CartPage() {
   const { t } = useTranslation()
@@ -26,7 +27,7 @@ export default function CartPage() {
   const [guestBuilding, setGuestBuilding] = useState('')
   const [guestCardError, setGuestCardError] = useState<string | null>(null)
 
-  const canPurchaseFc = isSignedIn && (user?.role === 'member' || user?.role === 'admin')
+  const canPurchaseFc = isSignedIn && isMemberUser(user)
   const hasFcOnlyBlocked = items.some((item) => item.accessStatus === 'fc_only' && !canPurchaseFc)
   const checkoutLink = items.find((item) => item.stripeLink)?.stripeLink
 

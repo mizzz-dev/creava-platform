@@ -1,8 +1,7 @@
 import { createContext, useContext, useMemo, useState, useEffect, type PropsWithChildren } from 'react'
 import { HAS_LOGTO, LOGTO_API_RESOURCE, LOGTO_APP_ID, LOGTO_ENDPOINT, resolveLogtoCallbackUrl, resolvePostLogoutRedirectUrl } from './config'
-import { SITE_TYPE } from '@/lib/siteLinks'
 
-const AUTH_STORAGE_PREFIX = `logto_${SITE_TYPE}`
+const AUTH_STORAGE_PREFIX = 'logto_unified'
 const ACCESS_TOKEN_KEY = `${AUTH_STORAGE_PREFIX}_access_token`
 const ID_TOKEN_KEY = `${AUTH_STORAGE_PREFIX}_id_token`
 const REFRESH_TOKEN_KEY = `${AUTH_STORAGE_PREFIX}_refresh_token`

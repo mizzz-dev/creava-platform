@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ROUTES } from '@/lib/routeConstants'
 import { useCurrentUser } from '@/hooks/useCurrentUser'
+import { isMemberUser } from '@/lib/auth/membership'
 
 interface MemberGuideCardProps {
   className?: string
@@ -11,7 +12,7 @@ export default function MemberGuideCard({ className = '' }: MemberGuideCardProps
   const { t } = useTranslation()
   const { isLoaded, isSignedIn, user } = useCurrentUser()
 
-  const isMember = user?.role === 'member' || user?.role === 'admin'
+  const isMember = isMemberUser(user)
   const title = !isLoaded
     ? t('memberGuide.loadingTitle', { defaultValue: '会員状態を確認中です…' })
     : isMember

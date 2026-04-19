@@ -6,7 +6,7 @@
 
 ## 1. 現在の Logto 基盤課題（整理前）
 
-1. フロントの App ID が単一 env 依存で、main/store/fc の分離運用が曖昧。
+1. main/store/fc で認証基盤を分断しない前提へ統一し、単一ユーザープール運用を明示する必要がある。
 2. callback 後の復帰先が固定され、ログイン前導線の文脈を戻せない。
 3. access token の refresh を実装しておらず、長時間利用時の UX 低下余地がある。
 4. backend scope 検証が全体一律で、操作単位（checkout/portal）の明示が弱い。
@@ -17,9 +17,7 @@
 
 ## 2.1 Application type
 
-- main: SPA
-- store: SPA
-- fc: SPA
+- frontend SPA app: **単一の unified SPA app**（main/store/fc 共通）
 - backend API: API Resource (`https://api.mizzz.jp`)
 - automation / Management API: M2M（必要時に有効化）
 
@@ -30,10 +28,11 @@
 
 > Logto Cloud では Management API に custom domain を使わない。
 
-## 2.3 app 分割方針
+## 2.3 app 方針（統一）
 
-- main/store/fc は **別 SPA app** を推奨（障害切り分け・redirect 管理・権限誤配布防止）。
-- 一時的に単一 app を併用する場合は `VITE_LOGTO_APP_ID` を fallback として許容し、段階移行する。
+- main/store/fc は **同一 Logto SPA app / 同一ユーザープール** を利用する。
+- callback / post logout redirect URI は複数登録して運用し、認証概念は分割しない。
+- `VITE_LOGTO_APP_ID_UNIFIED` を正とし、サイト別 App ID は段階撤去する。
 
 ## 3. Application / redirect / domain 整理
 
@@ -98,11 +97,11 @@ backend の payment controller で操作単位にスコープ検証を行う。
 
 ## 5. frontend auth 実装方針（本リポジトリ準拠）
 
-1. `VITE_LOGTO_APP_ID_MAIN/STORE/FC` を追加し、`VITE_SITE_TYPE` で自動選択。
+1. `VITE_LOGTO_APP_ID_UNIFIED` を利用し、main/store/fc で同じ認証基盤を使う。
 2. callback 後はログイン前の意図した復帰先へ遷移。
 3. `getAccessToken()` は refresh_token grant で再取得を試行。
 4. token endpoint の `content-type` を検証し、HTML 混入をエラー化。
-5. auth 関連 storage key をサイト別 namespace 化。
+5. auth 関連 storage key は `logto_unified` へ統一し、認証概念の分断を避ける。
 
 ## 6. backend token validation / middleware 方針
 
@@ -174,10 +173,11 @@ backend の payment controller で操作単位にスコープ検証を行う。
 ## 9.1 frontend env
 
 - `VITE_LOGTO_ENDPOINT`
-- `VITE_LOGTO_APP_ID_MAIN`
-- `VITE_LOGTO_APP_ID_STORE`
-- `VITE_LOGTO_APP_ID_FC`
-- `VITE_LOGTO_APP_ID`（互換fallback）
+- `VITE_LOGTO_APP_ID_UNIFIED`
+- `VITE_LOGTO_APP_ID_MAIN`（移行互換）
+- `VITE_LOGTO_APP_ID_STORE`（移行互換）
+- `VITE_LOGTO_APP_ID_FC`（移行互換）
+- `VITE_LOGTO_APP_ID`（旧互換fallback）
 - `VITE_LOGTO_CALLBACK_PATH`
 - `VITE_LOGTO_POST_LOGOUT_REDIRECT_URI`
 - `VITE_LOGTO_API_RESOURCE`
@@ -200,10 +200,11 @@ backend の payment controller で操作単位にスコープ検証を行う。
 ## 9.3 CI Secrets（推奨）
 
 - `VITE_LOGTO_ENDPOINT`
-- `VITE_LOGTO_APP_ID_MAIN`
-- `VITE_LOGTO_APP_ID_STORE`
-- `VITE_LOGTO_APP_ID_FC`
-- `VITE_LOGTO_APP_ID`（段階移行用）
+- `VITE_LOGTO_APP_ID_UNIFIED`
+- `VITE_LOGTO_APP_ID_MAIN`（移行互換）
+- `VITE_LOGTO_APP_ID_STORE`（移行互換）
+- `VITE_LOGTO_APP_ID_FC`（移行互換）
+- `VITE_LOGTO_APP_ID`（旧互換）
 - `VITE_LOGTO_API_RESOURCE`
 - `VITE_LOGTO_ACCOUNT_CENTER_URL`
 - `VITE_LOGTO_ISSUER`
@@ -238,3 +239,12 @@ backend の payment controller で操作単位にスコープ検証を行う。
 - `endpoint` / `issuer` / `jwks` / `management endpoint` を env で分離しているため、
   主要コード変更なしで切替しやすい。
 - custom domain 依存は end-user 認証導線に限定しているため、運用影響を局所化できる。
+
+
+## 13. user status / role 責務分離（2026-04 統一方針）
+
+- 会員判定は `membershipStatus`（`non_member/member/grace/canceled/expired/suspended`）を正とする。
+- アカウント可用性は `accountStatus`（`active/pending/restricted/suspended/deleted_like`）で管理する。
+- internal 操作権限は `internalRole` / permission で管理し、会員判定と混同しない。
+- `accessLevel` / `entitlementState` は閲覧・提供機能の到達範囲を示し、membership と責務分離する。
+- support / internal admin は `logtoUserId` を共通キーに main/store/fc 横断で同一ユーザーを追跡する。

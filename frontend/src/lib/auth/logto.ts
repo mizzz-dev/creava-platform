@@ -1,4 +1,4 @@
-import type { AppUser, ContractStatus, MemberPlan, UserRole } from '@/types'
+import type { AccountStatus, AppUser, ContractStatus, InternalRole, MemberPlan, MembershipStatus, UserRole } from '@/types'
 
 export interface LogtoClaimsLike {
   sub?: unknown
@@ -9,7 +9,55 @@ export interface LogtoClaimsLike {
   roles?: unknown
   memberPlan?: unknown
   contractStatus?: unknown
+  membershipStatus?: unknown
+  accountStatus?: unknown
+  accessLevel?: unknown
+  internalRole?: unknown
   [key: string]: unknown
+}
+
+function resolveMembershipStatus(raw: unknown): MembershipStatus {
+  if (raw === 'member') return 'member'
+  if (raw === 'grace') return 'grace'
+  if (raw === 'canceled') return 'canceled'
+  if (raw === 'expired') return 'expired'
+  if (raw === 'suspended') return 'suspended'
+  return 'non_member'
+}
+
+function deriveMembershipStatus(raw: unknown, role: UserRole, plan: MemberPlan, contractStatus: ContractStatus): MembershipStatus {
+  const normalized = resolveMembershipStatus(raw)
+  if (normalized !== 'non_member') return normalized
+  if (contractStatus === 'grace') return 'grace'
+  if (contractStatus === 'canceled') return 'canceled'
+  if (contractStatus === 'expired') return 'expired'
+  if (role === 'admin' || role === 'member' || role === 'premium') return 'member'
+  if (plan === 'paid' || plan === 'premium') return 'member'
+  return 'non_member'
+}
+
+function resolveAccountStatus(raw: unknown): AccountStatus {
+  if (raw === 'pending') return 'pending'
+  if (raw === 'restricted') return 'restricted'
+  if (raw === 'suspended') return 'suspended'
+  if (raw === 'deleted_like') return 'deleted_like'
+  return 'active'
+}
+
+function resolveInternalRole(raw: unknown): InternalRole {
+  if (raw === 'support') return 'support'
+  if (raw === 'moderator') return 'moderator'
+  if (raw === 'admin') return 'admin'
+  if (raw === 'super_admin') return 'super_admin'
+  return 'user'
+}
+
+function resolveAccessLevel(raw: unknown): AppUser['accessLevel'] {
+  if (raw === 'public') return 'public'
+  if (raw === 'member') return 'member'
+  if (raw === 'premium') return 'premium'
+  if (raw === 'admin') return 'admin'
+  return 'logged_in'
 }
 
 function resolveRole(raw: unknown): UserRole {
@@ -23,7 +71,8 @@ function resolveRole(raw: unknown): UserRole {
 function resolveMemberPlan(raw: unknown): MemberPlan {
   if (raw === 'free') return 'free'
   if (raw === 'premium') return 'premium'
-  return 'paid'
+  if (raw === 'paid') return 'paid'
+  return 'free'
 }
 
 function resolveContractStatus(raw: unknown): ContractStatus {
@@ -50,14 +99,21 @@ export function toAppUserFromLogtoClaims(claims: LogtoClaimsLike): AppUser {
   const userId = typeof claims.sub === 'string' && claims.sub ? claims.sub : 'guest'
   const email = typeof claims.email === 'string' ? claims.email : null
   const role = pickRole(claims)
+  const contractStatus = resolveContractStatus(claims.contractStatus)
+  const memberPlan = resolveMemberPlan(claims.memberPlan)
+  const membershipStatus = deriveMembershipStatus(claims.membershipStatus, role, memberPlan, contractStatus)
+  const accessLevel = resolveAccessLevel(claims.accessLevel)
 
   return {
     id: userId,
     email,
     role,
-    memberPlan: resolveMemberPlan(claims.memberPlan),
-    contractStatus: resolveContractStatus(claims.contractStatus),
+    memberPlan,
+    contractStatus,
+    membershipStatus,
+    accountStatus: resolveAccountStatus(claims.accountStatus),
+    accessLevel,
+    internalRole: resolveInternalRole(claims.internalRole),
     emailVerified: claims.email_verified === true,
   }
 }
-

@@ -31,7 +31,7 @@ function AuthButtonWithAuth() {
     <div className="flex items-center gap-3">
       {user && (
         <span className="rounded bg-gray-100 px-2 py-0.5 font-mono text-xs text-gray-500">
-          {user.role}
+          {user.membershipStatus}
         </span>
       )}
       <button onClick={() => void signOut()} className={btnClass}>
