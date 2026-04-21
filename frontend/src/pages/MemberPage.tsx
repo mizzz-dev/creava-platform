@@ -20,6 +20,7 @@ import { resolveAccountCenterUrl } from '@/lib/auth/config'
 import { useAuthClient } from '@/lib/auth/AuthProvider'
 import UserLifecycleBanner from '@/components/common/UserLifecycleBanner'
 import MemberValueExperiencePanel from '@/components/common/MemberValueExperiencePanel'
+import MemberProgressHub from '@/components/common/MemberProgressHub'
 
 const MEMBER_BENEFITS = [
   'member.benefitEarly',
@@ -492,6 +493,7 @@ export default function MemberPage() {
         <div className="mt-6 space-y-4">
           <UserLifecycleBanner user={user} lifecycle={lifecycle} context="member" />
           <MemberValueExperiencePanel sourceSite="member" />
+          <MemberProgressHub sourceSite="member" />
           {lifecycleSummary && (
             <div className="rounded border border-gray-200 p-5 dark:border-gray-800">
               <p className="font-mono text-[11px] text-gray-400">account summary</p>
