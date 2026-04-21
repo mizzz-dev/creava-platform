@@ -22,6 +22,7 @@ import FanclubShortcuts from '@/modules/fanclub/sections/FanclubShortcuts'
 import CmsVisualShowcaseSection from '@/components/common/CmsVisualShowcaseSection'
 import UserLifecycleBanner from '@/components/common/UserLifecycleBanner'
 import MemberValueExperiencePanel from '@/components/common/MemberValueExperiencePanel'
+import MemberProgressHub from '@/components/common/MemberProgressHub'
 
 export default function FanclubPage() {
   const { t, i18n } = useTranslation()
@@ -44,6 +45,7 @@ export default function FanclubPage() {
           primaryCta={{ label: t('nav.member', { defaultValue: 'マイページ' }), to: ROUTES.MEMBER }}
         />
         <MemberValueExperiencePanel sourceSite="fc" />
+        <MemberProgressHub sourceSite="fc" />
         <FanclubGuard>
           <FanclubContentSections />
         </FanclubGuard>

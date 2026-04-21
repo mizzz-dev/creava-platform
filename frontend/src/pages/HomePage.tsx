@@ -27,6 +27,7 @@ import { getEventsList } from '@/modules/events/api'
 import { getProducts } from '@/modules/store/api'
 import UserLifecycleBanner from '@/components/common/UserLifecycleBanner'
 import MemberValueExperiencePanel from '@/components/common/MemberValueExperiencePanel'
+import MemberProgressHub from '@/components/common/MemberProgressHub'
 
 export default function HomePage() {
   const { t, i18n } = useTranslation()
@@ -119,8 +120,9 @@ export default function HomePage() {
       <GitHubTrustSection />
       <LatestSection />
       <PersonalizedHubSection />
-      <div className="mx-auto max-w-5xl px-4 py-4">
+      <div className="mx-auto max-w-5xl space-y-4 px-4 py-4">
         <MemberValueExperiencePanel sourceSite="main" compact />
+        <MemberProgressHub sourceSite="main" />
       </div>
       <FeaturedWorksSection />
       <CaseStudyTeaserSection />

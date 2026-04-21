@@ -107,6 +107,136 @@
       "type": "string",
       "default": "new"
     },
+    "memberRankState": {
+      "type": "enumeration",
+      "enum": [
+        "none",
+        "starter",
+        "core",
+        "premium",
+        "legacy",
+        "honorary"
+      ],
+      "default": "none"
+    },
+    "rankTier": {
+      "type": "enumeration",
+      "enum": [
+        "tier_0",
+        "tier_1",
+        "tier_2",
+        "tier_3",
+        "tier_4"
+      ],
+      "default": "tier_0"
+    },
+    "rankProgressState": {
+      "type": "enumeration",
+      "enum": [
+        "not_started",
+        "in_progress",
+        "ready_to_unlock",
+        "capped"
+      ],
+      "default": "not_started"
+    },
+    "streakState": {
+      "type": "enumeration",
+      "enum": [
+        "none",
+        "active",
+        "at_risk",
+        "broken"
+      ],
+      "default": "none"
+    },
+    "achievementState": {
+      "type": "enumeration",
+      "enum": [
+        "none",
+        "unlocked",
+        "highlighted",
+        "archived"
+      ],
+      "default": "none"
+    },
+    "missionState": {
+      "type": "enumeration",
+      "enum": [
+        "available",
+        "in_progress",
+        "completed",
+        "expired",
+        "hidden"
+      ],
+      "default": "available"
+    },
+    "missionProgress": {
+      "type": "integer",
+      "default": 0
+    },
+    "perkState": {
+      "type": "enumeration",
+      "enum": [
+        "none",
+        "teaser",
+        "available",
+        "expiring",
+        "locked"
+      ],
+      "default": "none"
+    },
+    "perkEligibility": {
+      "type": "boolean",
+      "default": false
+    },
+    "perkUnlockState": {
+      "type": "enumeration",
+      "enum": [
+        "locked",
+        "eligible",
+        "unlocked",
+        "claimed",
+        "expired"
+      ],
+      "default": "locked"
+    },
+    "benefitVisibilityState": {
+      "type": "enumeration",
+      "enum": [
+        "hidden",
+        "teaser",
+        "visible",
+        "emphasized",
+        "member_only"
+      ],
+      "default": "teaser"
+    },
+    "personalizationState": {
+      "type": "enumeration",
+      "enum": [
+        "none",
+        "basic",
+        "member",
+        "cross_site"
+      ],
+      "default": "basic"
+    },
+    "activitySummaryState": {
+      "type": "enumeration",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "low"
+    },
+    "nextUnlockHint": {
+      "type": "text"
+    },
+    "lastProgressUpdateAt": {
+      "type": "datetime"
+    },
     "notificationPreference": {
       "type": "json",
       "required": true

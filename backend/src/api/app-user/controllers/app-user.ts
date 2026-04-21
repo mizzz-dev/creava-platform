@@ -218,6 +218,30 @@ function toMembershipSummary(record: any): { membershipPlan: MembershipPlan; mem
   return { membershipPlan, membershipStatus: normalizeMembershipStatus(membershipStatus), accessLevel }
 }
 
+
+function deriveMemberProgressSeed(membershipStatus: MembershipStatus) {
+  const isMember = membershipStatus === 'member'
+  const isGrace = membershipStatus === 'grace'
+  return {
+    memberRankState: isMember || isGrace ? 'starter' : 'none',
+    rankTier: isMember || isGrace ? 'tier_1' : 'tier_0',
+    rankProgressState: isMember ? 'in_progress' : 'not_started',
+    streakState: isGrace ? 'at_risk' : isMember ? 'active' : 'none',
+    achievementState: 'none',
+    missionState: isMember || isGrace ? 'in_progress' : 'available',
+    missionProgress: isMember ? 35 : isGrace ? 70 : 0,
+    perkState: isMember ? 'available' : isGrace ? 'expiring' : 'locked',
+    perkEligibility: isMember || isGrace,
+    perkUnlockState: isMember ? 'unlocked' : isGrace ? 'eligible' : 'locked',
+    benefitVisibilityState: isMember ? 'emphasized' : isGrace ? 'visible' : 'teaser',
+    personalizationState: isMember || isGrace ? 'cross_site' : 'basic',
+    activitySummaryState: 'low',
+    nextUnlockHint: isMember || isGrace
+      ? 'FC更新確認・通知設定・store回遊で次ランクを解放できます。'
+      : '会員登録後にランク・ミッション・特典段階が有効になります。',
+  }
+}
+
 function buildSeedData(logtoUserId: string, claims: NormalizedClaims, sourceSite: SiteType, membership: { membershipPlan: MembershipPlan; membershipStatus: MembershipStatus; accessLevel: AccessLevel }, nowIso: string) {
   const completedFields = [claims.displayName, claims.email, claims.avatarUrl].filter(Boolean).length
 
@@ -236,6 +260,7 @@ function buildSeedData(logtoUserId: string, claims: NormalizedClaims, sourceSite
     membershipPlan: membership.membershipPlan,
     accessLevel: membership.accessLevel,
     loyaltyState: membership.membershipPlan === 'free' ? 'new' : 'member_active',
+    ...deriveMemberProgressSeed(membership.membershipStatus),
     notificationPreference: {
       emailOptIn: true,
       inAppOptIn: true,
@@ -277,6 +302,7 @@ function buildSeedData(logtoUserId: string, claims: NormalizedClaims, sourceSite
       crmPreference: 'app',
     },
     lastSyncedAt: nowIso,
+    lastProgressUpdateAt: nowIso,
     syncVersion: 1,
   }
 }
@@ -387,6 +413,16 @@ async function buildUserSummary(strapi: any, logtoUserId: string) {
       membershipPlan: appUser.membershipPlan,
       accessLevel: appUser.accessLevel,
       loyaltyState: appUser.loyaltyState,
+      memberRankState: appUser.memberRankState ?? 'none',
+      rankTier: appUser.rankTier ?? 'tier_0',
+      rankProgressState: appUser.rankProgressState ?? 'not_started',
+      streakState: appUser.streakState ?? 'none',
+      missionState: appUser.missionState ?? 'available',
+      missionProgress: appUser.missionProgress ?? 0,
+      achievementState: appUser.achievementState ?? 'none',
+      perkState: appUser.perkState ?? 'none',
+      perkUnlockState: appUser.perkUnlockState ?? 'locked',
+      nextUnlockHint: appUser.nextUnlockHint ?? null,
       accountStatus: appUser.accountStatus,
       linkedProviders: appUser.linkedProviders,
       firstLoginAt: appUser.firstLoginAt,
@@ -505,6 +541,8 @@ export default ({ strapi }) => ({
           entitlementState: membership.membershipStatus === 'member' || membership.membershipStatus === 'grace' ? 'active' : 'none',
           suspendedAt: membership.membershipStatus === 'suspended' ? nowIso : existing.suspendedAt ?? null,
           renewedAt: membership.membershipStatus === 'member' ? nowIso : existing.renewedAt ?? null,
+          ...deriveMemberProgressSeed(membership.membershipStatus),
+          lastProgressUpdateAt: nowIso,
           lastSyncedAt: nowIso,
         },
       })
@@ -587,6 +625,23 @@ export default ({ strapi }) => ({
           : null,
         notificationPreference,
         lifecycleSummary,
+        progressionSummary: {
+          loyaltyState: appUser.loyaltyState,
+          memberRankState: appUser.memberRankState ?? 'none',
+          rankTier: appUser.rankTier ?? 'tier_0',
+          rankProgressState: appUser.rankProgressState ?? 'not_started',
+          streakState: appUser.streakState ?? 'none',
+          missionState: appUser.missionState ?? 'available',
+          missionProgress: appUser.missionProgress ?? 0,
+          achievementState: appUser.achievementState ?? 'none',
+          perkState: appUser.perkState ?? 'none',
+          perkUnlockState: appUser.perkUnlockState ?? 'locked',
+          benefitVisibilityState: appUser.benefitVisibilityState ?? 'teaser',
+          personalizationState: appUser.personalizationState ?? 'basic',
+          activitySummaryState: appUser.activitySummaryState ?? 'low',
+          nextUnlockHint: appUser.nextUnlockHint ?? null,
+          lastProgressUpdateAt: appUser.lastProgressUpdateAt ?? null,
+        },
       }
     } catch (error) {
       const message = (error as Error).message
@@ -661,6 +716,10 @@ export default ({ strapi }) => ({
           }),
           onboardingStatus: normalizeOnboardingStatus(user.onboardingState),
           profileCompletionStatus: normalizeProfileCompletionStatus(user.profileCompletionState),
+          memberRankState: user.memberRankState ?? 'none',
+          missionState: user.missionState ?? 'available',
+          perkState: user.perkState ?? 'none',
+          achievementState: user.achievementState ?? 'none',
           lastLoginAt: user.lastLoginAt,
           lastSyncedAt: user.lastSyncedAt,
         })),

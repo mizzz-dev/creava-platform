@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import PageHead from '@/components/seo/PageHead'
 import ErrorState from '@/components/common/ErrorState'
 import SkeletonListItem from '@/components/common/SkeletonListItem'
+import MemberProgressHub from '@/components/common/MemberProgressHub'
 import { useCurrentUser, useStrapiCollection } from '@/hooks'
 import { resolveBenefitExperienceState } from '@/lib/auth/benefitState'
 import { buildBenefitPresentation } from '@/lib/auth/benefitPresentation'
@@ -96,6 +97,10 @@ export default function SupportCenterPage() {
   return (
     <section className="mx-auto max-w-5xl px-4 py-14">
       <PageHead title={t('support.title')} description={t('support.description')} />
+
+      <div className="mb-6">
+        <MemberProgressHub sourceSite="support" />
+      </div>
 
       <header className="space-y-4">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">support center</p>
