@@ -71,6 +71,7 @@ const SupportGuideDetailPage = lazy(() => import('@/pages/support/SupportGuideDe
 const DiscoveryPage = lazy(() => import('@/pages/DiscoveryPage'))
 const LegacySubdomainRedirectPage = lazy(() => import('@/pages/LegacySubdomainRedirectPage'))
 const InternalAdminPage = lazy(() => import('@/pages/internal/InternalAdminPage'))
+const NotificationCenterPage = lazy(() => import('@/pages/NotificationCenterPage'))
 
 // 定数は循環参照を避けるため routeConstants から取得し re-export する
 export { ROUTES, detailPath } from './routeConstants'
@@ -112,6 +113,7 @@ export function AppRoutes() {
             <Route path={ROUTES.STORE_TERMS} element={<TermsPage />} />
             <Route path={ROUTES.STORE_PRIVACY} element={<PrivacyPolicyPage />} />
             <Route path={ROUTES.AUTH_CALLBACK} element={<AuthCallbackPage />} />
+            <Route path={ROUTES.NOTIFICATION_CENTER} element={<NotificationCenterPage />} />
             <Route path={ROUTES.INTERNAL_ADMIN} element={<InternalAdminPage />} />
             <Route path={ROUTES.LEGAL_PRIVACY} element={<PrivacyPolicyPage />} />
             <Route path={ROUTES.LEGAL_TERMS} element={<TermsPage />} />
@@ -136,6 +138,7 @@ export function AppRoutes() {
             <Route path={ROUTES.FC_LOGIN_VERIFY_EMAIL} element={<FanclubVerifyEmailPage />} />
             <Route path={ROUTES.FC_MYPAGE} element={<FanclubAuthGuard><FanclubMyPageSite /></FanclubAuthGuard>} />
             <Route path={ROUTES.MEMBER} element={<FanclubAuthGuard><MemberPage /></FanclubAuthGuard>} />
+            <Route path={ROUTES.NOTIFICATION_CENTER} element={<FanclubAuthGuard><NotificationCenterPage /></FanclubAuthGuard>} />
             <Route path={ROUTES.NEWS} element={<NewsPage />} />
             <Route path={ROUTES.NEWS_DETAIL} element={<NewsDetailPage />} />
             <Route path={ROUTES.BLOG} element={<BlogPage />} />
@@ -195,6 +198,7 @@ export function AppRoutes() {
           <Route path={ROUTES.STORE_DETAIL} element={isMainSite ? <LegacySubdomainRedirectPage target="store" /> : <StoreDetailPage />} />
           <Route path={ROUTES.CART} element={isMainSite ? <LegacySubdomainRedirectPage target="store" /> : <CartPage />} />
           <Route path={ROUTES.MEMBER} element={<MemberPage />} />
+          <Route path={ROUTES.NOTIFICATION_CENTER} element={<NotificationCenterPage />} />
           <Route path={ROUTES.ABOUT} element={<AboutPage />} />
           <Route path={ROUTES.PRICING} element={<PricingPage />} />
           <Route path={ROUTES.FAQ} element={<FAQPage />} />

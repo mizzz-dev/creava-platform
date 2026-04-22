@@ -428,6 +428,150 @@ function buildPrivacySummary(appUser: any) {
   return summary
 }
 
+
+
+function normalizeMessageType(raw: unknown): string {
+  const value = String(raw ?? 'important_notice')
+  return value || 'important_notice'
+}
+
+function resolveMessageCategory(raw: unknown): string {
+  const value = String(raw ?? '').trim().toLowerCase()
+  if (value.includes('security')) return 'security'
+  if (value.includes('support')) return 'support'
+  if (value.includes('member') || value.includes('renewal') || value.includes('rejoin')) return 'membership'
+  if (value.includes('store')) return 'store'
+  if (value.includes('fc')) return 'fc'
+  if (value.includes('campaign') || value.includes('seasonal')) return 'campaign'
+  return 'account'
+}
+
+function resolveMessageSeverity(priority: unknown): 'critical' | 'high' | 'medium' | 'low' {
+  const normalized = String(priority ?? 'normal')
+  if (normalized === 'high') return 'high'
+  return 'medium'
+}
+
+function toMessageSummary(item: any, deliverySummary: Record<string, any>) {
+  const isRead = Boolean(item?.isRead)
+  const now = new Date().toISOString()
+  const messageType = normalizeMessageType(item?.notificationType)
+  const category = resolveMessageCategory(item?.category ?? messageType)
+  const readState = isRead ? 'read' : 'unread'
+  const archiveState = item?.archivedAt ? 'archived' : 'active'
+  const dismissState = item?.dismissedAt ? 'dismissed' : 'active'
+  const delivery = deliverySummary[String(item?.id)]
+
+  return {
+    messageId: String(item?.id),
+    title: String(item?.title ?? ''),
+    body: String(item?.body ?? ''),
+    href: typeof item?.href === 'string' ? item.href : null,
+    sourceSite: item?.sourceSite ?? 'cross',
+    messageType,
+    messageCategory: category,
+    messageSeverity: resolveMessageSeverity(item?.priority),
+    messagePriority: item?.priority === 'high' ? 'high' : 'normal',
+    messageVisibilityState: 'visible',
+    deliveryState: delivery?.deliveryState ?? 'pending',
+    readState,
+    archiveState,
+    dismissState,
+    messageReason: item?.category ?? null,
+    messageMetadata: {
+      locale: item?.locale ?? 'ja',
+      from: item?.sourceSite ?? 'cross',
+    },
+    visibleFromAt: item?.visibleFrom ?? null,
+    expiresAt: item?.visibleTo ?? null,
+    deliveredAt: delivery?.deliveredAt ?? null,
+    firstSeenAt: isRead ? (item?.readAt ?? now) : null,
+    readAt: item?.readAt ?? null,
+    archivedAt: item?.archivedAt ?? null,
+    dismissedAt: item?.dismissedAt ?? null,
+  }
+}
+
+async function buildNotificationInbox(strapi: any, authUserId: string, appUser: any) {
+  const [messagesRaw, logs, preference] = await Promise.all([
+    strapi.documents('api::member-notification.member-notification').findMany({
+      filters: { userId: { $eq: authUserId } },
+      sort: ['publishedAt:desc', 'createdAt:desc'],
+      limit: 100,
+    }),
+    strapi.documents('api::delivery-log.delivery-log').findMany({
+      filters: { userId: { $eq: authUserId } },
+      sort: ['createdAt:desc'],
+      limit: 300,
+    }),
+    strapi.documents('api::notification-preference.notification-preference').findFirst({
+      filters: { userId: { $eq: authUserId } },
+    }),
+  ])
+
+  const deliveryByTemplate = new Map<string, any>()
+  for (const log of logs) {
+    const key = `${log.templateKey}:${log.sourceSite}`
+    if (!deliveryByTemplate.has(key)) {
+      deliveryByTemplate.set(key, {
+        deliveryState: log.status === 'sent' ? 'delivered' : log.status,
+        deliveredAt: log.sentAt ?? null,
+      })
+    }
+  }
+
+  const deliveryByMessageId: Record<string, any> = {}
+  for (const message of messagesRaw) {
+    const key = `${String(message.notificationType)}:${String(message.sourceSite ?? 'cross')}`
+    if (deliveryByTemplate.has(key)) deliveryByMessageId[String(message.id)] = deliveryByTemplate.get(key)
+  }
+
+  const messages = messagesRaw.map((item: any) => toMessageSummary(item, deliveryByMessageId))
+  const activeMessages = messages.filter((item: any) => item.archiveState === 'active' && item.dismissState === 'active')
+  const unreadMessages = activeMessages.filter((item: any) => item.readState !== 'read')
+
+  const summary = {
+    total: messages.length,
+    unread: unreadMessages.length,
+    read: messages.filter((item: any) => item.readState === 'read').length,
+    archived: messages.filter((item: any) => item.archiveState === 'archived').length,
+    dismissed: messages.filter((item: any) => item.dismissState === 'dismissed').length,
+    important: activeMessages.filter((item: any) => item.messagePriority === 'high').length,
+    actionRequired: activeMessages.filter((item: any) => item.messageType === 'important_notice' || item.messageType === 'security_notice').length,
+    byCategory: activeMessages.reduce((acc: Record<string, number>, item: any) => {
+      const key = item.messageCategory
+      acc[key] = (acc[key] ?? 0) + 1
+      return acc
+    }, {}),
+  }
+
+  const deliverySummary = {
+    total: logs.length,
+    delivered: logs.filter((item: any) => item.status === 'sent').length,
+    pending: logs.filter((item: any) => item.status === 'pending').length,
+    failed: logs.filter((item: any) => item.status === 'failed').length,
+    skipped: logs.filter((item: any) => item.status === 'skipped').length,
+    suppressed: logs.filter((item: any) => item.status === 'suppressed').length,
+  }
+
+  return {
+    inboxSummary: summary,
+    unreadSummary: {
+      total: summary.unread,
+      important: unreadMessages.filter((item: any) => item.messagePriority === 'high').length,
+      actionRequired: unreadMessages.filter((item: any) => item.messageType === 'important_notice' || item.messageType === 'security_notice').length,
+    },
+    deliverySummary,
+    preferenceState: {
+      inAppOptIn: preference?.inAppOptIn ?? true,
+      emailOptIn: preference?.emailOptIn ?? true,
+      notificationConsentState: appUser?.notificationConsentState ?? 'enabled',
+      crmConsentState: appUser?.crmConsentState ?? 'opted_in',
+    },
+    messages,
+  }
+}
+
 function resolveMfaState(claims: Record<string, unknown>, appUser: any): 'disabled' | 'available' | 'enabled' | 'required' {
   if (appUser?.accountStatus === 'restricted' || appUser?.accountStatus === 'suspended') return 'required'
   if (claims.aal === 'aal2') return 'enabled'
@@ -677,7 +821,7 @@ async function buildUserSummary(strapi: any, logtoUserId: string) {
   })
   if (!appUser) return null
 
-  const [notificationPreference, inquirySubmissions, moderationLogs, favorites, viewHistories, reports, latestSubscription, latestEntitlement] = await Promise.all([
+  const [notificationPreference, inquirySubmissions, moderationLogs, favorites, viewHistories, reports, latestSubscription, latestEntitlement, notificationInbox] = await Promise.all([
     strapi.documents('api::notification-preference.notification-preference').findFirst({ filters: { userId: { $eq: logtoUserId } } }),
     strapi.documents('api::inquiry-submission.inquiry-submission').findMany({ filters: { email: { $eqi: appUser.primaryEmail ?? '' } }, limit: 10, sort: ['submittedAt:desc'] }),
     strapi.documents('api::moderation-log.moderation-log').findMany({ filters: { performedBy: { $eq: logtoUserId } }, limit: 10, sort: ['createdAt:desc'] }),
@@ -686,6 +830,7 @@ async function buildUserSummary(strapi: any, logtoUserId: string) {
     strapi.documents('api::community-report.community-report').findMany({ filters: { reporterUserId: { $eq: logtoUserId } }, limit: 10, sort: ['createdAt:desc'] }),
     findLatestSubscription(strapi, logtoUserId),
     findLatestEntitlement(strapi, logtoUserId),
+    buildNotificationInbox(strapi, logtoUserId, appUser),
   ])
 
   const lifecycleSummary = buildLifecycleSummary(appUser, latestSubscription, latestEntitlement)
@@ -744,6 +889,11 @@ async function buildUserSummary(strapi: any, logtoUserId: string) {
       activityState: {
         favoriteCount: favorites.length,
         recentHistoryCount: viewHistories.length,
+      },
+      notificationInbox: {
+        inboxSummary: notificationInbox.inboxSummary,
+        unreadSummary: notificationInbox.unreadSummary,
+        deliverySummary: notificationInbox.deliverySummary,
       },
       billing: latestSubscription
         ? {
@@ -1162,6 +1312,100 @@ export default ({ strapi }) => ({
       const message = (error as Error).message
       if (message.includes('Authorization') || message.includes('JWT')) return ctx.unauthorized('ログイン状態を確認して再試行してください。')
       return ctx.internalServerError('membership cancellation request の登録に失敗しました。')
+    }
+  },
+
+
+  async notificationInbox(ctx) {
+    try {
+      const authUser = await requireAuthUser(ctx)
+      const appUser = await strapi.documents('api::app-user.app-user').findFirst({
+        filters: {
+          $or: [
+            { authUserId: { $eq: authUser.userId } },
+            { supabaseUserId: { $eq: authUser.userId } },
+            { logtoUserId: { $eq: authUser.userId } },
+          ],
+        },
+      })
+      if (!appUser) return ctx.notFound('app user が未プロビジョニングです。')
+      const inbox = await buildNotificationInbox(strapi, authUser.userId, appUser)
+      ctx.body = inbox
+    } catch (error) {
+      const message = (error as Error).message
+      if (message.includes('Authorization') || message.includes('JWT')) return ctx.unauthorized('ログイン状態を確認して再試行してください。')
+      return ctx.internalServerError('notification inbox の取得に失敗しました。')
+    }
+  },
+
+  async markNotificationRead(ctx) {
+    try {
+      const authUser = await requireAuthUser(ctx)
+      const messageId = Number(ctx.params.messageId)
+      if (!Number.isFinite(messageId) || messageId <= 0) return ctx.badRequest('messageId が不正です。')
+      const notification = await strapi.documents('api::member-notification.member-notification').findFirst({
+        filters: { id: { $eq: messageId }, userId: { $eq: authUser.userId } },
+      })
+      if (!notification) return ctx.notFound('notification が見つかりません。')
+      if (!notification.isRead) {
+        await strapi.documents('api::member-notification.member-notification').update({
+          documentId: notification.documentId,
+          data: { isRead: true, readAt: new Date().toISOString() },
+        })
+      }
+      ctx.body = { ok: true }
+    } catch (error) {
+      const message = (error as Error).message
+      if (message.includes('Authorization') || message.includes('JWT')) return ctx.unauthorized('ログイン状態を確認して再試行してください。')
+      return ctx.internalServerError('notification read 更新に失敗しました。')
+    }
+  },
+
+  async archiveNotification(ctx) {
+    try {
+      const authUser = await requireAuthUser(ctx)
+      const messageId = Number(ctx.params.messageId)
+      if (!Number.isFinite(messageId) || messageId <= 0) return ctx.badRequest('messageId が不正です。')
+      const notification = await strapi.documents('api::member-notification.member-notification').findFirst({
+        filters: { id: { $eq: messageId }, userId: { $eq: authUser.userId } },
+      })
+      if (!notification) return ctx.notFound('notification が見つかりません。')
+      await strapi.documents('api::member-notification.member-notification').update({
+        documentId: notification.documentId,
+        data: {
+          isRead: true,
+          readAt: notification.readAt ?? new Date().toISOString(),
+          archivedAt: new Date().toISOString(),
+        },
+      })
+      ctx.body = { ok: true }
+    } catch (error) {
+      const message = (error as Error).message
+      if (message.includes('Authorization') || message.includes('JWT')) return ctx.unauthorized('ログイン状態を確認して再試行してください。')
+      return ctx.internalServerError('notification archive 更新に失敗しました。')
+    }
+  },
+
+  async dismissNotification(ctx) {
+    try {
+      const authUser = await requireAuthUser(ctx)
+      const messageId = Number(ctx.params.messageId)
+      if (!Number.isFinite(messageId) || messageId <= 0) return ctx.badRequest('messageId が不正です。')
+      const notification = await strapi.documents('api::member-notification.member-notification').findFirst({
+        filters: { id: { $eq: messageId }, userId: { $eq: authUser.userId } },
+      })
+      if (!notification) return ctx.notFound('notification が見つかりません。')
+      await strapi.documents('api::member-notification.member-notification').update({
+        documentId: notification.documentId,
+        data: {
+          dismissedAt: new Date().toISOString(),
+        },
+      })
+      ctx.body = { ok: true }
+    } catch (error) {
+      const message = (error as Error).message
+      if (message.includes('Authorization') || message.includes('JWT')) return ctx.unauthorized('ログイン状態を確認して再試行してください。')
+      return ctx.internalServerError('notification dismiss 更新に失敗しました。')
     }
   },
 
