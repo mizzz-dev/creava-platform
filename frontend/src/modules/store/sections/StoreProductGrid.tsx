@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import SectionReveal from '@/components/common/SectionReveal'
 import SkeletonProductCard from '@/components/common/SkeletonProductCard'
 import ProductCard from '@/modules/store/components/ProductCard'
-import { trackEvent } from '@/modules/analytics'
+import { trackMizzzEvent } from '@/modules/analytics/tracking'
 import { ROUTES } from '@/lib/routeConstants'
 import type { StoreProductSummary } from '@/modules/store/types'
 import type { DisplayCurrency } from '@/modules/store/lib/currency'
@@ -81,7 +81,7 @@ export default function StoreProductGrid({ products, loading, error, currency, t
   return (
     <div id="store-products" className="grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4">
       {products.map((p) => (
-        <div key={p.id} onClick={() => trackEvent('store_product_card_click', { slug: p.slug })}>
+        <div key={p.id} onClick={() => trackMizzzEvent('cta_click', { sourceSection: 'store_product_grid', sourceComponent: 'product_card', targetEntity: p.slug, eventReason: 'product_detail_open' })}>
           <ProductCard product={p} displayCurrency={currency} />
         </div>
       ))}

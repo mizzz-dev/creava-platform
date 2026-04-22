@@ -95,3 +95,16 @@ export function trackErrorPageCta(
 ): void {
   trackMizzzEvent('cta_click', { pageType: 'error', category: code, cta, ...extras })
 }
+
+
+export function trackExperimentExposure(experimentId: string, variantId: string, extras?: AnalyticsParams): void {
+  trackMizzzEvent('exposure_event_logged', { experimentId, variantId, experimentState: 'running', ...extras })
+}
+
+export function trackExperimentOutcome(experimentId: string, outcomeMetric: string, conversionState: string, extras?: AnalyticsParams): void {
+  trackMizzzEvent('experiment_outcome_logged', { experimentId, outcomeMetric, conversionState, ...extras })
+}
+
+export function trackConversionEvent(conversionType: string, conversionState: string, extras?: AnalyticsParams): void {
+  trackMizzzEvent('conversion_event_logged', { conversionType, conversionState, ...extras })
+}

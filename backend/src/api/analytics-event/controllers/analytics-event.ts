@@ -74,6 +74,9 @@ const ALLOWED_EVENTS = new Set([
   'experiment_start', 'experiment_pause', 'experiment_complete', 'experiment_stop',
   'kill_switch_preview_view', 'kill_switch_trigger_start', 'kill_switch_trigger_complete',
   'exposure_reason_view',
+  'analytics_dashboard_view', 'event_taxonomy_reference_view', 'funnel_summary_view', 'attribution_summary_view', 'experiment_summary_view',
+  'exposure_event_logged', 'conversion_event_logged', 'experiment_outcome_logged', 'event_validation_run', 'schema_drift_detected',
+  'duplicate_event_detected', 'identity_merge_review_open', 'analytics_runbook_open',
 ])
 
 function sanitizeText(value: unknown, maxLength = 120): string | undefined {
@@ -460,8 +463,20 @@ export default factories.createCoreController('api::analytics-event.analytics-ev
     const params = body.params ?? {}
     const sourceSite = sanitizeSourceSite(params.sourceSite)
     const payload = Object.fromEntries(
-      Object.entries(params).filter(([key]) => !['email', 'phone', 'name', 'userId'].includes(key)),
+      Object.entries(params).filter(([key]) => !['email', 'phone', 'name', 'userId', 'accessToken', 'refreshToken'].includes(key)),
     )
+
+    const eventId = sanitizeText(params.eventId, 180)
+    if (eventId) {
+      const duplicated = await strapi.documents('api::analytics-event.analytics-event').findFirst({
+        filters: { eventId: { $eq: eventId } },
+        fields: ['id', 'eventId'],
+      })
+      if (duplicated) {
+        ctx.body = { ok: true, deduped: true }
+        return
+      }
+    }
 
     await strapi.documents('api::analytics-event.analytics-event').create({
       data: {
@@ -480,15 +495,37 @@ export default factories.createCoreController('api::analytics-event.analytics-ev
         referrerType: sanitizeReferrerType(params.referrerType),
         experimentId: sanitizeText(params.experimentId, 80),
         variantId: sanitizeText(params.variantId, 80),
+        eventId,
+        dedupeKey: sanitizeText(params.dedupeKey, 180),
+        requestId: sanitizeText(params.requestId, 180),
+        sessionId: sanitizeText(params.sessionId, 180),
+        anonymousId: sanitizeText(params.anonymousId, 180),
+        eventType: sanitizeText(params.eventType, 60),
+        eventCategory: sanitizeText(params.eventCategory, 60),
+        attributionState: sanitizeText(params.attributionState, 60),
+        identityState: sanitizeText(params.identityState, 60),
+        identityMergeState: sanitizeText(params.identityMergeState, 60),
+        eventQualityState: sanitizeText(params.eventQualityState, 60),
+        dedupeState: sanitizeText(params.dedupeState, 60),
+        replayState: sanitizeText(params.replayState, 60),
+        membershipStatus: sanitizeText(params.membershipStatus, 60),
+        entitlementState: sanitizeText(params.entitlementState, 60),
+        subscriptionState: sanitizeText(params.subscriptionState, 60),
+        billingState: sanitizeText(params.billingState, 60),
+        lifecycleStage: sanitizeText(params.lifecycleStage, 80),
+        sourceSection: sanitizeText(params.sourceSection, 120),
+        sourceScreen: sanitizeText(params.sourceScreen, 120),
+        sourceComponent: sanitizeText(params.sourceComponent, 120),
+        eventReason: sanitizeText(params.eventReason, 160),
         path: sanitizeText(params.page_path, 240),
         payload,
         eventAt: parseDateInput(params.timestamp) ?? new Date(),
         ipHash: hashIp(getClientIp(ctx)),
-        consentState: 'granted',
+        consentState: sanitizeText(params.consentState, 20) === 'denied' ? 'denied' : 'granted',
       },
     })
 
-    ctx.body = { ok: true }
+    ctx.body = { ok: true, deduped: false }
   },
 
   async opsSummary(ctx) {
