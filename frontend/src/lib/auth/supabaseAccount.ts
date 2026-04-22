@@ -40,3 +40,20 @@ export async function requestSupabaseEmailChange(accessToken: string, nextEmail:
     throw new Error(`メールアドレス変更リクエストに失敗しました (${response.status})`)
   }
 }
+
+export async function revokeSupabaseSessions(accessToken: string, scope: 'global' | 'others' = 'others'): Promise<void> {
+  ensureSupabaseConfig()
+  const endpoint = new URL(`${SUPABASE_URL}/auth/v1/logout`)
+  endpoint.searchParams.set('scope', scope)
+  const response = await fetch(endpoint.toString(), {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      apikey: SUPABASE_ANON_KEY,
+      Accept: 'application/json',
+    },
+  })
+  if (!response.ok) {
+    throw new Error(`セッション破棄に失敗しました (${response.status})`)
+  }
+}

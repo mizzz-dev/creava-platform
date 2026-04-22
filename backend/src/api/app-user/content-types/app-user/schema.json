@@ -418,6 +418,25 @@
     },
     "statusUpdatedAt": {
       "type": "datetime"
+    },
+    "securitySummary": {
+      "type": "json",
+      "required": true
+    },
+    "securityUpdatedAt": {
+      "type": "datetime"
+    },
+    "lastSensitiveActionAt": {
+      "type": "datetime"
+    },
+    "lastPasswordResetAt": {
+      "type": "datetime"
+    },
+    "lastEmailChangeAt": {
+      "type": "datetime"
+    },
+    "lastMfaUpdateAt": {
+      "type": "datetime"
     }
   }
 }

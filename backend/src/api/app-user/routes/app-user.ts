@@ -13,6 +13,12 @@ export default {
       config: { auth: false },
     },
     {
+      method: 'POST',
+      path: '/user-sync/security/sensitive-action',
+      handler: 'app-user.verifySensitiveAction',
+      config: { auth: false },
+    },
+    {
       method: 'GET',
       path: '/user-sync/support/lookup',
       handler: 'app-user.supportLookup',

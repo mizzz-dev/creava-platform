@@ -5,7 +5,7 @@ import PageHead from '@/components/seo/PageHead'
 import SocialAuthProviderStatus from '@/components/auth/SocialAuthProviderStatus'
 import { useCurrentUser, useUserLifecycleApi } from '@/hooks'
 import { ROUTES } from '@/lib/routeConstants'
-import { clearWithdrawRequest, getMemberAccountSettings, getMemberBillingSummary, getMemberDashboard, requestWithdraw, updateMemberAccountSettings, type MemberBillingSummary } from '@/modules/member/api'
+import { clearWithdrawRequest, getMemberAccountSettings, getMemberBillingSummary, getMemberDashboard, requestWithdraw, updateMemberAccountSettings, verifySensitiveAction, type MemberBillingSummary } from '@/modules/member/api'
 import type { MemberAccountSettings, MemberDashboardData, MemberOrderStatus, MemberPaymentSettings, MemberShippingSettings, ShipmentStatus } from '@/modules/member/types'
 import { buildCrmSegments, buildLtvDashboard, buildSupportTemplates } from '@/modules/store/lib/commerceOptimization'
 import MyPagePersonalizationPanel from '@/modules/personalization/components/MyPagePersonalizationPanel'
@@ -21,7 +21,7 @@ import { useAuthClient } from '@/lib/auth/AuthProvider'
 import UserLifecycleBanner from '@/components/common/UserLifecycleBanner'
 import MemberValueExperiencePanel from '@/components/common/MemberValueExperiencePanel'
 import MemberProgressHub from '@/components/common/MemberProgressHub'
-import { requestSupabaseEmailChange, sendSupabasePasswordReset } from '@/lib/auth/supabaseAccount'
+import { requestSupabaseEmailChange, revokeSupabaseSessions, sendSupabasePasswordReset } from '@/lib/auth/supabaseAccount'
 
 const MEMBER_BENEFITS = [
   'member.benefitEarly',
@@ -181,6 +181,7 @@ export default function MemberPage() {
   const [securityMessage, setSecurityMessage] = useState<string | null>(null)
   const [securityError, setSecurityError] = useState<string | null>(null)
   const [securityLoading, setSecurityLoading] = useState(false)
+  const [sessionRevokeScope, setSessionRevokeScope] = useState<'others' | 'global'>('others')
   const role = user?.role ?? 'guest'
   const isMember = user?.membershipStatus === 'member' || user?.membershipStatus === 'grace'
   const isAdmin = role === 'admin'
@@ -276,6 +277,28 @@ export default function MemberPage() {
       cancelled = true
     }
   }, [authClient, isLoaded, isSignedIn])
+
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn || !user) return
+    trackMizzzEvent('security_hub_view', {
+      sourceSite: SITE_TYPE,
+      locale: document.documentElement.lang || 'ja',
+      theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light',
+      membershipStatus: user.membershipStatus,
+      lifecycleStage: lifecycle?.lifecycleStage ?? 'unknown',
+    })
+  }, [isLoaded, isSignedIn, lifecycle?.lifecycleStage, user])
+
+  useEffect(() => {
+    if (!billingSummary?.securitySummary || !user) return
+    trackMizzzEvent('security_summary_view', {
+      sourceSite: SITE_TYPE,
+      membershipStatus: user.membershipStatus,
+      lifecycleStage: lifecycle?.lifecycleStage ?? 'unknown',
+      securityLevelState: billingSummary.securitySummary.securityLevelState,
+      mfaState: billingSummary.securitySummary.mfaState,
+    })
+  }, [billingSummary?.securitySummary, lifecycle?.lifecycleStage, user])
 
   const visibleNotices = useMemo(() => {
     if (!dashboardData) return []
@@ -438,6 +461,14 @@ export default function MemberPage() {
     }
   }
 
+  const ensureSensitiveActionVerified = async (actionType: Parameters<typeof verifySensitiveAction>[1]) => {
+    const token = await authClient.getAccessToken()
+    if (!token) throw new Error('missing token')
+    trackMizzzEvent('sensitive_action_reauth_start', { actionType, sourceSite: SITE_TYPE, membershipStatus: user?.membershipStatus ?? 'non_member' })
+    await verifySensitiveAction(token, actionType)
+    return token
+  }
+
   const handleEmailChange = async () => {
     if (!securityEmail.trim()) {
       setSecurityError(t('member.securityEmailRequired', { defaultValue: '変更先メールアドレスを入力してください。' }))
@@ -447,14 +478,41 @@ export default function MemberPage() {
     setSecurityError(null)
     setSecurityMessage(null)
     try {
-      const token = await authClient.getAccessToken()
-      if (!token) throw new Error('missing token')
+      const token = await ensureSensitiveActionVerified('email_change')
       await requestSupabaseEmailChange(token, securityEmail.trim())
       const baseMessage = t('member.securityEmailChangeSent', { defaultValue: 'メールアドレス変更確認メールを送信しました。新旧メールで承認を完了してください。' })
       setSecurityMessage(SUPABASE_EMAIL_CHANGE_REDIRECT_URL ? `${baseMessage} (${SUPABASE_EMAIL_CHANGE_REDIRECT_URL})` : baseMessage)
       trackMizzzEvent('email_change_start', { sourceSite: SITE_TYPE, membershipStatus: user?.membershipStatus ?? 'non_member' })
-    } catch {
-      setSecurityError(t('member.securityEmailChangeError', { defaultValue: 'メールアドレス変更リクエストに失敗しました。再認証後に再度お試しください。' }))
+    } catch (error) {
+      if (error instanceof Error && error.message === 'reauth_required') {
+        setSecurityError(t('member.securityReauthRequired', { defaultValue: '安全のため再認証が必要です。再ログイン後にもう一度お試しください。' }))
+      } else {
+        setSecurityError(t('member.securityEmailChangeError', { defaultValue: 'メールアドレス変更リクエストに失敗しました。再認証後に再度お試しください。' }))
+      }
+    } finally {
+      setSecurityLoading(false)
+    }
+  }
+
+  const handleSessionRevoke = async () => {
+    setSecurityLoading(true)
+    setSecurityError(null)
+    setSecurityMessage(null)
+    try {
+      const token = await ensureSensitiveActionVerified('session_revoke')
+      await revokeSupabaseSessions(token, sessionRevokeScope)
+      setSecurityMessage(
+        sessionRevokeScope === 'global'
+          ? t('member.securitySessionRevokeGlobalDone', { defaultValue: '全セッションを破棄しました。必要に応じて再ログインしてください。' })
+          : t('member.securitySessionRevokeOthersDone', { defaultValue: 'この端末以外のセッションを破棄しました。' }),
+      )
+      trackMizzzEvent('session_revoke_complete', { sourceSite: SITE_TYPE, membershipStatus: user?.membershipStatus ?? 'non_member', scope: sessionRevokeScope })
+    } catch (error) {
+      if (error instanceof Error && error.message === 'reauth_required') {
+        setSecurityError(t('member.securityReauthRequired', { defaultValue: '安全のため再認証が必要です。再ログイン後にもう一度お試しください。' }))
+      } else {
+        setSecurityError(t('member.securitySessionRevokeError', { defaultValue: 'セッション破棄に失敗しました。時間をおいて再試行してください。' }))
+      }
     } finally {
       setSecurityLoading(false)
     }
@@ -861,6 +919,15 @@ export default function MemberPage() {
               <div className="mt-4 rounded border border-dashed border-gray-200 p-3 text-xs dark:border-gray-700">
                 <p className="font-semibold text-gray-900 dark:text-gray-100">{t('member.securitySectionTitle', { defaultValue: 'セキュリティ設定（自己管理）' })}</p>
                 <p className="mt-1 text-gray-600 dark:text-gray-300">{t('member.securitySectionLead', { defaultValue: 'パスワード再設定・メール変更は Supabase Auth の安全なフローで実行します。' })}</p>
+                {billingSummary?.securitySummary && (
+                  <div className="mt-2 grid gap-2 rounded border border-gray-200 bg-gray-50 p-2 text-[11px] text-gray-600 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-300 sm:grid-cols-2">
+                    <p>securityLevel: <span className="font-mono">{billingSummary.securitySummary.securityLevelState}</span></p>
+                    <p>mfaState: <span className="font-mono">{billingSummary.securitySummary.mfaState}</span></p>
+                    <p>linkedIdentity: <span className="font-mono">{billingSummary.securitySummary.linkedIdentityState}</span></p>
+                    <p>sessionState: <span className="font-mono">{billingSummary.securitySummary.sessionState}</span></p>
+                    <p className="sm:col-span-2">linkedProviders: <span className="font-mono">{(billingSummary.securitySummary.linkedProviders ?? []).join(', ') || '-'}</span></p>
+                  </div>
+                )}
                 <div className="mt-2 flex flex-wrap gap-2">
                   <button
                     type="button"
@@ -886,6 +953,24 @@ export default function MemberPage() {
                     className="rounded border border-gray-300 px-2 py-1 text-[11px] text-gray-700 hover:border-violet-300 hover:text-violet-600 disabled:opacity-60 dark:border-gray-700 dark:text-gray-200"
                   >
                     {t('member.securityEmailChangeAction', { defaultValue: 'メール変更を申請' })}
+                  </button>
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <select
+                    value={sessionRevokeScope}
+                    onChange={(event) => setSessionRevokeScope(event.target.value === 'global' ? 'global' : 'others')}
+                    className="rounded border border-gray-200 bg-white px-2 py-1 text-[11px] dark:border-gray-700 dark:bg-gray-900"
+                  >
+                    <option value="others">{t('member.securitySessionScopeOthers', { defaultValue: 'この端末以外' })}</option>
+                    <option value="global">{t('member.securitySessionScopeGlobal', { defaultValue: '全端末' })}</option>
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => { void handleSessionRevoke() }}
+                    disabled={securityLoading}
+                    className="rounded border border-gray-300 px-2 py-1 text-[11px] text-gray-700 hover:border-violet-300 hover:text-violet-600 disabled:opacity-60 dark:border-gray-700 dark:text-gray-200"
+                  >
+                    {t('member.securitySessionRevokeAction', { defaultValue: 'セッションを破棄する' })}
                   </button>
                 </div>
                 {securityMessage && <p className="mt-2 text-emerald-600 dark:text-emerald-300">{securityMessage}</p>}
