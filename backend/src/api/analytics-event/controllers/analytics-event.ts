@@ -41,6 +41,9 @@ const ALLOWED_EVENTS = new Set([
   'rejoin_banner_view', 'rejoin_cta_click', 'reactivation_success',
   'member_value_block_view', 'renewal_help_click', 'support_from_renewal_state',
   'lifecycle_message_sent', 'lifecycle_message_clicked', 'winback_offer_view', 'winback_offer_click',
+  'notification_center_view', 'inbox_summary_view', 'message_detail_view', 'message_mark_read', 'message_archive', 'message_dismiss',
+  'unread_badge_click', 'important_notice_view', 'important_notice_cta_click', 'lifecycle_message_view', 'lifecycle_message_cta_click',
+  'campaign_message_view', 'campaign_message_cta_click', 'notification_settings_view', 'notification_settings_save', 'support_from_notification_center',
 ])
 
 function sanitizeText(value: unknown, maxLength = 120): string | undefined {

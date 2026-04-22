@@ -19,6 +19,7 @@ export const ROUTES = {
   STORE_DETAIL: '/store/:handle',
   CART: '/store/cart',
   MEMBER: '/member',
+  NOTIFICATION_CENTER: '/member/notifications',
   PRICING: '/pricing',
   FAQ: '/faq',
   SUPPORT_CENTER: '/support',

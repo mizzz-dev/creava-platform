@@ -1122,6 +1122,10 @@ export default function MemberPage() {
                 </section>
 
                 <section className="rounded border border-gray-200 p-4 dark:border-gray-700 lg:col-span-2">
+                  <div className="mb-3 flex items-center justify-between">
+                    <p className="text-xs text-gray-600 dark:text-gray-300">通知の履歴・未読・重要通知は共通通知センターで管理できます。</p>
+                    <Link to={ROUTES.NOTIFICATION_CENTER} className="text-xs underline text-violet-700 dark:text-violet-300">通知センターを開く</Link>
+                  </div>
                   <NotificationPreferenceCenter location="member_page" />
                 </section>
                 {privacySummary && (

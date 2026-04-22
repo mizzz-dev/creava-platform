@@ -60,6 +60,31 @@ export default {
       handler: 'app-user.appendSecurityEvent',
       config: { auth: false },
     },
+
+    {
+      method: 'GET',
+      path: '/user-sync/notifications/inbox',
+      handler: 'app-user.notificationInbox',
+      config: { auth: false },
+    },
+    {
+      method: 'POST',
+      path: '/user-sync/notifications/messages/:messageId/read',
+      handler: 'app-user.markNotificationRead',
+      config: { auth: false },
+    },
+    {
+      method: 'POST',
+      path: '/user-sync/notifications/messages/:messageId/archive',
+      handler: 'app-user.archiveNotification',
+      config: { auth: false },
+    },
+    {
+      method: 'POST',
+      path: '/user-sync/notifications/messages/:messageId/dismiss',
+      handler: 'app-user.dismissNotification',
+      config: { auth: false },
+    },
     {
       method: 'GET',
       path: '/user-sync/support/lookup',

@@ -74,6 +74,13 @@ export default function NotificationSettingsPanel({ location }: { location: stri
 
       <div className="mt-4 flex flex-wrap gap-3 text-xs">
         <Link
+          to={ROUTES.NOTIFICATION_CENTER}
+          onClick={() => trackMizzzEvent('unread_badge_click', { location, sourceSite: 'member' })}
+          className="inline-flex text-violet-700 underline dark:text-violet-300"
+        >
+          {t('common.openNotificationCenter', { defaultValue: '通知センターを開く' })}
+        </Link>
+        <Link
           to={ROUTES.MEMBER}
           onClick={() => {
             trackMizzzEvent('benefit_prompt_clicked', {
