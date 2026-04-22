@@ -20,6 +20,9 @@ type NormalizedClaims = {
 }
 
 const OPS_TOKEN = process.env.LOGTO_USER_SYNC_OPS_TOKEN
+const SENSITIVE_REAUTH_MAX_AGE_SEC = Number(process.env.SENSITIVE_REAUTH_MAX_AGE_SEC ?? '900')
+const SUPPORTED_SENSITIVE_ACTIONS = ['email_change', 'password_change', 'provider_link_change', 'session_revoke', 'account_recovery'] as const
+type SensitiveActionType = (typeof SUPPORTED_SENSITIVE_ACTIONS)[number]
 
 function normalizeLocale(raw: unknown, fallback: string = 'ja'): string {
   if (raw === 'ja' || raw === 'en' || raw === 'ko') return raw
@@ -290,6 +293,22 @@ function buildSeedData(authUserId: string, claims: NormalizedClaims, sourceSite:
     reactivatedAt: null,
     acquisitionSource: sourceSite,
     linkedProviders: claims.linkedProviders,
+    securitySummary: {
+      securityLevelState: 'basic',
+      mfaState: 'available',
+      reauthRequiredState: 'unknown',
+      linkedIdentityState: claims.linkedProviders.length > 1 ? 'multi_provider' : claims.linkedProviders.length === 1 ? 'single_provider' : 'none',
+      sessionState: 'normal',
+      recentAccessState: 'available',
+      recoveryState: 'self_service_ready',
+      sensitiveActionState: 'idle',
+      securityNoticeState: 'none',
+    },
+    securityUpdatedAt: nowIso,
+    lastSensitiveActionAt: null,
+    lastPasswordResetAt: null,
+    lastEmailChangeAt: null,
+    lastMfaUpdateAt: null,
     firstLoginAt: nowIso,
     lastLoginAt: nowIso,
     statusUpdatedAt: nowIso,
@@ -310,6 +329,76 @@ function buildSeedData(authUserId: string, claims: NormalizedClaims, sourceSite:
     lastSyncedAt: nowIso,
     lastProgressUpdateAt: nowIso,
     syncVersion: 1,
+  }
+}
+
+function resolveMfaState(claims: Record<string, unknown>, appUser: any): 'disabled' | 'available' | 'enabled' | 'required' {
+  if (appUser?.accountStatus === 'restricted' || appUser?.accountStatus === 'suspended') return 'required'
+  if (claims.aal === 'aal2') return 'enabled'
+  const amr = Array.isArray(claims.amr) ? claims.amr : []
+  if (amr.some((method) => typeof method === 'string' && (method.includes('totp') || method.includes('mfa')))) return 'enabled'
+  return 'available'
+}
+
+function resolveLinkedIdentityState(linkedProviders: string[]): 'none' | 'single_provider' | 'multi_provider' | 'conflict_risk' {
+  const normalized = Array.from(new Set(linkedProviders.map((provider) => provider.trim().toLowerCase()).filter(Boolean)))
+  if (normalized.length === 0) return 'none'
+  if (normalized.length === 1) return 'single_provider'
+  const hasEmail = normalized.includes('email') || normalized.includes('password')
+  return hasEmail ? 'multi_provider' : 'conflict_risk'
+}
+
+function buildSecuritySummary(params: { authUser: AuthenticatedUser; appUser: any; lifecycleSummary: ReturnType<typeof buildLifecycleSummary>; nowIso: string }) {
+  const { authUser, appUser, lifecycleSummary, nowIso } = params
+  const linkedProviders = Array.isArray(appUser?.linkedProviders) ? appUser.linkedProviders : []
+  const mfaState = resolveMfaState(authUser.claims, appUser)
+  const linkedIdentityState = resolveLinkedIdentityState(linkedProviders)
+  const authTime = typeof authUser.claims.auth_time === 'number'
+    ? authUser.claims.auth_time
+    : typeof authUser.claims.iat === 'number'
+      ? authUser.claims.iat
+      : null
+  const tokenAgeSec = authTime ? Math.max(0, Math.floor(Date.now() / 1000) - authTime) : null
+  const reauthRequiredState = tokenAgeSec === null ? 'unknown' : tokenAgeSec > SENSITIVE_REAUTH_MAX_AGE_SEC ? 'required' : 'fresh'
+  const sessionState = appUser?.accountStatus === 'restricted' || appUser?.accountStatus === 'suspended'
+    ? 'review_recommended'
+    : reauthRequiredState === 'required'
+      ? 'revoke_recommended'
+      : 'normal'
+  const securityLevelState = mfaState === 'enabled'
+    ? 'strong'
+    : linkedIdentityState === 'multi_provider'
+      ? 'enhanced'
+      : lifecycleSummary.accessLevel === 'admin'
+        ? 'restricted'
+        : 'basic'
+
+  return {
+    securityHub: 'supabase',
+    securityLevelState,
+    mfaState,
+    reauthRequiredState,
+    linkedIdentityState,
+    sessionState,
+    recentAccessState: appUser?.lastLoginAt ? 'available' : 'limited',
+    recoveryState: appUser?.primaryEmail ? 'self_service_ready' : 'support_required',
+    sensitiveActionState: 'idle',
+    securityNoticeState: sessionState === 'normal' ? 'none' : 'review_recommended',
+    passwordChangeCapability: appUser?.primaryEmail ? 'self_service' : 'support_required',
+    emailChangeCapability: reauthRequiredState === 'required' ? 'reauth_required' : 'self_service',
+    providerLinkCapability: linkedIdentityState === 'conflict_risk' ? 'support_review_recommended' : 'self_service',
+    sessionRevokeCapability: reauthRequiredState === 'required' ? 'reauth_required' : 'self_service',
+    securityUpdatedAt: appUser?.securityUpdatedAt ?? nowIso,
+    lastSensitiveActionAt: appUser?.lastSensitiveActionAt ?? null,
+    lastPasswordResetAt: appUser?.lastPasswordResetAt ?? null,
+    lastEmailChangeAt: appUser?.lastEmailChangeAt ?? null,
+    lastMfaUpdateAt: appUser?.lastMfaUpdateAt ?? null,
+    linkedProviders,
+    recentAccess: {
+      lastLoginAt: appUser?.lastLoginAt ?? null,
+      sourceSite: appUser?.sourceSite ?? 'cross',
+      sessionId: authUser.sessionId ?? null,
+    },
   }
 }
 
@@ -420,6 +509,13 @@ async function buildUserSummary(strapi: any, logtoUserId: string) {
 
   const lifecycleSummary = buildLifecycleSummary(appUser, latestSubscription, latestEntitlement)
 
+  const securitySummary = buildSecuritySummary({
+    authUser: { userId: logtoUserId, email: appUser.primaryEmail, claims: {}, scopes: [], sessionId: null },
+    appUser,
+    lifecycleSummary,
+    nowIso: new Date().toISOString(),
+  })
+
   return {
     appUser,
     userSummary: {
@@ -439,6 +535,7 @@ async function buildUserSummary(strapi: any, logtoUserId: string) {
       nextUnlockHint: appUser.nextUnlockHint ?? null,
       accountStatus: appUser.accountStatus,
       linkedProviders: appUser.linkedProviders,
+      security: securitySummary,
       firstLoginAt: appUser.firstLoginAt,
       lastLoginAt: appUser.lastLoginAt,
       sourceSite: appUser.sourceSite,
@@ -548,6 +645,14 @@ export default ({ strapi }) => ({
           locale: claims.locale,
           sourceSite,
           linkedProviders: claims.linkedProviders,
+          securitySummary: {
+            ...(existing.securitySummary ?? {}),
+            linkedIdentityState: resolveLinkedIdentityState(claims.linkedProviders),
+            mfaState: resolveMfaState(authUser.claims, existing),
+            reauthRequiredState: 'unknown',
+            securityUpdatedAt: nowIso,
+          },
+          securityUpdatedAt: nowIso,
           lastLoginAt: nowIso,
           membershipPlan: membership.membershipPlan,
           membershipStatus: membership.membershipStatus,
@@ -618,6 +723,12 @@ export default ({ strapi }) => ({
         : toMembershipSummary(latestSubscription)
 
       const lifecycleSummary = buildLifecycleSummary(appUser, latestSubscription, latestEntitlement)
+      const securitySummary = buildSecuritySummary({
+        authUser,
+        appUser,
+        lifecycleSummary,
+        nowIso: new Date().toISOString(),
+      })
 
       ctx.body = {
         appUser,
@@ -655,6 +766,8 @@ export default ({ strapi }) => ({
           : null,
         notificationPreference,
         lifecycleSummary,
+        securityHub: securitySummary.securityHub,
+        securitySummary,
         progressionSummary: {
           loyaltyState: appUser.loyaltyState,
           memberRankState: appUser.memberRankState ?? 'none',
@@ -679,6 +792,66 @@ export default ({ strapi }) => ({
         return ctx.unauthorized('ログイン状態を確認して再試行してください。')
       }
       ctx.internalServerError('user summary の取得に失敗しました。')
+    }
+  },
+
+  async verifySensitiveAction(ctx) {
+    try {
+      const authUser = await requireAuthUser(ctx)
+      const actionType = String(ctx.request.body?.actionType ?? '').trim() as SensitiveActionType
+      if (!SUPPORTED_SENSITIVE_ACTIONS.includes(actionType)) {
+        return ctx.badRequest(`actionType が不正です。(${SUPPORTED_SENSITIVE_ACTIONS.join(', ')})`)
+      }
+
+      const appUser = await strapi.documents('api::app-user.app-user').findFirst({
+        filters: {
+          $or: [
+            { authUserId: { $eq: authUser.userId } },
+            { supabaseUserId: { $eq: authUser.userId } },
+            { logtoUserId: { $eq: authUser.userId } },
+          ],
+        },
+      })
+      if (!appUser) return ctx.notFound('app user が未プロビジョニングです。')
+
+      const authTime = typeof authUser.claims.auth_time === 'number'
+        ? authUser.claims.auth_time
+        : typeof authUser.claims.iat === 'number'
+          ? authUser.claims.iat
+          : null
+      const tokenAgeSec = authTime ? Math.max(0, Math.floor(Date.now() / 1000) - authTime) : Number.MAX_SAFE_INTEGER
+      if (tokenAgeSec > SENSITIVE_REAUTH_MAX_AGE_SEC) {
+        return ctx.preconditionFailed('再認証が必要です。')
+      }
+
+      const nowIso = new Date().toISOString()
+      await strapi.documents('api::app-user.app-user').update({
+        documentId: appUser.documentId,
+        data: {
+          lastSensitiveActionAt: nowIso,
+          securityUpdatedAt: nowIso,
+          securitySummary: {
+            ...(appUser.securitySummary ?? {}),
+            sensitiveActionState: 'verified',
+            reauthRequiredState: 'fresh',
+            securityUpdatedAt: nowIso,
+          },
+        },
+      })
+
+      ctx.body = {
+        ok: true,
+        actionType,
+        sensitiveActionState: 'verified',
+        tokenAgeSec,
+        verifiedAt: nowIso,
+      }
+    } catch (error) {
+      const message = (error as Error).message
+      if (message.includes('Authorization') || message.includes('JWT')) {
+        return ctx.unauthorized('ログイン状態を確認して再試行してください。')
+      }
+      return ctx.internalServerError('sensitive action の検証に失敗しました。')
     }
   },
 

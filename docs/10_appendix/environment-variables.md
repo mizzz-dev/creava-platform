@@ -21,6 +21,10 @@
 | `VITE_SUPABASE_ANON_KEY` | frontend 公開用 anon key | 必須 | 必須 | 必須 |
 | `VITE_SUPABASE_OAUTH_DEFAULT_PROVIDER` | 既定 OAuth provider | 任意 | 任意 | 任意 |
 | `VITE_SUPABASE_PROJECT_REF` | account center導線や運用表示用 project ref | 任意 | 任意 | 任意 |
+| `VITE_SUPABASE_PASSWORD_RESET_REDIRECT_URL` | password reset 完了後の戻り先 | 推奨 | 推奨 | 推奨 |
+| `VITE_SUPABASE_EMAIL_CHANGE_REDIRECT_URL` | email change 承認後の戻り先 | 推奨 | 推奨 | 推奨 |
+| `VITE_SUPABASE_REAUTH_REDIRECT_URL` | sensitive action 再認証後の戻り先 | 推奨 | 推奨 | 推奨 |
+| `VITE_SUPABASE_SECURITY_HUB_PATH` | security hub 既定導線 | 任意 | 任意 | 任意 |
 | `VITE_LOGTO_*` | 旧認証互換（移行期間のみ） | 任意 | 任意 | 任意 |
 | `VITE_USER_SYNC_ENABLED` | user provisioning bridge の有効化 | 任意 | 任意 | 任意 |
 | `VITE_USER_LIFECYCLE_ONBOARDING_ENABLED` | lifecycle/onboarding UI 表示フラグ | 任意 | 推奨 | 推奨 |
@@ -52,6 +56,10 @@
 - `VITE_SUPABASE_ANON_KEY`
 - `VITE_SUPABASE_OAUTH_DEFAULT_PROVIDER`
 - `VITE_SUPABASE_PROJECT_REF`
+- `VITE_SUPABASE_PASSWORD_RESET_REDIRECT_URL`
+- `VITE_SUPABASE_EMAIL_CHANGE_REDIRECT_URL`
+- `VITE_SUPABASE_REAUTH_REDIRECT_URL`
+- `VITE_SUPABASE_SECURITY_HUB_PATH`
 
 > `SUPABASE_SERVICE_ROLE_KEY` は backend のみで使用し、frontend に設定しないこと。
 
@@ -139,6 +147,7 @@
 - `SUPABASE_JWKS_URI`
 - `SUPABASE_JWT_AUDIENCE`
 - `SUPABASE_SERVICE_ROLE_KEY`（trusted server 限定。frontend 露出禁止）
+- `SENSITIVE_REAUTH_MAX_AGE_SEC`（sensitive action を許可する認証 freshness 秒数）
 - `PERSONALIZED_PERK_ENABLED`
 - `RANK_GRACE_RETENTION_DAYS`
 

@@ -33,6 +33,33 @@ export type MemberBillingSummary = {
     sourceOfTruth: string
     syncState: string
   } | null
+  securityHub?: string
+  securitySummary?: {
+    securityLevelState: string
+    mfaState: string
+    reauthRequiredState: string
+    linkedIdentityState: string
+    sessionState: string
+    recentAccessState: string
+    recoveryState: string
+    sensitiveActionState: string
+    passwordChangeCapability: string
+    emailChangeCapability: string
+    providerLinkCapability: string
+    sessionRevokeCapability: string
+    securityNoticeState: string
+    securityUpdatedAt: string | null
+    lastSensitiveActionAt: string | null
+    lastPasswordResetAt: string | null
+    lastEmailChangeAt: string | null
+    lastMfaUpdateAt: string | null
+    linkedProviders: string[]
+    recentAccess?: {
+      lastLoginAt: string | null
+      sourceSite: string
+      sessionId: string | null
+    }
+  } | null
 }
 
 export async function getMemberBillingSummary(authToken: string): Promise<MemberBillingSummary> {
@@ -67,7 +94,33 @@ export async function getMemberBillingSummary(authToken: string): Promise<Member
     membership: json.membership,
     billingSummary: json.billingSummary ?? null,
     entitlementSummary: json.entitlementSummary ?? null,
+    securityHub: typeof json.securityHub === 'string' ? json.securityHub : undefined,
+    securitySummary: json.securitySummary ?? null,
   }
+}
+
+export async function verifySensitiveAction(authToken: string, actionType: 'email_change' | 'password_change' | 'provider_link_change' | 'session_revoke' | 'account_recovery'): Promise<{ ok: boolean; verifiedAt: string }> {
+  const baseUrl = import.meta.env.VITE_STRAPI_API_URL
+  if (!baseUrl) throw new Error('VITE_STRAPI_API_URL が未設定です。')
+
+  const response = await fetch(`${baseUrl.replace(/\/$/, '')}/api/user-sync/security/sensitive-action`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${authToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ actionType }),
+  })
+
+  if (response.status === 412) {
+    throw new Error('reauth_required')
+  }
+  if (!response.ok) {
+    throw new Error(`sensitive action verify failed: ${response.status}`)
+  }
+  const json = await response.json() as { ok: boolean; verifiedAt: string }
+  return json
 }
 
 
