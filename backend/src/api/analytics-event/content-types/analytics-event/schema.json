@@ -10,50 +10,174 @@
     "draftAndPublish": false
   },
   "attributes": {
-    "eventName": { "type": "string", "required": true },
+    "eventName": {
+      "type": "string",
+      "required": true
+    },
     "sourceSite": {
       "type": "enumeration",
-      "enum": ["main", "store", "fc", "unknown"],
+      "enum": [
+        "main",
+        "store",
+        "fc",
+        "unknown"
+      ],
       "default": "unknown",
       "required": true
     },
-    "locale": { "type": "string", "default": "ja" },
+    "locale": {
+      "type": "string",
+      "default": "ja"
+    },
     "theme": {
       "type": "enumeration",
-      "enum": ["light", "dark", "unknown"],
+      "enum": [
+        "light",
+        "dark",
+        "unknown"
+      ],
       "default": "unknown"
     },
-    "pageType": { "type": "string" },
-    "contentType": { "type": "string" },
-    "entityId": { "type": "string" },
-    "entitySlug": { "type": "string" },
-    "formType": { "type": "string" },
-    "category": { "type": "string" },
+    "pageType": {
+      "type": "string"
+    },
+    "contentType": {
+      "type": "string"
+    },
+    "entityId": {
+      "type": "string"
+    },
+    "entitySlug": {
+      "type": "string"
+    },
+    "formType": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
     "userState": {
       "type": "enumeration",
-      "enum": ["guest", "logged_in", "unknown"],
+      "enum": [
+        "guest",
+        "logged_in",
+        "unknown"
+      ],
       "default": "unknown"
     },
     "deviceType": {
       "type": "enumeration",
-      "enum": ["mobile", "tablet", "desktop", "unknown"],
+      "enum": [
+        "mobile",
+        "tablet",
+        "desktop",
+        "unknown"
+      ],
       "default": "unknown"
     },
     "referrerType": {
       "type": "enumeration",
-      "enum": ["direct", "internal", "external", "unknown"],
+      "enum": [
+        "direct",
+        "internal",
+        "external",
+        "unknown"
+      ],
       "default": "unknown"
     },
-    "experimentId": { "type": "string" },
-    "variantId": { "type": "string" },
-    "path": { "type": "string" },
-    "payload": { "type": "json" },
-    "eventAt": { "type": "datetime", "required": true },
-    "ipHash": { "type": "string" },
+    "experimentId": {
+      "type": "string"
+    },
+    "variantId": {
+      "type": "string"
+    },
+    "path": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "json"
+    },
+    "eventAt": {
+      "type": "datetime",
+      "required": true
+    },
+    "ipHash": {
+      "type": "string"
+    },
     "consentState": {
       "type": "enumeration",
-      "enum": ["granted", "denied", "unknown"],
+      "enum": [
+        "granted",
+        "denied",
+        "unknown"
+      ],
       "default": "unknown"
+    },
+    "eventId": {
+      "type": "string"
+    },
+    "dedupeKey": {
+      "type": "string"
+    },
+    "requestId": {
+      "type": "string"
+    },
+    "sessionId": {
+      "type": "string"
+    },
+    "anonymousId": {
+      "type": "string"
+    },
+    "eventType": {
+      "type": "string"
+    },
+    "eventCategory": {
+      "type": "string"
+    },
+    "attributionState": {
+      "type": "string"
+    },
+    "identityState": {
+      "type": "string"
+    },
+    "identityMergeState": {
+      "type": "string"
+    },
+    "eventQualityState": {
+      "type": "string"
+    },
+    "dedupeState": {
+      "type": "string"
+    },
+    "replayState": {
+      "type": "string"
+    },
+    "membershipStatus": {
+      "type": "string"
+    },
+    "entitlementState": {
+      "type": "string"
+    },
+    "subscriptionState": {
+      "type": "string"
+    },
+    "billingState": {
+      "type": "string"
+    },
+    "lifecycleStage": {
+      "type": "string"
+    },
+    "sourceSection": {
+      "type": "string"
+    },
+    "sourceScreen": {
+      "type": "string"
+    },
+    "sourceComponent": {
+      "type": "string"
+    },
+    "eventReason": {
+      "type": "string"
     }
   }
 }

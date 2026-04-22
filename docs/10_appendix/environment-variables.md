@@ -395,3 +395,44 @@
 ### 運用注意
 - `SUPABASE_SERVICE_ROLE_KEY` は backend/trusted server 以外に設定しない。
 - release dashboard 用変数と flag dashboard 用変数は分離し、責務を混在させない。
+
+## 11. analytics foundation / attribution / experiment measurement 追加（2026-04-22）
+
+### frontend runtime env
+- `VITE_ANALYTICS_FOUNDATION_ENABLED`: cross-site analytics foundation を有効化。
+- `VITE_ANALYTICS_TAXONOMY_VERSION`: event taxonomy の運用バージョン。
+- `VITE_ANALYTICS_SESSION_TIMEOUT_MINUTES`: session 境界判定に使う閾値。
+- `VITE_ANALYTICS_REQUIRED_EVENT_STREAM`: 必須イベント（product/security/ops）の stream 定義。
+- `VITE_ANALYTICS_OPTIONAL_EVENT_STREAM`: consent 依存イベント（marketing/product 改善）の stream 定義。
+- `VITE_ANALYTICS_ATTRIBUTION_MODEL`: attribution モデル（初期は `last_touch`）。
+- `VITE_ANALYTICS_FUNNEL_STRICT_MODE`: funnel stage の厳格判定。
+- `VITE_ANALYTICS_EXPERIMENT_TRACKING_ENABLED`: exposure/outcome 計測の有効化。
+- `VITE_ANALYTICS_OBSERVABILITY_ENABLED`: duplicate/schema drift 可視化の有効化。
+
+### backend runtime env
+- `ANALYTICS_FOUNDATION_ENABLED`: ingestion/summary pipeline の有効化。
+- `ANALYTICS_TAXONOMY_VERSION`: backend 側 taxonomy バージョン。
+- `ANALYTICS_ATTRIBUTION_MODEL`: attribution 集計モデル。
+- `ANALYTICS_DEDUPE_WINDOW_SECONDS`: duplicate 判定 window。
+- `ANALYTICS_INGEST_REQUIRED_CONSENT_EVENTS`: consent 必須イベント群。
+- `ANALYTICS_INGEST_REQUIRED_OPERATIONAL_EVENTS`: consent 非依存の必須運用イベント群。
+- `ANALYTICS_SCHEMA_DRIFT_ALERT_THRESHOLD`: schema drift alert の閾値。
+- `ANALYTICS_DUPLICATE_ALERT_THRESHOLD`: duplicate alert の閾値。
+- `ANALYTICS_LATE_EVENT_THRESHOLD_MINUTES`: late event 判定。
+- `ANALYTICS_PIPELINE_REPLAY_GUARD_ENABLED`: replay guard の有効化。
+- `ANALYTICS_SUMMARY_REFRESH_INTERVAL_MIN`: summary refresh 間隔。
+- `ANALYTICS_RAW_RETENTION_DAYS`: raw event 保持日数。
+- `ANALYTICS_DERIVED_RETENTION_DAYS`: derived summary 保持日数。
+
+### GitHub Secrets / Variables
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`（frontend へ露出しない）
+- `ANALYTICS_OPS_TOKEN`
+- `ANALYTICS_IP_HASH_SALT`
+- `ANALYTICS_TAXONOMY_VERSION`
+
+### 運用注意
+- `auth.users` を analytics business state の source とせず、app 側 user domain + summary を参照する。
+- release dashboard / flag dashboard / analytics dashboard の責務を分離する。
+- raw event と KPI/derived metric/attribution result を混同しない。

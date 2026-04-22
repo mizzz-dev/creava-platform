@@ -1,4 +1,5 @@
 import { getAnalyticsBaseContext } from '@/modules/analytics/context'
+import { inferEventMeta } from '@/modules/analytics/taxonomy'
 
 let initialized = false
 let lastTrackedPath: string | null = null
@@ -18,9 +19,13 @@ function isAnalyticsAllowed(): boolean {
   return Boolean((window as Window & { __MIZZZ_ANALYTICS_ALLOWED__?: boolean }).__MIZZZ_ANALYTICS_ALLOWED__)
 }
 
+function makeEventId(eventName: string, timestamp: string, sessionId: string): string {
+  return `${eventName}:${sessionId}:${timestamp}`
+}
+
 async function forwardToOps(eventName: string, params: Record<string, string | number | boolean>): Promise<void> {
   const endpoint = getOpsEndpoint()
-  if (!endpoint || !isAnalyticsAllowed()) return
+  if (!endpoint) return
 
   try {
     await fetch(endpoint, {
@@ -84,8 +89,20 @@ export function trackPageView(pathname: string): void {
     theme: base.theme,
     pageType: base.pageType,
     userState: base.userState,
+    authenticatedState: base.authenticatedState,
+    anonymousState: base.anonymousState,
+    sessionId: base.sessionId,
+    anonymousId: base.anonymousId,
     deviceType: base.deviceType,
     referrerType: base.referrerType,
+    attributionState: base.attributionState,
+    eventType: 'page_view',
+    eventCategory: 'navigation',
+    consentAwareTrackingState: analyticsAllowed ? 'consented' : 'required_only',
+    eventQualityState: 'normal',
+    dedupeState: 'event_id',
+    replayState: 'none',
+    eventId: makeEventId('page_view', base.timestamp, base.sessionId),
     timestamp: base.timestamp,
   }
 
@@ -104,14 +121,27 @@ export function trackEvent(eventName: string, params?: Record<string, string | n
 
   const pathname = window.location.pathname
   const base = getAnalyticsBaseContext(pathname)
+  const meta = inferEventMeta(eventName)
   const payload: Record<string, string | number | boolean> = {
     sourceSite: base.sourceSite,
     locale: base.locale,
     theme: base.theme,
     pageType: base.pageType,
     userState: base.userState,
+    authenticatedState: base.authenticatedState,
+    anonymousState: base.anonymousState,
+    sessionId: base.sessionId,
+    anonymousId: base.anonymousId,
     deviceType: base.deviceType,
     referrerType: base.referrerType,
+    attributionState: base.attributionState,
+    eventType: meta.eventType,
+    eventCategory: meta.eventCategory,
+    consentAwareTrackingState: analyticsAllowed ? 'consented' : 'required_only',
+    eventQualityState: 'normal',
+    dedupeState: 'event_id',
+    replayState: 'none',
+    eventId: makeEventId(eventName, base.timestamp, base.sessionId),
     timestamp: base.timestamp,
     ...(params ?? {}),
   }

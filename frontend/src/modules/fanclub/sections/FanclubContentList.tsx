@@ -5,7 +5,7 @@ import SectionReveal from '@/components/common/SectionReveal'
 import { detailPath } from '@/lib/routeConstants'
 import { formatDate } from '@/utils'
 import { trackViewHistory } from '@/modules/store/lib/commerceOptimization'
-import { trackEvent } from '@/modules/analytics'
+import { trackMizzzEvent } from '@/modules/analytics/tracking'
 import type { FanclubContent } from '@/types'
 
 interface Props {
@@ -58,7 +58,7 @@ export default function FanclubContentList({ items }: Props) {
                   className="group flex items-start justify-between gap-4 px-5 py-4 transition-colors hover:bg-[var(--ds-color-bg-muted)]"
                   onClick={() => {
                     trackViewHistory('blog', item.slug)
-                    trackEvent('fanclub_content_click', { slug: item.slug })
+                    trackMizzzEvent('cta_click', { sourceSection: 'fanclub_content_list', sourceComponent: 'content_row', targetEntity: item.slug, eventReason: 'content_detail_open', contentType: 'fanclub_content' })
                   }}
                 >
                   <div className="min-w-0">

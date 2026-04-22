@@ -3,20 +3,27 @@ import { SITE_TYPE } from '@/lib/siteLinks'
 export type SourceSite = 'main' | 'store' | 'fc'
 export type UserState = 'guest' | 'logged_in'
 
+type AuthenticatedState = 'authenticated' | 'anonymous'
+
 export interface AnalyticsBaseContext {
   sourceSite: SourceSite
   locale: string
   theme: 'light' | 'dark'
   pageType: string
   userState: UserState
+  authenticatedState: AuthenticatedState
+  anonymousState: 'anonymous' | 'known_anonymous'
+  sessionId: string
+  anonymousId: string
   deviceType: 'mobile' | 'tablet' | 'desktop'
   referrerType: 'direct' | 'internal' | 'external'
-  experimentId?: string
-  variantId?: string
+  attributionState: 'unattributed' | 'last_touch'
   timestamp: string
 }
 
 const DEFAULT_LOCALE = 'ja'
+const SESSION_KEY = 'mizzz_analytics_session_v1'
+const ANON_KEY = 'mizzz_analytics_anonymous_v1'
 
 function normalizeSourceSite(): SourceSite {
   if (SITE_TYPE === 'store') return 'store'
@@ -49,9 +56,30 @@ function detectReferrerType(): 'direct' | 'internal' | 'external' {
   }
 }
 
+function readAuthToken(): string | null {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem('auth_unified_access_token') || localStorage.getItem('logto_access_token')
+}
+
 function detectUserState(): UserState {
-  if (typeof window === 'undefined') return 'guest'
-  return localStorage.getItem('logto_access_token') ? 'logged_in' : 'guest'
+  return readAuthToken() ? 'logged_in' : 'guest'
+}
+
+function randomId(prefix: string): string {
+  return `${prefix}_${Math.random().toString(36).slice(2, 10)}_${Date.now().toString(36)}`
+}
+
+function getOrCreateStorageId(key: string, prefix: string): string {
+  if (typeof window === 'undefined') return randomId(prefix)
+  const existing = sessionStorage.getItem(key) ?? localStorage.getItem(key)
+  if (existing) return existing
+  const created = randomId(prefix)
+  if (key === SESSION_KEY) {
+    sessionStorage.setItem(key, created)
+  } else {
+    localStorage.setItem(key, created)
+  }
+  return created
 }
 
 export function inferPageType(pathname: string): string {
@@ -76,14 +104,21 @@ export function getAnalyticsBaseContext(pathname: string): AnalyticsBaseContext 
     ? DEFAULT_LOCALE
     : (document.documentElement.lang || DEFAULT_LOCALE)
 
+  const userState = detectUserState()
+
   return {
     sourceSite: normalizeSourceSite(),
     locale,
     theme: detectTheme(),
     pageType: inferPageType(pathname),
-    userState: detectUserState(),
+    userState,
+    authenticatedState: userState === 'logged_in' ? 'authenticated' : 'anonymous',
+    anonymousState: userState === 'logged_in' ? 'known_anonymous' : 'anonymous',
+    sessionId: getOrCreateStorageId(SESSION_KEY, 'sess'),
+    anonymousId: getOrCreateStorageId(ANON_KEY, 'anon'),
     deviceType: detectDeviceType(),
     referrerType: detectReferrerType(),
+    attributionState: detectReferrerType() === 'direct' ? 'unattributed' : 'last_touch',
     timestamp: new Date().toISOString(),
   }
 }
