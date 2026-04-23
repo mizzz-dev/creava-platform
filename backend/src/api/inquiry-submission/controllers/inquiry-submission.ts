@@ -219,6 +219,30 @@ function buildAttachmentMeta(uploaded: any[]): Array<Record<string, unknown>> {
   }))
 }
 
+function buildInquiryNumber(sourceSite: 'main' | 'store' | 'fc' | 'unknown', submittedAtIso: string, id: number | string): string {
+  const sitePrefix = sourceSite === 'unknown' ? 'MZ' : sourceSite.toUpperCase()
+  const day = submittedAtIso.slice(0, 10).replace(/-/g, '')
+  const serial = String(id).padStart(6, '0')
+  return `${sitePrefix}-${day}-${serial}`
+}
+
+function mapRequesterType(authUserId: string): 'guest' | 'authenticated_user' {
+  return authUserId ? 'authenticated_user' : 'guest'
+}
+
+function getNowIso() {
+  return new Date().toISOString()
+}
+
+function appendTransitionHistory(entry: Record<string, unknown> | null | undefined, transition: Record<string, unknown>) {
+  const meta = (entry?.caseMetadata ?? {}) as Record<string, unknown>
+  const previous = Array.isArray(meta.transitionHistory) ? meta.transitionHistory as Record<string, unknown>[] : []
+  return {
+    ...meta,
+    transitionHistory: [...previous, transition].slice(-40),
+  }
+}
+
 function toCsvCell(value: unknown): string {
   if (value === null || value === undefined) return ''
   const text = String(value).replace(/"/g, '""').replace(/\r?\n/g, '\\n')
@@ -537,8 +561,9 @@ export default factories.createCoreController(
           })
         : []
 
-      const submittedAt = new Date().toISOString()
-      const entry = await strapi.entityService.create('api::inquiry-submission.inquiry-submission', {
+      const submittedAt = getNowIso()
+      const requesterType = mapRequesterType(authUserId)
+      const created = await strapi.entityService.create('api::inquiry-submission.inquiry-submission', {
         data: {
           formType,
           inquiryCategory,
@@ -554,6 +579,8 @@ export default factories.createCoreController(
           locale,
           sourcePage,
           sourceSite,
+          inquiryTraceId: requestId,
+          requesterType,
           authUserId: authUserId || undefined,
           status: isSpam ? 'spam' : String(formDefinition?.initialStatus ?? 'new'),
           priority: isSpam ? 'low' : String(formDefinition?.initialPriority ?? 'normal'),
@@ -584,9 +611,24 @@ export default factories.createCoreController(
             supportCaseType: inquiryCategory,
             sourceSite,
             locale,
+            transitionHistory: [{
+              at: submittedAt,
+              actorType: 'user',
+              action: 'submitted',
+              status: isSpam ? 'spam' : 'new',
+              caseStatus: isSpam ? 'closed' : 'submitted',
+              note: 'public submit',
+            }],
           },
         },
       })
+      const inquiryNumber = buildInquiryNumber(sourceSite, submittedAt, created.id)
+      await strapi.entityService.update('api::inquiry-submission.inquiry-submission', created.id, {
+        data: {
+          inquiryNumber,
+        } as Record<string, unknown>,
+      })
+      const entry = { ...created, inquiryNumber }
 
       const notifyTo = resolveNotificationTargets(formDefinition, sourceSite)
 
@@ -648,7 +690,7 @@ export default factories.createCoreController(
               inquiryCategory,
               submittedAt,
               subject,
-              referenceId: entry.id,
+              referenceId: inquiryNumber,
             }),
           })
         } catch (error) {
@@ -659,17 +701,25 @@ export default factories.createCoreController(
       const submitState = 'succeeded'
       const resultState = notificationState === 'failed' ? 'delivery_error' : 'success'
 
+      await strapi.entityService.update('api::inquiry-submission.inquiry-submission', entry.id, {
+        data: {
+          notificationState,
+          adminReviewState: isSpam ? 'spam' : 'new',
+        } as Record<string, unknown>,
+      }).catch(() => undefined)
+
       ctx.body = {
         data: {
           id: entry.id,
+          inquiryNumber,
+          inquiryTraceId: requestId,
           status: isSpam ? 'spam' : 'new',
           submittedAt,
           requestId,
-          inquiryTraceId: requestId,
           inquirySubmitState: submitState,
           inquiryDeliveryState: deliveryState,
           inquiryResultState: resultState,
-          inquiryRequesterType: authUserId ? 'authenticated_user' : 'guest',
+          inquiryRequesterType: requesterType,
           inquiryReceivedAt: submittedAt,
           inquiryConfirmedAt: submittedAt,
           inquirySentAt: submittedAt,
@@ -680,6 +730,41 @@ export default factories.createCoreController(
           inquiryErrorState: notificationState === 'failed'
             ? { type: 'notification', message: notificationErrorMessage || 'notify failed' }
             : null,
+        },
+      }
+    },
+
+    async publicTrack(ctx) {
+      const inquiryNumber = normalizeText(ctx.query.inquiryNumber, 64)
+      const email = normalizeText(ctx.query.email, 200).toLowerCase()
+      if (!inquiryNumber || !email) return ctx.badRequest('inquiryNumber と email は必須です')
+
+      const entries = await strapi.entityService.findMany('api::inquiry-submission.inquiry-submission', {
+        filters: {
+          $and: [
+            { inquiryNumber: { $eq: inquiryNumber } },
+            { email: { $eqi: email } },
+          ],
+        },
+        fields: ['inquiryNumber', 'inquiryTraceId', 'formType', 'inquiryCategory', 'subject', 'status', 'sourceSite', 'submittedAt', 'updatedAt', 'caseStatus', 'caseResolutionState', 'replyStatus', 'notificationState'],
+        limit: 1,
+      })
+      const item = Array.isArray(entries) ? entries[0] : null
+      if (!item) return ctx.notFound('問い合わせが見つかりません')
+
+      ctx.body = {
+        data: {
+          inquiryNumber: item.inquiryNumber,
+          inquiryTraceId: item.inquiryTraceId ?? null,
+          formType: item.formType,
+          supportCaseType: item.inquiryCategory ?? 'other',
+          subject: item.subject ?? '',
+          sourceSite: item.sourceSite ?? 'main',
+          submittedAt: item.submittedAt,
+          updatedAt: item.updatedAt,
+          replyStatus: item.replyStatus ?? 'pending',
+          notificationState: item.notificationState ?? 'unknown',
+          ...toUserCaseState(item as Record<string, unknown>),
         },
       }
     },
@@ -737,7 +822,7 @@ export default factories.createCoreController(
         const [rows, total] = await Promise.all([
           strapi.entityService.findMany('api::inquiry-submission.inquiry-submission', {
             filters: scopedFilters,
-            fields: ['formType', 'inquiryCategory', 'subject', 'message', 'status', 'priority', 'sourceSite', 'submittedAt', 'updatedAt', 'resolvedAt', 'repliedAt', 'attachmentCount', 'replyStatus', 'caseStatus', 'caseResolutionState', 'caseVisibilityState', 'selfServiceState'],
+            fields: ['formType', 'inquiryCategory', 'subject', 'message', 'status', 'priority', 'sourceSite', 'submittedAt', 'updatedAt', 'resolvedAt', 'repliedAt', 'attachmentCount', 'replyStatus', 'caseStatus', 'caseResolutionState', 'caseVisibilityState', 'selfServiceState', 'inquiryNumber', 'inquiryTraceId', 'requesterType'],
             sort: 'submittedAt:desc',
             start: (page - 1) * pageSize,
             limit: pageSize,
@@ -748,6 +833,8 @@ export default factories.createCoreController(
         ctx.body = {
           data: (rows as Array<Record<string, unknown>>).map((row) => ({
             id: row.id,
+            inquiryNumber: row.inquiryNumber ?? `TEMP-${row.id}`,
+            inquiryTraceId: row.inquiryTraceId ?? null,
             formType: row.formType,
             supportCaseType: row.inquiryCategory ?? 'other',
             subject: row.subject ?? '',
@@ -760,6 +847,7 @@ export default factories.createCoreController(
             repliedAt: row.repliedAt ?? null,
             attachmentCount: row.attachmentCount ?? 0,
             replyStatus: row.replyStatus ?? 'pending',
+            requesterType: row.requesterType ?? 'guest',
             ...toUserCaseState(row),
           })),
           meta: {
@@ -783,7 +871,7 @@ export default factories.createCoreController(
         const filters = await resolveMyInquiryFilter(ctx, strapi)
         const entries = await strapi.entityService.findMany('api::inquiry-submission.inquiry-submission', {
           filters: { $and: [filters, { id: { $eq: id } }] },
-          fields: ['formType', 'inquiryCategory', 'subject', 'message', 'status', 'priority', 'sourceSite', 'sourcePage', 'locale', 'submittedAt', 'updatedAt', 'resolvedAt', 'repliedAt', 'attachmentCount', 'replyStatus', 'caseStatus', 'caseResolutionState', 'caseVisibilityState', 'selfServiceState', 'firstResponseAt', 'lastUserActionAt', 'lastSupportActionAt'],
+          fields: ['formType', 'inquiryCategory', 'subject', 'message', 'status', 'priority', 'sourceSite', 'sourcePage', 'locale', 'submittedAt', 'updatedAt', 'resolvedAt', 'repliedAt', 'attachmentCount', 'replyStatus', 'caseStatus', 'caseResolutionState', 'caseVisibilityState', 'selfServiceState', 'firstResponseAt', 'lastUserActionAt', 'lastSupportActionAt', 'inquiryNumber', 'inquiryTraceId', 'requesterType', 'notificationState'],
           limit: 1,
         })
         const item = Array.isArray(entries) ? entries[0] : null
@@ -801,7 +889,7 @@ export default factories.createCoreController(
         const filters = await resolveMyInquiryFilter(ctx, strapi)
         const entries = await strapi.entityService.findMany('api::inquiry-submission.inquiry-submission', {
           filters: { $and: [filters, { id: { $eq: id } }] },
-          fields: ['caseStatus'],
+          fields: ['caseStatus', 'caseMetadata'],
           limit: 1,
         })
         const item = Array.isArray(entries) ? entries[0] : null
@@ -821,6 +909,13 @@ export default factories.createCoreController(
             replyStatus: 'pending',
             lastActionAt: now,
             lastUserActionAt: now,
+            adminReviewState: 'triaging',
+            caseMetadata: appendTransitionHistory(item as Record<string, unknown>, {
+              at: now,
+              actorType: 'user',
+              action: 'reopen',
+              caseStatus: 'reopened',
+            }),
           } as Record<string, unknown>,
         })
 
@@ -889,6 +984,7 @@ export default factories.createCoreController(
           fields: [
             'formType', 'inquiryCategory', 'name', 'email', 'subject', 'status', 'priority', 'sourceSite', 'sourcePage', 'locale',
             'attachmentCount', 'spamFlag', 'spamReason', 'submittedAt', 'updatedAt', 'handledAt', 'handler', 'replyStatus', 'repliedAt', 'lastActionAt',
+            'inquiryNumber', 'inquiryTraceId', 'requesterType', 'notificationState', 'caseStatus', 'caseResolutionState', 'assignmentState', 'adminReviewState',
           ],
           start: (page - 1) * pageSize,
           limit: pageSize,
@@ -985,6 +1081,8 @@ export default factories.createCoreController(
       if (status) {
         updateData.status = status
         if (['in_review', 'waiting_reply', 'replied', 'closed'].includes(status)) updateData.handledAt = now
+        if (['in_review', 'waiting_reply', 'replied', 'closed'].includes(status) && !body.firstReviewedAt) updateData.firstReviewedAt = now
+        if (['in_review', 'waiting_reply', 'replied', 'closed'].includes(status)) updateData.acknowledgedAt = now
         if (['in_review'].includes(status)) updateData.caseStatus = 'triaging'
         if (['waiting_reply'].includes(status)) updateData.caseStatus = 'waiting_user'
         if (['replied'].includes(status)) {
@@ -998,6 +1096,7 @@ export default factories.createCoreController(
           updateData.caseStatus = 'closed'
           updateData.caseResolutionState = 'support_resolved'
           updateData.resolvedAt = now
+          updateData.closedAt = now
           updateData.lastSupportActionAt = now
         }
         if (status === 'replied') {
@@ -1012,11 +1111,35 @@ export default factories.createCoreController(
       if (adminMemo) updateData.adminMemo = adminMemo
       if (handler) updateData.handler = handler
       if (internalTags.length) updateData.internalTags = internalTags
+      if (handler) updateData.assignmentState = 'assigned'
+      if (adminMemo) updateData.internalNoteState = 'updated'
+      if (status === 'spam') updateData.adminReviewState = 'spam'
+      else if (status === 'closed') updateData.adminReviewState = 'closed'
+      else if (status === 'replied') updateData.adminReviewState = 'resolved'
+      else if (status === 'in_review' || status === 'waiting_reply') updateData.adminReviewState = 'triaging'
 
       let updated = 0
       for (const id of ids) {
+        const entries = await strapi.entityService.findMany('api::inquiry-submission.inquiry-submission', {
+          filters: { id: { $eq: id } },
+          fields: ['caseMetadata'],
+          limit: 1,
+        })
+        const current = Array.isArray(entries) ? entries[0] as Record<string, unknown> : null
+        const nextData = {
+          ...updateData,
+          caseMetadata: appendTransitionHistory(current, {
+            at: now,
+            actorType: 'support',
+            action: 'ops_bulk_update',
+            status: status || null,
+            priority: priority || null,
+            handler: handler || null,
+          }),
+        }
+
         await strapi.entityService.update('api::inquiry-submission.inquiry-submission', id, {
-          data: updateData,
+          data: nextData as Record<string, unknown>,
         }).catch(() => undefined)
         updated += 1
       }

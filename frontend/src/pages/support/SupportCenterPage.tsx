@@ -18,7 +18,7 @@ import type { FAQItem, GuideItem, SourceSite } from '@/types'
 import { siteScopedCategories } from '@/modules/support/config'
 import { trackMizzzEvent } from '@/modules/analytics/tracking'
 import { useAuthClient } from '@/lib/auth/AuthProvider'
-import { getMySupportHistory, getMySupportSummary, reopenSupportCase, type SupportCaseHistoryItem, type SupportCaseSummary } from '@/modules/support/caseApi'
+import { getMySupportCaseDetail, getMySupportHistory, getMySupportSummary, reopenSupportCase, type SupportCaseDetail, type SupportCaseHistoryItem, type SupportCaseSummary } from '@/modules/support/caseApi'
 import { getPublicStatusSummary, type PublicStatusResponse } from '@/modules/status/api'
 import StatusNoticePanel from '@/modules/status/components/StatusNoticePanel'
 
@@ -43,6 +43,7 @@ export default function SupportCenterPage() {
   const [caseLoading, setCaseLoading] = useState(false)
   const [caseError, setCaseError] = useState<string | null>(null)
   const [statusSummary, setStatusSummary] = useState<PublicStatusResponse['publicStatusSummary'] | null>(null)
+  const [selectedCase, setSelectedCase] = useState<SupportCaseDetail | null>(null)
   const site = detectSite()
   const sourceSite = site === 'all' ? 'main' : site
   const benefitState = resolveBenefitExperienceState({ user, lifecycle, sourceSite })
@@ -204,9 +205,22 @@ export default function SupportCenterPage() {
             <ul className="mt-4 space-y-2">
               {caseHistory.map((item) => (
                 <li key={item.id} className="rounded-xl border border-gray-100 p-3 dark:border-gray-800">
-                  <p className="text-xs text-gray-500 dark:text-gray-400">#{item.id} · {item.supportCaseType} · {item.sourceSite}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{item.inquiryNumber} · {item.supportCaseType} · {item.sourceSite}</p>
                   <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100">{item.subject || t('support.case.noSubject')}</p>
                   <p className="mt-1 text-xs text-gray-500 dark:text-gray-300">{t(`support.case.status.${item.caseStatus}`)} / {t(`support.case.resolution.${item.caseResolutionState}`)}</p>
+                  <p className="mt-1 text-[11px] text-gray-500 dark:text-gray-400">trace: {item.inquiryTraceId ?? '-'}</p>
+                  <button
+                    type="button"
+                    className="mt-2 text-xs text-cyan-600 underline dark:text-cyan-300"
+                    onClick={() => {
+                      void auth.getAccessToken().then((token) => {
+                        if (!token) return
+                        return getMySupportCaseDetail(token, item.id).then(setSelectedCase)
+                      })
+                    }}
+                  >
+                    {t('support.case.viewDetail')}
+                  </button>
                   {(item.caseStatus === 'resolved' || item.caseStatus === 'closed') && (
                     <button
                       type="button"
@@ -231,6 +245,17 @@ export default function SupportCenterPage() {
           </>
         )}
       </section>
+      {selectedCase && (
+        <section className="mt-4 rounded-2xl border border-cyan-200 bg-cyan-50/40 p-4 text-xs dark:border-cyan-900/60 dark:bg-cyan-950/10">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t('support.case.detailTitle')}</h3>
+            <button type="button" className="text-gray-500 underline" onClick={() => setSelectedCase(null)}>{t('support.case.closeDetail')}</button>
+          </div>
+          <p className="mt-2 text-gray-600 dark:text-gray-300">{selectedCase.inquiryNumber} / trace: {selectedCase.inquiryTraceId ?? '-'}</p>
+          <p className="mt-1 text-gray-600 dark:text-gray-300">{t(`support.case.status.${selectedCase.caseStatus}`)} / {t(`support.case.resolution.${selectedCase.caseResolutionState}`)}</p>
+          <p className="mt-2 whitespace-pre-wrap text-gray-700 dark:text-gray-200">{selectedCase.message || selectedCase.messagePreview}</p>
+        </section>
+      )}
 
       <header className="space-y-4">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">support center</p>
