@@ -34,6 +34,8 @@
 | `VITE_NOTIFICATION_DIGEST_DEFAULT` | digest 既定（daily/weekly） | 任意 | 任意 | 推奨 |
 | `VITE_SUPPORT_CENTER_HISTORY_PAGE_SIZE` | support hub の case history 表示件数 | 任意 | 推奨 | 推奨 |
 | `VITE_SUPPORT_CENTER_SUGGESTION_MAX` | self-service article 提案件数 | 任意 | 推奨 | 推奨 |
+| `VITE_HELP_SEARCH_MIN_QUERY_LENGTH` | help center 検索ログを送る最小文字数 | 任意 | 推奨 | 推奨 |
+| `VITE_HELP_SEARCH_DEBOUNCE_MS` | help center 検索ログ送信の debounce | 任意 | 推奨 | 推奨 |
 | `VITE_ONBOARDING_REMINDER_DAYS` | onboarding 再表示までの日数 | 任意 | 任意 | 推奨 |
 | `VITE_MEMBERSHIP_STATE_SYNC_INTERVAL_SEC` | frontend で state summary を再同期する間隔（秒） | 任意 | 推奨 | 推奨 |
 | `VITE_RENEWAL_REMINDER_DAYS` | renewal前 notice 表示開始日数 | 任意 | 推奨 | 推奨 |
@@ -128,6 +130,8 @@
 | `INQUIRY_CSAT_LOW_SCORE_THRESHOLD` | low CSAT 判定閾値（1-5） | 推奨 |
 | `INQUIRY_REOPEN_MONITOR_DAYS` | reopen/repeat contact を監視する期間（日） | 推奨 |
 | `INQUIRY_KNOWLEDGE_GAP_MIN_CASES` | knowledge gap 疑いの最小件数 | 推奨 |
+| `INQUIRY_KNOWLEDGE_NO_RESULT_MIN_DAILY` | no-result query を gap 候補化する最小日次件数 | 任意 |
+| `INQUIRY_KNOWLEDGE_EFFECTIVENESS_LOOKBACK_DAYS` | article effectiveness 集計期間（日） | 任意 |
 | `INQUIRY_COACHING_SUGGESTION_ENABLED` | coaching suggestion の生成有効化 | 推奨 |
 | `INQUIRY_TEMPLATE_OVERUSE_RATIO` | template overuse 判定の比率閾値（0-1） | 任意 |
 | `INQUIRY_MY_HISTORY_PAGE_MAX` | `/inquiry-submissions/me/history` の最大 pageSize | 推奨 |

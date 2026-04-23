@@ -8,6 +8,8 @@ import { getFaqList } from '@/modules/faq/api'
 import { ROUTES } from '@/lib/routeConstants'
 import type { FAQItem, GuideItem } from '@/types'
 import { useStrapiCollection } from '@/hooks'
+import { isFanclubSite, isStoreSite } from '@/lib/siteLinks'
+import { trackDeflectionState, trackKnowledgeArticleView, trackKnowledgeFeedback } from '@/modules/support/knowledgeOps'
 
 export default function SupportGuideDetailPage() {
   const { t } = useTranslation()
@@ -16,6 +18,7 @@ export default function SupportGuideDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { items: faqItems } = useStrapiCollection<FAQItem>(() => getFaqList())
+  const sourceSite = isStoreSite ? 'store' : isFanclubSite ? 'fc' : 'main'
 
   const fetchGuide = () => {
     setLoading(true)
@@ -32,6 +35,22 @@ export default function SupportGuideDetailPage() {
     fetchGuide()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug])
+
+  useEffect(() => {
+    if (!item) return
+    trackKnowledgeArticleView({
+      sourceSite,
+      articleType: 'guide',
+      articleSlug: item.slug,
+      category: item.category,
+    })
+    trackDeflectionState({
+      sourceSite,
+      deflectionState: 'article_viewed',
+      articleType: 'guide',
+      category: item.category,
+    })
+  }, [item, sourceSite])
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-14">
@@ -72,6 +91,40 @@ export default function SupportGuideDetailPage() {
                     </li>
                   ))}
               </ul>
+            </div>
+          </section>
+
+          <section className="mt-4 rounded-xl border border-cyan-200 bg-cyan-50/40 p-4 text-xs dark:border-cyan-900/60 dark:bg-cyan-950/20">
+            <p className="font-semibold text-gray-900 dark:text-gray-100">{t('support.articleFeedbackTitle')}</p>
+            <div className="mt-2 flex gap-2">
+              <button
+                type="button"
+                className="rounded-full border border-emerald-300 px-3 py-1 text-emerald-700 dark:border-emerald-700 dark:text-emerald-300"
+                onClick={() => {
+                  if (!item) return
+                  trackKnowledgeFeedback({ sourceSite, articleType: 'guide', articleSlug: item.slug, category: item.category, feedbackState: 'helpful' })
+                  trackDeflectionState({ sourceSite, deflectionState: 'article_helpful', articleType: 'guide', category: item.category })
+                }}
+              >
+                {t('support.articleFeedbackHelpful')}
+              </button>
+              <button
+                type="button"
+                className="rounded-full border border-rose-300 px-3 py-1 text-rose-700 dark:border-rose-700 dark:text-rose-300"
+                onClick={() => {
+                  if (!item) return
+                  trackKnowledgeFeedback({ sourceSite, articleType: 'guide', articleSlug: item.slug, category: item.category, feedbackState: 'not_helpful' })
+                }}
+              >
+                {t('support.articleFeedbackNotHelpful')}
+              </button>
+              <Link
+                to={ROUTES.CONTACT}
+                className="rounded-full border border-violet-300 px-3 py-1 text-violet-700 dark:border-violet-700 dark:text-violet-300"
+                onClick={() => trackDeflectionState({ sourceSite, deflectionState: 'still_need_support', articleType: 'guide', category: item.category })}
+              >
+                {t('support.articleFeedbackContact')}
+              </Link>
             </div>
           </section>
         </>

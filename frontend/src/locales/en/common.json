@@ -842,6 +842,11 @@
     "emptyRecent": "No recently updated guides.",
     "noResultsTitle": "No results found",
     "noResultsDescription": "Try different keywords or categories, or use the quick links at the top.",
+    "searchResultStateLabel": "Search state",
+    "articleFeedbackTitle": "Did this article solve your issue?",
+    "articleFeedbackHelpful": "Yes, solved",
+    "articleFeedbackNotHelpful": "No, still unclear",
+    "articleFeedbackContact": "Contact support",
     "resetFilters": "Reset filters",
     "postSubmitHelpTitle": "Self-help after submission",
     "postSubmitHelpDescription": "While waiting for a reply, check related help for additional guidance.",
@@ -978,6 +983,12 @@
       "description": "Relevant FAQ/Guide content is prioritized before inquiry submission.",
       "empty": "No suggested articles for this condition.",
       "stillNeedHelp": "Still need help"
+    },
+    "searchResultState": {
+      "results_found": "Relevant results found",
+      "low_confidence": "Few results found, try refining your query",
+      "no_results": "No matching articles found",
+      "ambiguous": "Enter a keyword to search"
     }
   },
   "favoriteAdd": "Add to favorites",

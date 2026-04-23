@@ -86,6 +86,11 @@
 - `help_hub_view`
 - `article_suggestion_view`
 - `article_suggestion_click`
+- `help_search_query`
+- `help_search_no_result`
+- `help_article_view`
+- `help_article_feedback`
+- `self_service_deflection`
 - `still_need_help_click`
 - `case_reopen_click`
 - （既存）`support_from_notification_center`, `support_from_account_center`
@@ -123,9 +128,13 @@
 - frontend env:
   - `VITE_SUPPORT_CENTER_HISTORY_PAGE_SIZE`
   - `VITE_SUPPORT_CENTER_SUGGESTION_MAX`
+  - `VITE_HELP_SEARCH_MIN_QUERY_LENGTH`
+  - `VITE_HELP_SEARCH_DEBOUNCE_MS`
 - backend env:
   - `INQUIRY_MY_HISTORY_PAGE_MAX`
   - `INQUIRY_MY_SUMMARY_MAX_ROWS`
+  - `INQUIRY_KNOWLEDGE_NO_RESULT_MIN_DAILY`
+  - `INQUIRY_KNOWLEDGE_EFFECTIVENESS_LOOKBACK_DAYS`
 - 既存必須:
   - `SUPABASE_JWT_ISSUER`, `SUPABASE_JWKS_URI`, `SUPABASE_JWT_AUDIENCE`
   - `INQUIRY_OPS_TOKEN`
