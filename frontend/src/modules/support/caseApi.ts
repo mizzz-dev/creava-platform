@@ -25,6 +25,8 @@ export interface SupportCaseSummary {
 
 export interface SupportCaseHistoryItem {
   id: number
+  inquiryNumber: string
+  inquiryTraceId: string | null
   formType: string
   supportCaseType: string
   subject: string
@@ -41,6 +43,14 @@ export interface SupportCaseHistoryItem {
   caseResolutionState: SupportCaseResolutionState
   caseVisibilityState: SupportCaseVisibilityState
   selfServiceState: SelfServiceState
+  requesterType: 'guest' | 'authenticated_user' | 'member'
+}
+
+export interface SupportCaseDetail extends SupportCaseHistoryItem {
+  sourcePage?: string
+  locale?: string
+  message?: string
+  notificationState?: 'not_configured' | 'sent' | 'failed' | 'unknown'
 }
 
 function ensureJson(response: Response, label: string): Promise<any> {
@@ -90,6 +100,11 @@ export async function reopenSupportCase(token: string, id: number): Promise<void
     method: 'PATCH',
     body: JSON.stringify({}),
   })
+}
+
+export async function getMySupportCaseDetail(token: string, id: number): Promise<SupportCaseDetail> {
+  const res = await call<{ data: SupportCaseDetail }>(token, `/api/inquiry-submissions/me/${id}`)
+  return res.data
 }
 function getApiBaseUrl(): string {
   const base = import.meta.env.VITE_STRAPI_API_URL

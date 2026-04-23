@@ -38,6 +38,7 @@ export type InquiryRequesterType = 'guest' | 'authenticated_user' | 'member'
 
 export interface InquirySubmissionResult {
   id: number
+  inquiryNumber?: string
   status: string
   submittedAt: string
   requestId?: string

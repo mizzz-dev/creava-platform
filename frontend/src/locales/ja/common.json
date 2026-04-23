@@ -222,7 +222,11 @@
     "policyAgreeAnd": "と",
     "policyAgreeSuffix": "に同意してください。",
     "maxFiles": "最大{{max}}ファイル",
-    "retry": "再送する"
+    "retry": "再送する",
+    "inquiryNumber": "お問い合わせ番号",
+    "traceId": "追跡ID",
+    "deliveryState": "通知状態",
+    "resultState": "送信結果"
   },
   "seo": {
     "home": "mizzzの公式ホームページ。映像・写真・音楽の作品、最新情報、料金目安、Store、Fanclub、制作依頼までを案内します。",
@@ -903,6 +907,9 @@
       "unresolved": "未解決",
       "selfResolved": "自己解決",
       "noSubject": "件名未設定",
+      "viewDetail": "詳細を見る",
+      "detailTitle": "問い合わせ詳細",
+      "closeDetail": "詳細を閉じる",
       "reopen": "再オープンする",
       "empty": "問い合わせ履歴はありません。",
       "status": {

@@ -222,7 +222,11 @@
     "policyAgreeAnd": "and",
     "policyAgreeSuffix": ".",
     "maxFiles": "Up to {{max}} files",
-    "retry": "Retry"
+    "retry": "Retry",
+    "inquiryNumber": "Inquiry Number",
+    "traceId": "Trace ID",
+    "deliveryState": "Delivery State",
+    "resultState": "Submit Result"
   },
   "seo": {
     "home": "The official website of mizzz—portfolio, latest updates, pricing guidance, store, fanclub, and contact for new projects.",
@@ -903,6 +907,9 @@
       "unresolved": "Unresolved",
       "selfResolved": "Self-resolved",
       "noSubject": "No subject",
+      "viewDetail": "View detail",
+      "detailTitle": "Inquiry detail",
+      "closeDetail": "Close detail",
       "reopen": "Reopen case",
       "empty": "No inquiry history yet.",
       "status": {

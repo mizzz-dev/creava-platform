@@ -222,7 +222,11 @@
     "policyAgreeAnd": "및",
     "policyAgreeSuffix": "에 동의해 주세요.",
     "maxFiles": "최대 {{max}}개 파일",
-    "retry": "다시 전송"
+    "retry": "다시 전송",
+    "inquiryNumber": "문의 번호",
+    "traceId": "추적 ID",
+    "deliveryState": "알림 상태",
+    "resultState": "전송 결과"
   },
   "seo": {
     "home": "mizzz 공식 홈페이지입니다. 포트폴리오, 최신 소식, 요금 안내, 스토어, 팬클럽, 의뢰 문의까지 한곳에서 확인할 수 있습니다.",
@@ -903,6 +907,9 @@
       "unresolved": "미해결",
       "selfResolved": "자체 해결",
       "noSubject": "제목 없음",
+      "viewDetail": "상세 보기",
+      "detailTitle": "문의 상세",
+      "closeDetail": "상세 닫기",
       "reopen": "케이스 다시 열기",
       "empty": "문의 이력이 없습니다.",
       "status": {

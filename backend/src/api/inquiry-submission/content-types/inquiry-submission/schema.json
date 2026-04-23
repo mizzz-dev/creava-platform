@@ -36,6 +36,13 @@
       "enum": ["main", "store", "fc", "unknown"],
       "default": "unknown"
     },
+    "inquiryNumber": { "type": "string", "unique": true },
+    "inquiryTraceId": { "type": "string" },
+    "requesterType": {
+      "type": "enumeration",
+      "enum": ["guest", "authenticated_user", "member"],
+      "default": "guest"
+    },
     "authUserId": { "type": "string" },
     "status": {
       "type": "enumeration",
@@ -88,6 +95,29 @@
     "lastUserActionAt": { "type": "datetime" },
     "lastSupportActionAt": { "type": "datetime" },
     "caseMetadata": { "type": "json" },
+    "acknowledgedAt": { "type": "datetime" },
+    "firstReviewedAt": { "type": "datetime" },
+    "closedAt": { "type": "datetime" },
+    "notificationState": {
+      "type": "enumeration",
+      "enum": ["not_configured", "sent", "failed", "unknown"],
+      "default": "unknown"
+    },
+    "assignmentState": {
+      "type": "enumeration",
+      "enum": ["unassigned", "assigned"],
+      "default": "unassigned"
+    },
+    "adminReviewState": {
+      "type": "enumeration",
+      "enum": ["new", "triaging", "reviewed", "resolved", "closed", "spam"],
+      "default": "new"
+    },
+    "internalNoteState": {
+      "type": "enumeration",
+      "enum": ["empty", "updated"],
+      "default": "empty"
+    },
     "repliedAt": { "type": "datetime" },
     "ipHash": { "type": "string" },
     "userAgent": { "type": "string" },

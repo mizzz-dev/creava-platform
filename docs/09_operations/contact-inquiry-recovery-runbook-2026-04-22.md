@@ -1,8 +1,11 @@
-# お問い合わせフォーム復旧 runbook（2026-04-22）
+# お問い合わせ受付・追跡・運用 runbook（2026-04-23）
 
 ## 0. 対象と結論
 - 対象サイト: `mizzz.jp` (main), `store.mizzz.jp` (store), `fc.mizzz.jp` (fc)
 - 送信基盤: Strapi `POST /api/inquiry-submissions/public`
+- 追跡基盤:
+  - guest 追跡: `GET /api/inquiry-submissions/public/track?inquiryNumber=...&email=...`
+  - ログイン履歴: `GET /api/inquiry-submissions/me/summary`, `GET /api/inquiry-submissions/me/history`, `GET /api/inquiry-submissions/me/:id`
 - 保存先: Strapi Content Manager `Inquiry Submission`
 - store/fc の `/contact` は main `/contact` にリダイレクトし、問い合わせ運用は main 側に集約
 
@@ -14,14 +17,24 @@
 3. **traceability が不足していた。**
    - request id / trace id を画面・レスポンスで十分に表示せず、ログ追跡がしにくかった。
 
-## 2. フロー定義（入力→確認→送信→結果→運用確認）
+## 2. フロー定義（入力→確認→送信→受付→履歴→対応→解決）
 - inquiryValidationState: `validating` / `validation_error`
 - inquiryConfirmState: `ready_to_confirm` / `confirmed`
 - inquirySubmitState: `submitting` / `succeeded` / `failed`
 - inquiryDeliveryState: `delivered` / `failed` / `unknown`
 - inquiryResultState: `success` / `validation_error` / `delivery_error` / `system_error`
 - inquiryTraceId: `x-request-id`（レスポンスにも返却）
+- inquiryNumber: `SITE-YYYYMMDD-######`（例: `MAIN-20260423-000123`）
 - inquiryReceivedAt / inquiryConfirmedAt / inquirySentAt / inquiryFailedAt をレスポンスで返却
+
+### inquiry lifecycle（運用状態）
+- inquiryStatus: `new` / `in_review` / `waiting_reply` / `replied` / `closed` / `spam` / `failed`
+- caseStatus: `submitted` / `triaging` / `waiting_user` / `in_progress` / `resolved` / `closed` / `reopened`
+- caseResolutionState: `unresolved` / `support_resolved` / `self_resolved` / `duplicate` / `escalated`
+- requesterType: `guest` / `authenticated_user`
+- notificationState: `not_configured` / `sent` / `failed` / `unknown`
+- assignmentState: `unassigned` / `assigned`
+- adminReviewState: `new` / `triaging` / `reviewed` / `resolved` / `closed` / `spam`
 
 ## 3. 現在の問い合わせ導線
 - main: `/contact` で DynamicForm（確認ステップあり）
@@ -43,7 +56,7 @@
 ## 5. 運用側確認手順
 1. Strapi Admin → `Inquiry Submission` を開く
 2. `submittedAt` 降順で最新レコードを確認
-3. `sourceSite`, `formType`, `inquiryCategory`, `status`, `spamFlag` を確認
+3. `inquiryNumber`, `inquiryTraceId`, `sourceSite`, `formType`, `inquiryCategory`, `status`, `caseStatus`, `notificationState` を確認
 4. trace が必要な場合:
    - ユーザー画面の `traceId`
    - backend ログの `[rid=...]` で照合
@@ -51,7 +64,18 @@
    - レコード保存はされるため、管理画面に存在するか確認
    - メールプラグイン/SMTP 設定と `INQUIRY_NOTIFY_TO*` を確認
 
-## 6. 失敗時の一次切り分け
+## 6. user-facing 確認手順（ログイン済み / guest）
+### 6-1. ログイン済みユーザー
+1. `/support` へアクセス
+2. 問い合わせ履歴ブロックで `inquiryNumber` と状態を確認
+3. 「詳細を見る」で本文・trace ID を確認
+4. `resolved` / `closed` は「再オープンする」から reopen
+
+### 6-2. guest ユーザー
+1. 送信完了画面に表示される `お問い合わせ番号` と `追跡ID` を控える
+2. support 運用者が `public/track` API でメールアドレスと照合して受付状態を案内
+
+## 7. 失敗時の一次切り分け
 1. フロント runtime env
    - `VITE_STRAPI_API_URL` が正しいか
 2. backend env
@@ -63,7 +87,7 @@
 5. レート制限
    - 429 と `Retry-After` を確認
 
-## 7. GitHub Secrets / Runtime 設定
+## 8. GitHub Secrets / Runtime 設定
 - Frontend (GitHub Secrets / Variables)
   - `VITE_STRAPI_API_URL`
   - `VITE_SITE_TYPE`（main/store/fc）
@@ -76,7 +100,7 @@
   - `INQUIRY_NOTIFY_TO`（または site/form ごとの routed env）
   - SMTP 関連 env（メール通知利用時）
 
-## 8. local / staging / production 確認手順
+## 9. local / staging / production 確認手順
 1. フォーム入力
 2. validation エラー確認
 3. 確認ステップへ遷移
@@ -87,12 +111,18 @@
 8. 通知有効時は通知メール到達確認
 9. 故意に env を壊した状態で error 分類表示を確認
 
-## 9. よくあるトラブル
+## 10. status 更新手順（support / internal admin）
+1. `PATCH /api/inquiry-submissions/ops/bulk-update` を利用（`INQUIRY_OPS_TOKEN` 必須）。
+2. `ids` と更新値（`status`, `priority`, `handler`, `adminMemo`, `internalTags`）を指定。
+3. 更新時に `caseMetadata.transitionHistory` へ監査ログを追記。
+4. `status=replied|closed` の場合は `resolvedAt` / `closedAt` などを自動補完。
+
+## 11. よくあるトラブル
 - `VITE_STRAPI_API_URL` 未設定: 送信不可（system_error）
 - CORS 不一致: fetch 失敗（delivery_error）
 - 送信先が HTML 返却: URL/プロキシ誤設定（delivery_error）
 - 通知先未設定: 保存成功するが通知は `not_configured`
 
-## 10. 仮定
+## 12. 仮定
 - SMTP の最終運用設定（provider/credential）は環境ごとに既存運用手順に従う。
 - store/fc は main contact へ集約し、問い合わせ投稿データの `sourceSite` で文脈を識別する。

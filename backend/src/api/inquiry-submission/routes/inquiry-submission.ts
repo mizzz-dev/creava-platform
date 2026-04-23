@@ -10,6 +10,14 @@ export default {
     },
     {
       method: 'GET',
+      path: '/inquiry-submissions/public/track',
+      handler: 'inquiry-submission.publicTrack',
+      config: {
+        auth: false,
+      },
+    },
+    {
+      method: 'GET',
       path: '/inquiry-submissions/ops/summary',
       handler: 'inquiry-submission.opsSummary',
       config: {

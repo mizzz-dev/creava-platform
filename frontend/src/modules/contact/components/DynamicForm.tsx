@@ -166,10 +166,10 @@ export default function DynamicForm({ definition, sourcePage }: { definition: Fo
         <p className={`font-mono text-sm ${success ? 'text-emerald-400' : 'text-red-400'}`}>
           {success ? pickLocale(definition.successMessage, i18n.language) : pickLocale(definition.failureMessage, i18n.language)}
         </p>
-        {success ? <p className="text-xs text-gray-500">#{submittedId ?? '-'} / {submissionResult?.inquiryReceivedAt ? new Date(submissionResult.inquiryReceivedAt).toLocaleString() : new Date().toLocaleString()}</p> : null}
-        {success ? <p className="text-xs text-gray-500">traceId: {submissionResult?.inquiryTraceId ?? submissionResult?.requestId ?? '-'}</p> : null}
-        {success ? <p className="text-xs text-gray-500">delivery: {deliveryState}</p> : null}
-        {success ? <p className="text-xs text-gray-500">result: {resultState}</p> : null}
+        {success ? <p className="text-xs text-gray-500">{t('contact.inquiryNumber')}: {submissionResult?.inquiryNumber ?? `#${submittedId ?? '-'}`} / {submissionResult?.inquiryReceivedAt ? new Date(submissionResult.inquiryReceivedAt).toLocaleString() : new Date().toLocaleString()}</p> : null}
+        {success ? <p className="text-xs text-gray-500">{t('contact.traceId')}: {submissionResult?.inquiryTraceId ?? submissionResult?.requestId ?? '-'}</p> : null}
+        {success ? <p className="text-xs text-gray-500">{t('contact.deliveryState')}: {deliveryState}</p> : null}
+        {success ? <p className="text-xs text-gray-500">{t('contact.resultState')}: {resultState}</p> : null}
         {!success ? <p className="text-xs text-gray-500">result: {resultState}</p> : null}
         {!success && errorMessage ? <p className="text-xs text-red-300 whitespace-pre-wrap">{errorMessage}</p> : null}
         <div className="rounded-xl border border-cyan-800/50 bg-cyan-950/20 p-4">
