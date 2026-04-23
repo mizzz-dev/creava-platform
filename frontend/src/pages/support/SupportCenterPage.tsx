@@ -21,6 +21,7 @@ import { useAuthClient } from '@/lib/auth/AuthProvider'
 import { getMySupportCaseDetail, getMySupportHistory, getMySupportSummary, postMySupportReply, reopenSupportCase, type SupportCaseDetail, type SupportCaseHistoryItem, type SupportCaseSummary } from '@/modules/support/caseApi'
 import { getPublicStatusSummary, type PublicStatusResponse } from '@/modules/status/api'
 import StatusNoticePanel from '@/modules/status/components/StatusNoticePanel'
+import { resolveSearchResultState, trackDeflectionState, trackKnowledgeArticleView, trackKnowledgeSearch } from '@/modules/support/knowledgeOps'
 
 const detectSite = (): SourceSite => {
   if (isStoreSite) return 'store'
@@ -31,6 +32,8 @@ const detectSite = (): SourceSite => {
 
 const SUPPORT_HISTORY_PAGE_SIZE = Number(import.meta.env.VITE_SUPPORT_CENTER_HISTORY_PAGE_SIZE ?? 6)
 const SUPPORT_SUGGESTION_MAX = Number(import.meta.env.VITE_SUPPORT_CENTER_SUGGESTION_MAX ?? 4)
+const HELP_SEARCH_DEBOUNCE_MS = Number(import.meta.env.VITE_HELP_SEARCH_DEBOUNCE_MS ?? 350)
+const HELP_SEARCH_MIN_QUERY_LENGTH = Number(import.meta.env.VITE_HELP_SEARCH_MIN_QUERY_LENGTH ?? 2)
 
 export default function SupportCenterPage() {
   const { t } = useTranslation()
@@ -112,6 +115,7 @@ export default function SupportCenterPage() {
   )
 
   const hasResults = filteredFaqs.length > 0 || filteredGuides.length > 0
+  const searchResultState = useMemo(() => resolveSearchResultState(filteredFaqs.length + filteredGuides.length, search), [filteredFaqs.length, filteredGuides.length, search])
   const articleSuggestions = useMemo(() => {
     const topFaq = filteredFaqs.slice(0, 2).map((item) => ({ title: item.question, to: ROUTES.FAQ }))
     const topGuide = filteredGuides.slice(0, 2).map((item) => ({ title: item.title, to: ROUTES.SUPPORT_GUIDE_DETAIL.replace(':slug', item.slug) }))
@@ -144,6 +148,20 @@ export default function SupportCenterPage() {
       suggestionCount: articleSuggestions.length,
     })
   }, [articleSuggestions.length, category, sourceSite])
+
+  useEffect(() => {
+    const keyword = search.trim()
+    if (keyword.length < HELP_SEARCH_MIN_QUERY_LENGTH) return
+    const timer = window.setTimeout(() => {
+      trackKnowledgeSearch({
+        sourceSite,
+        query: keyword,
+        resultCount: filteredFaqs.length + filteredGuides.length,
+        category: category === 'all' ? 'general' : category,
+      })
+    }, HELP_SEARCH_DEBOUNCE_MS)
+    return () => window.clearTimeout(timer)
+  }, [category, filteredFaqs.length, filteredGuides.length, search, sourceSite])
 
   useEffect(() => {
     let cancelled = false
@@ -360,6 +378,11 @@ export default function SupportCenterPage() {
             </button>
           ))}
         </div>
+        {search.trim().length >= HELP_SEARCH_MIN_QUERY_LENGTH && (
+          <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+            {t('support.searchResultStateLabel')}: {t(`support.searchResultState.${searchResultState}`)}
+          </p>
+        )}
       </div>
 
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
@@ -415,7 +438,21 @@ export default function SupportCenterPage() {
               <Link
                 to={item.to}
                 className="text-sm text-cyan-700 underline dark:text-cyan-300"
-                onClick={() => trackMizzzEvent('article_suggestion_click', { sourceSite, supportCaseType: category === 'all' ? 'general' : category })}
+                onClick={() => {
+                  trackMizzzEvent('article_suggestion_click', { sourceSite, supportCaseType: category === 'all' ? 'general' : category })
+                  trackKnowledgeArticleView({
+                    sourceSite,
+                    articleType: item.to.includes('/support/guides/') ? 'guide' : 'faq',
+                    articleSlug: item.to,
+                    category: category === 'all' ? 'general' : category,
+                  })
+                  trackDeflectionState({
+                    sourceSite,
+                    deflectionState: 'article_viewed',
+                    articleType: item.to.includes('/support/guides/') ? 'guide' : 'faq',
+                    category: category === 'all' ? 'general' : category,
+                  })
+                }}
               >
                 {item.title}
               </Link>
@@ -426,7 +463,14 @@ export default function SupportCenterPage() {
         <Link
           to={ROUTES.CONTACT}
           className="mt-4 inline-flex rounded-full border border-cyan-300 px-3 py-1 text-xs text-cyan-800 dark:border-cyan-700 dark:text-cyan-300"
-          onClick={() => trackMizzzEvent('still_need_help_click', { sourceSite, supportCaseType: category === 'all' ? 'general' : category })}
+          onClick={() => {
+            trackMizzzEvent('still_need_help_click', { sourceSite, supportCaseType: category === 'all' ? 'general' : category })
+            trackDeflectionState({
+              sourceSite,
+              deflectionState: 'still_need_support',
+              category: category === 'all' ? 'general' : category,
+            })
+          }}
         >
           {t('support.selfService.stillNeedHelp')}
         </Link>

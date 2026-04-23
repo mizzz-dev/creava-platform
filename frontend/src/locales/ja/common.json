@@ -842,6 +842,11 @@
     "emptyRecent": "最近更新されたガイドはありません。",
     "noResultsTitle": "検索結果が見つかりませんでした",
     "noResultsDescription": "キーワードやカテゴリを変更するか、サポートセンター上部のクイックリンクをお試しください。",
+    "searchResultStateLabel": "検索状態",
+    "articleFeedbackTitle": "この記事で解決できましたか？",
+    "articleFeedbackHelpful": "はい、解決しました",
+    "articleFeedbackNotHelpful": "いいえ、解決していません",
+    "articleFeedbackContact": "解決しないので問い合わせる",
     "resetFilters": "検索条件をリセット",
     "postSubmitHelpTitle": "送信後の自己解決ガイド",
     "postSubmitHelpDescription": "返信を待つ間に、関連ヘルプから追加情報を確認できます。",
@@ -978,6 +983,12 @@
       "description": "関連FAQ / Guide を優先表示し、必要なときだけ問い合わせへ進めます。",
       "empty": "現在この条件で提案できる記事がありません。",
       "stillNeedHelp": "解決しないので問い合わせる"
+    },
+    "searchResultState": {
+      "results_found": "候補が見つかりました",
+      "low_confidence": "候補が少ないためキーワード調整を推奨",
+      "no_results": "一致する候補がありません",
+      "ambiguous": "キーワードを入力してください"
     }
   },
   "favoriteAdd": "お気に入りに追加",
