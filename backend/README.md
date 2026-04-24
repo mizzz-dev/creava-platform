@@ -41,6 +41,7 @@ npm run dev:backend
 | `npm run start` | 本番サーバー（自動再起動なし） |
 | `npm run build` | 管理画面をビルド |
 | `npm run strapi` | Strapi CLI を表示 |
+| `npm run audit:schema` | content model の relation/media/json/localized 使用状況を監査 |
 
 ## 環境変数
 
