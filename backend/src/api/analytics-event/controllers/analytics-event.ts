@@ -33,6 +33,7 @@ const ALLOWED_EVENTS = new Set([
   'recent_history_click', 'favorite_based_click', 'notification_based_click',
   'support_search', 'faq_open', 'guide_open',
   'help_hub_view', 'help_search_query', 'help_search_no_result', 'help_article_view', 'help_article_feedback', 'self_service_deflection',
+  'proactive_intervention_evaluated', 'proactive_intervention_click', 'proactive_intervention_feedback',
   'form_start', 'form_confirm', 'form_submit_success', 'form_submit_failure',
   'login_click', 'signup_click', 'login_success',
   'theme_toggle', 'locale_switch',

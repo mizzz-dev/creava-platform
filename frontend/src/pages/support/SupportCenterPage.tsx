@@ -23,6 +23,9 @@ import { getPublicStatusSummary, type PublicStatusResponse } from '@/modules/sta
 import StatusNoticePanel from '@/modules/status/components/StatusNoticePanel'
 import { resolveSearchResultState, trackDeflectionState, trackKnowledgeArticleView, trackKnowledgeSearch } from '@/modules/support/knowledgeOps'
 import ConversationalHelpAssistant from '@/modules/support/components/ConversationalHelpAssistant'
+import ProactiveSupportPanel from '@/modules/support/components/ProactiveSupportPanel'
+import { retrieveKnowledgeCandidates } from '@/modules/support/conversationalHelp'
+import type { ProactiveSupportSummary } from '@/modules/support/proactiveSupport'
 
 const detectSite = (): SourceSite => {
   if (isStoreSite) return 'store'
@@ -49,6 +52,7 @@ export default function SupportCenterPage() {
   const [statusData, setStatusData] = useState<PublicStatusResponse | null>(null)
   const [selectedCase, setSelectedCase] = useState<SupportCaseDetail | null>(null)
   const [replyBody, setReplyBody] = useState('')
+  const [proactiveSummary, setProactiveSummary] = useState<ProactiveSupportSummary | null>(null)
   const [replyState, setReplyState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const site = detectSite()
   const sourceSite = site === 'all' ? 'main' : site
@@ -117,6 +121,15 @@ export default function SupportCenterPage() {
 
   const hasResults = filteredFaqs.length > 0 || filteredGuides.length > 0
   const searchResultState = useMemo(() => resolveSearchResultState(filteredFaqs.length + filteredGuides.length, search), [filteredFaqs.length, filteredGuides.length, search])
+  const proactiveCandidates = useMemo(() => retrieveKnowledgeCandidates({
+    query: search,
+    sourceSite,
+    category,
+    faqs: faqs ?? [],
+    guides: guides ?? [],
+    statusSummary: statusData,
+  }), [category, faqs, guides, search, sourceSite, statusData])
+
   const articleSuggestions = useMemo(() => {
     const topFaq = filteredFaqs.slice(0, 2).map((item) => ({ title: item.question, to: ROUTES.FAQ }))
     const topGuide = filteredGuides.slice(0, 2).map((item) => ({ title: item.title, to: ROUTES.SUPPORT_GUIDE_DETAIL.replace(':slug', item.slug) }))
@@ -149,6 +162,22 @@ export default function SupportCenterPage() {
       suggestionCount: articleSuggestions.length,
     })
   }, [articleSuggestions.length, category, sourceSite])
+
+  useEffect(() => {
+    if (!proactiveSummary) return
+    trackMizzzEvent('proactive_intervention_evaluated', {
+      sourceSite,
+      supportCaseType: category === 'all' ? 'general' : category,
+      recommendationState: proactiveSummary.recommendationState,
+      recommendationScoreState: proactiveSummary.recommendationScoreState,
+      issueSignalState: proactiveSummary.issueSignalState,
+      interventionState: proactiveSummary.interventionState,
+      interventionPlacementState: proactiveSummary.interventionPlacementState,
+      preventionOutcomeState: proactiveSummary.preventionOutcomeState,
+      userContextState: proactiveSummary.userContextState,
+      lifecycleContextState: proactiveSummary.lifecycleContextState,
+    })
+  }, [category, proactiveSummary, sourceSite])
 
   useEffect(() => {
     const keyword = search.trim()
@@ -476,6 +505,18 @@ export default function SupportCenterPage() {
           {t('support.selfService.stillNeedHelp')}
         </Link>
       </section>
+
+      <ProactiveSupportPanel
+        sourceSite={sourceSite}
+        category={category}
+        search={search}
+        candidates={proactiveCandidates}
+        inquiryPath={`${ROUTES.CONTACT}?tab=${sourceSite === 'store' ? 'store_support' : sourceSite === 'fc' ? 'fc_support' : 'contact'}&prefill_category=${encodeURIComponent(category === 'all' ? 'general' : category)}&proactive_recommendation_state=${encodeURIComponent(proactiveSummary?.recommendationState ?? 'not_evaluated')}&proactive_issue_signal_state=${encodeURIComponent(proactiveSummary?.issueSignalState ?? 'none')}&proactive_intervention_state=${encodeURIComponent(proactiveSummary?.interventionState ?? 'not_triggered')}&proactive_prevention_outcome_state=${encodeURIComponent(proactiveSummary?.preventionOutcomeState ?? 'unknown')}`}
+        isSignedIn={isSignedIn}
+        membershipStatus={benefitState.membershipStatus}
+        lifecycleStage={lifecycle?.lifecycleStage}
+        onSummaryChanged={setProactiveSummary}
+      />
 
       <ConversationalHelpAssistant
         sourceSite={sourceSite}

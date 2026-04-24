@@ -131,7 +131,7 @@ export default function ConversationalHelpAssistant({ sourceSite, category, sear
   }
 
   return (
-    <section className="mt-8 rounded-2xl border border-cyan-200 bg-cyan-50/30 p-5 dark:border-cyan-900 dark:bg-cyan-950/20">
+    <section id="conversational-help-assistant" className="mt-8 rounded-2xl border border-cyan-200 bg-cyan-50/30 p-5 dark:border-cyan-900 dark:bg-cyan-950/20">
       <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t('support.assistant.title')}</h2>
       <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">{t('support.assistant.description')}</p>
 

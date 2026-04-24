@@ -13,6 +13,10 @@ interface Props {
     assistantSessionState?: string
     semanticRetrievalState?: string
     retrievalConfidenceState?: string
+    proactiveRecommendationState?: string
+    proactiveIssueSignalState?: string
+    proactiveInterventionState?: string
+    proactivePreventionOutcomeState?: string
   }
 }
 
@@ -46,6 +50,11 @@ export default function SupportAssistPanel({ formDefinition, handoffContext }: P
       {(handoffContext?.assistantSessionState || handoffContext?.semanticRetrievalState) && (
         <p className="mt-2 rounded-md border border-cyan-900/50 bg-cyan-950/40 px-2 py-1 text-[11px] text-cyan-100">
           assistant: {handoffContext.assistantSessionState ?? '-'} / retrieval: {handoffContext.semanticRetrievalState ?? '-'} ({handoffContext.retrievalConfidenceState ?? '-'})
+        </p>
+      )}
+      {(handoffContext?.proactiveRecommendationState || handoffContext?.proactiveIssueSignalState) && (
+        <p className="mt-2 rounded-md border border-violet-900/50 bg-violet-950/40 px-2 py-1 text-[11px] text-violet-100">
+          proactive: {handoffContext.proactiveRecommendationState ?? '-'} / issue: {handoffContext.proactiveIssueSignalState ?? '-'} / intervention: {handoffContext.proactiveInterventionState ?? '-'} / outcome: {handoffContext.proactivePreventionOutcomeState ?? '-'}
         </p>
       )}
 
