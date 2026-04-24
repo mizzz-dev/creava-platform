@@ -167,6 +167,11 @@
 | `STRAPI_PUBLISH_WEBHOOK_SECRET` | Strapi publish webhook 検証シークレット（`x-strapi-webhook-secret`） | 必須 |
 | `PREVIEW_SHARED_SECRET` | preview verify endpoint 用シークレット | 必須 |
 | `CMS_REVALIDATE_OPS_TOKEN` | manual revalidate endpoint 用 ops token | 必須 |
+| `STRAPI_SCHEMA_VERSION` | 現在運用中の schema バージョン識別子（runbook / migration と突合） | 推奨 |
+| `STRAPI_SCHEMA_COMPAT_MODE` | 互換 mapper を有効化する切替フラグ（段階移行時） | 推奨 |
+| `STRAPI_SCHEMA_MIGRATION_DRY_RUN` | migration script の dry-run 実行可否 | 推奨 |
+| `STRAPI_SCHEMA_MIGRATION_BATCH_SIZE` | migration/backfill のバッチ件数 | 推奨 |
+| `STRAPI_RELATION_POPULATE_DEPTH_MAX` | relation の最大 populate 深度ガード | 任意 |
 | `INQUIRY_MAILBOX_PROVIDER` | mailbox bridge プロバイダ名（監査ログ用） | 任意 |
 | `INQUIRY_MAILBOX_DEFAULT_FROM` | support outbound メール送信元 | 推奨 |
 | `INQUIRY_MAILBOX_DEFAULT_REPLY_TO` | user reply のデフォルト返信先 | 推奨 |
