@@ -1,5 +1,5 @@
-import { fetchSingle } from '@/lib/api/strapi'
-import type { StrapiQueryParams } from '@/lib/api/strapi'
+import { fetchSingle } from '@/lib/cms'
+import type { CmsQueryParams } from '@/lib/cms'
 import type { SiteSettings, StrapiSingleResponse } from '@/types'
 import { API_ENDPOINTS } from '@/lib/api/endpoints'
 
@@ -10,7 +10,7 @@ const ENDPOINT = API_ENDPOINTS.siteSettings
  * サイト設定（Single Type）を取得する
  */
 export function getSiteSettings(
-  params?: StrapiQueryParams,
+  params?: CmsQueryParams,
 ): Promise<StrapiSingleResponse<SiteSettings>> {
   return fetchSingle<SiteSettings>(ENDPOINT, {
     populate: [

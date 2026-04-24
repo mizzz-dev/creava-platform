@@ -1,5 +1,5 @@
-import { fetchCollection, fetchBySlug } from '@/lib/api/strapi'
-import type { StrapiQueryParams } from '@/lib/api/strapi'
+import { fetchCollection, fetchBySlug } from '@/lib/cms'
+import type { CmsQueryParams } from '@/lib/cms'
 import { buildEmptyListResponse, isStrapiForbiddenError } from '@/lib/api/fallback'
 import { StrapiApiError } from '@/lib/api/client'
 import type { Event, StrapiListResponse } from '@/types'
@@ -8,7 +8,7 @@ import { API_ENDPOINTS } from '@/lib/api/endpoints'
 const ENDPOINT = API_ENDPOINTS.events
 
 export function getEventsList(
-  params?: StrapiQueryParams,
+  params?: CmsQueryParams,
 ): Promise<StrapiListResponse<Event>> {
   const merged = {
     fields: [
@@ -37,7 +37,7 @@ export function getEventsList(
 export function getEventDetail(
   slug: string,
   signal?: AbortSignal,
-  params?: Omit<StrapiQueryParams, 'filters' | 'pagination'>,
+  params?: Omit<CmsQueryParams, 'filters' | 'pagination'>,
 ): Promise<Event | null> {
   return fetchBySlug<Event>(ENDPOINT, slug, params, { signal })
 }

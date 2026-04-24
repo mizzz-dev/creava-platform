@@ -20,6 +20,8 @@ interface ImportMetaEnv {
   readonly VITE_STRAPI_RESPONSE_CACHE_TTL_MS?: string
   readonly VITE_STRAPI_RESPONSE_CACHE_STALE_TTL_MS?: string
   readonly VITE_STRAPI_USE_TOKEN_FOR_PUBLIC?: string
+  readonly VITE_CMS_PROVIDER?: 'strapi' | 'wordpress'
+  readonly VITE_WORDPRESS_API_URL?: string
   readonly VITE_AUTH_PROVIDER?: 'logto' | 'supabase'
   readonly VITE_SUPABASE_URL?: string
   readonly VITE_SUPABASE_ANON_KEY?: string
