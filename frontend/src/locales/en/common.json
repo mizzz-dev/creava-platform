@@ -1218,6 +1218,20 @@
     "reactivatedTitle": "Welcome back. Your membership has been reactivated.",
     "reactivatedDescription": "Check recent updates, limited content, and perks to restart smoothly."
   },
+  "engagement": {
+    "sectionLabel": "Revisit, save, and share center",
+    "title": "Saved / Recently viewed / Resume",
+    "unreadActivity": "Unread activity: {{count}}",
+    "favoriteTitle": "Favorites",
+    "favoriteEmpty": "No favorites yet.",
+    "recentTitle": "Recently viewed",
+    "recentEmpty": "No recently viewed items yet.",
+    "continueTitle": "Continue journey",
+    "continueEmpty": "No resumable journey yet.",
+    "guestPersistenceState": "Guest persistence: {{state}}",
+    "syncState": "Sync state: {{state}}",
+    "loginHint": "Sign in to make saved state eligible for sync (without storing PII)."
+  },
   "status": {
     "title": "Service Status",
     "desc": "Prioritize user impact and current state. Check recommended actions before technical details.",

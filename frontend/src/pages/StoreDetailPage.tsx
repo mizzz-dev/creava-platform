@@ -31,7 +31,7 @@ import { trackCtaClick, trackEcommerceEvent } from '@/modules/analytics/tracking
 import NotificationInterestButton from '@/modules/notifications/components/NotificationInterestButton'
 import { createStoreCheckoutSession } from '@/modules/payments/api'
 import FavoriteToggleButton from '@/modules/personalization/components/FavoriteToggleButton'
-import { trackView } from '@/modules/personalization/storage'
+import { useEngagementCenter } from '@/modules/personalization/hooks/useEngagementCenter'
 import CommunityEngagementPanel from '@/modules/community/components/CommunityEngagementPanel'
 
 function purchaseStatusToAvailability(status: PurchaseStatus): 'InStock' | 'OutOfStock' | 'PreOrder' {
@@ -47,6 +47,7 @@ export default function StoreDetailPage() {
   const { products } = useProductList(8)
   const { addItem } = useCart()
   const { user } = useCurrentUser()
+  const { trackViewItem } = useEngagementCenter(user?.id)
   const { currency, updateCurrency } = useDisplayCurrency('JPY')
   const [checkoutLoading, setCheckoutLoading] = useState(false)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
@@ -66,7 +67,7 @@ export default function StoreDetailPage() {
   useEffect(() => {
     if (!product) return
     trackViewHistory('product', product.slug)
-    trackView({ kind: 'product', slug: product.slug, title: product.title, href: detailPath.product(product.slug), sourceSite: 'store' }, user?.id)
+    trackViewItem({ kind: 'product', slug: product.slug, title: product.title, href: detailPath.product(product.slug), sourceSite: 'store' })
     trackEcommerceEvent('view_item', {
       currency: product.currency,
       value: product.price,
@@ -78,7 +79,7 @@ export default function StoreDetailPage() {
         currency: product.currency,
       }],
     })
-  }, [product, user?.id])
+  }, [product, trackViewItem])
 
   const purchaseSummary =
     product?.purchaseStatus === 'soldout'
