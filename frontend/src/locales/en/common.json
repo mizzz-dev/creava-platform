@@ -1003,6 +1003,9 @@
       "low_confidence": "Few results found, try refining your query",
       "no_results": "No matching articles found",
       "ambiguous": "Enter a keyword to search"
+    },
+    "proactive": {
+      "title": "proactive support"
     }
   },
   "favoriteAdd": "Add to favorites",

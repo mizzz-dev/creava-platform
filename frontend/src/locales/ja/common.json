@@ -1003,6 +1003,9 @@
       "low_confidence": "候補が少ないためキーワード調整を推奨",
       "no_results": "一致する候補がありません",
       "ambiguous": "キーワードを入力してください"
+    },
+    "proactive": {
+      "title": "先回りサポート"
     }
   },
   "favoriteAdd": "お気に入りに追加",

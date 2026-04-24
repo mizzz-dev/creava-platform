@@ -45,6 +45,10 @@ export default function ContactPage() {
     assistantSessionState: searchParams.get('assistant_session_state') ?? '',
     semanticRetrievalState: searchParams.get('semantic_retrieval_state') ?? '',
     retrievalConfidenceState: searchParams.get('retrieval_confidence_state') ?? '',
+    proactiveRecommendationState: searchParams.get('proactive_recommendation_state') ?? '',
+    proactiveIssueSignalState: searchParams.get('proactive_issue_signal_state') ?? '',
+    proactiveInterventionState: searchParams.get('proactive_intervention_state') ?? '',
+    proactivePreventionOutcomeState: searchParams.get('proactive_prevention_outcome_state') ?? '',
   }), [searchParams])
 
   useEffect(() => {
