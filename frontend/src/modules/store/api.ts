@@ -1,7 +1,7 @@
-import { fetchCollection, fetchBySlug } from '@/lib/api/strapi'
+import { fetchCollection, fetchBySlug } from '@/lib/cms'
 import { getMockStoreProducts, getMockStoreProduct } from '@/lib/mock/store-products'
 import { isStrapiForbiddenError } from '@/lib/api/fallback'
-import type { StrapiQueryParams } from '@/lib/api/strapi'
+import type { CmsQueryParams } from '@/lib/cms'
 import type { StrapiListResponse } from '@/types'
 import type { StoreProduct, StoreProductSummary, PurchaseStatus, RelatedContentLink } from './types'
 import { API_ENDPOINTS } from '@/lib/api/endpoints'
@@ -117,7 +117,7 @@ function validateStoreListResponse(res: StrapiListResponse<StoreProductSummary>)
 }
 
 export function getProducts(
-  params?: StrapiQueryParams,
+  params?: CmsQueryParams,
 ): Promise<StrapiListResponse<StoreProductSummary>> {
   if (USE_MOCK) {
     const pageSize = params?.pagination?.pageSize ?? 12

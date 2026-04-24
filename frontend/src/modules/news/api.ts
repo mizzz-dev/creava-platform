@@ -1,5 +1,5 @@
-import { fetchCollection, fetchBySlug } from '@/lib/api/strapi'
-import type { StrapiQueryParams } from '@/lib/api/strapi'
+import { fetchCollection, fetchBySlug } from '@/lib/cms'
+import type { CmsQueryParams } from '@/lib/cms'
 import { buildEmptyListResponse, isStrapiForbiddenError } from '@/lib/api/fallback'
 import { StrapiApiError } from '@/lib/api/client'
 import type { NewsItem, StrapiListResponse } from '@/types'
@@ -8,7 +8,7 @@ import { API_ENDPOINTS } from '@/lib/api/endpoints'
 const ENDPOINT = API_ENDPOINTS.news
 
 export function getNewsList(
-  params?: StrapiQueryParams,
+  params?: CmsQueryParams,
 ): Promise<StrapiListResponse<NewsItem>> {
   const merged = {
     fields: ['title', 'slug', 'publishAt', 'accessStatus', 'limitedEndAt', 'archiveVisibleForFC'],
@@ -31,7 +31,7 @@ export function getNewsList(
 export function getNewsDetail(
   slug: string,
   signal?: AbortSignal,
-  params?: Omit<StrapiQueryParams, 'filters' | 'pagination'>,
+  params?: Omit<CmsQueryParams, 'filters' | 'pagination'>,
 ): Promise<NewsItem | null> {
   return fetchBySlug<NewsItem>(ENDPOINT, slug, { populate: ['thumbnail'], ...params }, { signal })
 }
