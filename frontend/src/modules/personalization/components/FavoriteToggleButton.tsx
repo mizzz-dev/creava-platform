@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCurrentUser } from '@/hooks'
-import { usePersonalization } from '../hooks/usePersonalization'
+import { useEngagementCenter } from '../hooks/useEngagementCenter'
 import type { PersonalizationEntityRef } from '../types'
 
 interface FavoriteToggleButtonProps {
@@ -12,9 +12,9 @@ interface FavoriteToggleButtonProps {
 export default function FavoriteToggleButton({ item }: FavoriteToggleButtonProps) {
   const { t } = useTranslation()
   const { user } = useCurrentUser()
-  const { isFavorited, toggleFavoriteItem } = usePersonalization(user?.id)
+  const { favorites, toggleFavoriteItem } = useEngagementCenter(user?.id)
 
-  const active = useMemo(() => isFavorited(item.kind, item.slug), [isFavorited, item.kind, item.slug])
+  const active = useMemo(() => favorites.some((favorite) => favorite.kind === item.kind && favorite.slug === item.slug), [favorites, item.kind, item.slug])
 
   return (
     <button

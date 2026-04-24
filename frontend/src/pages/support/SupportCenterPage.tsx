@@ -32,6 +32,7 @@ import { buildMultilingualOptimizationSummary } from '@/modules/support/multilin
 import { buildMultilingualOpsAutomationSummary, buildMultilingualOpsQueryParams } from '@/modules/support/multilingualOpsAutomation'
 import { buildPolicyGovernanceQueryParams, buildSupportPolicyGovernanceSummary } from '@/modules/support/policyGovernance'
 import { usePersonalization } from '@/modules/personalization/ops'
+import EngagementActivityCenter from '@/modules/personalization/components/EngagementActivityCenter'
 
 const detectSite = (): SourceSite => {
   if (isStoreSite) return 'store'
@@ -349,6 +350,7 @@ export default function SupportCenterPage() {
 
       <div className="mb-6 space-y-4">
         {statusData?.publicStatusSummary && <StatusNoticePanel summary={statusData.publicStatusSummary} />}
+        <EngagementActivityCenter sourceSite={sourceSite} />
         <MemberProgressHub sourceSite="support" />
         <CampaignPersonalizationPanel sourceSite="support" />
       </div>

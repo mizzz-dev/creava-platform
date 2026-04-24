@@ -1218,6 +1218,20 @@
     "reactivatedTitle": "おかえりなさい。会員ステータスを再開しました。",
     "reactivatedDescription": "最近の更新・限定公開・特典を確認して、再開後の体験を活用してください。"
   },
+  "engagement": {
+    "sectionLabel": "再訪・保存・共有センター",
+    "title": "保存 / 最近見た / 続きから見る",
+    "unreadActivity": "未読アクティビティ {{count}} 件",
+    "favoriteTitle": "お気に入り",
+    "favoriteEmpty": "お気に入りはまだありません。",
+    "recentTitle": "最近見た項目",
+    "recentEmpty": "最近見た項目はありません。",
+    "continueTitle": "続きから見る",
+    "continueEmpty": "再開可能な導線はまだありません。",
+    "guestPersistenceState": "ゲスト保存状態: {{state}}",
+    "syncState": "同期状態: {{state}}",
+    "loginHint": "ログインすると保存状態の同期対象になります（PIIは保存しません）。"
+  },
   "status": {
     "title": "サービスステータス",
     "desc": "ユーザー影響と現在の状態を優先して表示します。技術詳細より先に、推奨アクションをご確認ください。",

@@ -31,6 +31,7 @@ import StoreProductGrid from '@/modules/store/sections/StoreProductGrid'
 import StoreFooterCta from '@/modules/store/sections/StoreFooterCta'
 import CmsVisualShowcaseSection from '@/components/common/CmsVisualShowcaseSection'
 import MemberValueExperiencePanel from '@/components/common/MemberValueExperiencePanel'
+import EngagementActivityCenter from '@/modules/personalization/components/EngagementActivityCenter'
 
 export default function StorePage() {
   const { t, i18n } = useTranslation()
@@ -149,6 +150,7 @@ export default function StorePage() {
 
       <div className="mx-auto max-w-6xl px-4 py-10 sm:py-14 space-y-8">
         <MemberValueExperiencePanel sourceSite="store" />
+        <EngagementActivityCenter sourceSite="store" />
         <StoreFilterBar
           statusFilter={statusFilter}
           onStatusFilterChange={setStatusFilter}

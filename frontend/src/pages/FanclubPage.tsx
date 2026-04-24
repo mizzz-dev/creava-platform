@@ -25,6 +25,7 @@ import MemberValueExperiencePanel from '@/components/common/MemberValueExperienc
 import MemberProgressHub from '@/components/common/MemberProgressHub'
 import CampaignPersonalizationPanel from '@/components/common/CampaignPersonalizationPanel'
 import { usePersonalization } from '@/modules/personalization/ops'
+import EngagementActivityCenter from '@/modules/personalization/components/EngagementActivityCenter'
 
 export default function FanclubPage() {
   const { t, i18n } = useTranslation()
@@ -49,6 +50,7 @@ export default function FanclubPage() {
           primaryCta={{ label: t('nav.member', { defaultValue: 'マイページ' }), to: ROUTES.MEMBER }}
         />
         <MemberValueExperiencePanel sourceSite="fc" />
+        <EngagementActivityCenter sourceSite="fc" />
         <MemberProgressHub sourceSite="fc" />
         <CampaignPersonalizationPanel sourceSite="fc" />
         <FanclubGuard>

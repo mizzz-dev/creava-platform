@@ -30,6 +30,7 @@ import MemberValueExperiencePanel from '@/components/common/MemberValueExperienc
 import MemberProgressHub from '@/components/common/MemberProgressHub'
 import CampaignPersonalizationPanel from '@/components/common/CampaignPersonalizationPanel'
 import { usePersonalization } from '@/modules/personalization/ops'
+import EngagementActivityCenter from '@/modules/personalization/components/EngagementActivityCenter'
 
 export default function HomePage() {
   const { t, i18n } = useTranslation()
@@ -126,6 +127,7 @@ export default function HomePage() {
       {isMainChallenger ? <LatestSection /> : <PersonalizedHubSection />}
       <div className="mx-auto max-w-5xl space-y-4 px-4 py-4">
         <MemberValueExperiencePanel sourceSite="main" compact />
+        <EngagementActivityCenter sourceSite="main" />
         <MemberProgressHub sourceSite="main" />
         <CampaignPersonalizationPanel sourceSite="main" />
       </div>
