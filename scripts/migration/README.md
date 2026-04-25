@@ -52,3 +52,29 @@ node --loader ts-node/esm scripts/migrate-strapi-to-wordpress.ts --actual-run --
 ## 失敗時の再開
 - `--resume-failed-only` を使って `status=failed` アイテムだけ再実行する
 - rollback は frontend の provider flag を strapi 側へ戻し、WP 側データは保持
+
+
+## Strapi shutdown / residual dependency audit
+
+```bash
+# decommission audit report を生成
+node scripts/migration/strapi-decommission-audit.mjs
+
+# docs を除外してコード依存のみ監査
+node scripts/migration/strapi-decommission-audit.mjs --exclude-docs
+```
+
+- report は `scripts/migration/reports/decommission-audit-*.json` に保存
+- report には以下 state を出力
+  - `strapiShutdownState`
+  - `decommissionExecutionState`
+  - `residualDependencyState`
+  - `cleanupState`
+  - `secretCleanupState`
+  - `infraCleanupState`
+  - `fallbackBoundaryState`
+  - `rollbackBoundaryState`
+  - `postCutoverState`
+  - `decommissionTraceId`
+  - `decommissionStartedAt / decommissionCompletedAt / decommissionVerifiedAt`
+- unresolved dependency は `severity`（critical/high/medium/low）と `category` で分類

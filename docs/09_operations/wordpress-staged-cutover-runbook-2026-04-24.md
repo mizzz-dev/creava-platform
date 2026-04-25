@@ -71,3 +71,7 @@ node --loader ts-node/esm scripts/migrate-strapi-to-wordpress.ts --actual-run --
   - rollout flag / site flag / content type filter の誤設定を確認。
 - migration mode エラー
   - `--dry-run | --verify-only | --actual-run` のいずれか1つだけ指定する。
+
+
+## 8. 次段 runbook
+- Strapi停止実行・運用hardeningは [WordPress 単独運用移行 / Strapi shutdown execution / decommission runbook (2026-04-25)](./wordpress-strapi-shutdown-and-operations-hardening-runbook-2026-04-25.md) を参照。

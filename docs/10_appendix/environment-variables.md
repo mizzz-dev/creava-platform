@@ -172,6 +172,10 @@
 | `STRAPI_SCHEMA_MIGRATION_DRY_RUN` | migration script の dry-run 実行可否 | 推奨 |
 | `STRAPI_SCHEMA_MIGRATION_BATCH_SIZE` | migration/backfill のバッチ件数 | 推奨 |
 | `STRAPI_RELATION_POPULATE_DEPTH_MAX` | relation の最大 populate 深度ガード | 任意 |
+| `STRAPI_SHUTDOWN_EXECUTION_ENABLED` | Strapi shutdown 実行フェーズの明示フラグ（runbook連携） | 推奨 |
+| `STRAPI_DECOMMISSION_OBSERVATION_WINDOW_HOURS` | shutdown 後の観測時間（h） | 推奨 |
+| `STRAPI_DECOMMISSION_REQUIRE_CRITICAL_ZERO` | decommission 実行前に critical 残依存ゼロを必須化 | 推奨 |
+| `STRAPI_DECOMMISSION_REQUIRE_HIGH_ZERO` | decommission 実行前に high 残依存ゼロを必須化 | 推奨 |
 | `INQUIRY_MAILBOX_PROVIDER` | mailbox bridge プロバイダ名（監査ログ用） | 任意 |
 | `INQUIRY_MAILBOX_DEFAULT_FROM` | support outbound メール送信元 | 推奨 |
 | `INQUIRY_MAILBOX_DEFAULT_REPLY_TO` | user reply のデフォルト返信先 | 推奨 |
@@ -298,6 +302,8 @@
 - `PREVIEW_SHARED_SECRET`（`/api/cms-sync/preview/verify` 用）
 - `STRAPI_PUBLISH_WEBHOOK_SECRET`（`/api/cms-sync/strapi-webhook` 用）
 - `CMS_REVALIDATE_OPS_TOKEN`（`/api/cms-sync/revalidate` 用）
+- `STRAPI_SHUTDOWN_EXECUTION_ENABLED`（runbook上の実行フラグ。secret不要）
+- `STRAPI_DECOMMISSION_OBSERVATION_WINDOW_HOURS`（observability監視時間。secret不要）
 - `INQUIRY_IP_HASH_SALT`
 - `INQUIRY_OPS_TOKEN`
 - `INQUIRY_MY_HISTORY_PAGE_MAX`
