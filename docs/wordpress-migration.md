@@ -133,3 +133,31 @@
 2. discovery の relevance は当面「新着優先 + キーワード一致」で運用許容。
 3. preview secret は短期ローテーション運用を別runbookで実施する。
 4. Strapi shutdown はこのPRでは実施せず、parallel運用を継続する。
+
+
+---
+
+## 11. 次段（full Strapi shutdown / WordPress operations hardening）
+
+### 11-1. 今回の追加実装
+- `scripts/migration/strapi-decommission-audit.mjs` を追加し、Strapi residual dependency を `severity/category` 付きで可視化。
+- decommission report に shutdown/cleanup/rollback/post-cutover 系 state を追加。
+- runbook: `docs/09_operations/wordpress-strapi-shutdown-and-operations-hardening-runbook-2026-04-25.md` を追加し、
+  shutdown execution / editor workflow parity / media governance / publish hardening / rollback boundary を分離。
+
+### 11-2. 実行コマンド
+```bash
+# residual dependency 棚卸し
+node scripts/migration/strapi-decommission-audit.mjs
+
+# parity再確認
+node --loader ts-node/esm scripts/migrate-strapi-to-wordpress.ts --verify-only
+```
+
+### 11-3. decommission readiness gate（更新）
+- [ ] `strapi-decommission-audit` の `critical=0` / `high=0`
+- [ ] CI/CD から Strapi deploy path を除去する移行計画が合意済み
+- [ ] editor/reviewer/publisher/admin の WordPress運用チェックリストが運用済み
+- [ ] media governance（命名/alt/locale/reuse）が運用に載っている
+- [ ] preview/publish/revalidation 失敗時 runbook が運用周知済み
+- [ ] rollback boundary と observation window（72h以上）が承認済み
